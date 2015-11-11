@@ -35,18 +35,49 @@ var Box = function(x, y, n, fill, w, h){
     this.w = w || 1;
     this.h = h || 1;
 
-    // IMPLEMENT ME
-    this.lineSegments = NaN;
+    this.generateLineSegments();
+}
+
+Box.prototype.generateLineSegments = function() {
+    this.lineSegments = [];
+    this.lineSegments.push(new LineSegment(this.x - this.w/2, this.y + this.h/2, this.x + this.w/2, this.y + this.h/2));
+    this.lineSegments.push(new LineSegment(this.x - this.w/2, this.y + this.h/2, this.x - this.w/2, this.y - this.h/2));
+    this.lineSegments.push(new LineSegment(this.x - this.w/2, this.y - this.h/2, this.x + this.w/2, this.y - this.h/2));
+    this.lineSegments.push(new LineSegment(this.x + this.w/2, this.y + this.h/2, this.x + this.w/2, this.y - this.h/2));
+    console.log(this.lineSegments);
 }
 
 Box.prototype.draw = function(ctx) {
+    this.generateLineSegments();
     ctx.fillStyle = this.fill;
     ctx.fillRect(this.x, this.y, this.w, this.h);
 }
 
-Box.prototype.intersects = function(ray) {
-    // Implemented by subclasses
-    return false;
+Box.prototype.intersection = function(ray) {
+    var intersections = [];
+    var lineSegment;
+    for (var i = 0; i < this.lineSegments.length; i +=1) {
+        lineSegment = this.lineSegments[i];
+        intersections.extend(lineSegment.intersection(ray));
+    }
+
+    if (intersections.length == 0) {
+        return false;
+    }
+
+    // choose the intersection point that is closest to the ray's starting point
+    var cur_dist;
+    var closest_point = intersections[0];
+    var min_dist = distance(closest_point[0], closest_point[1], ray.x, ray.y);
+    for (var point in intersections) {
+        cur_dist = distance(point[0], point[1], ray.x, ray.y);
+        if (cur_dist < min_dist) {
+            closest_point = point;
+            min_dist = cur_dist;
+        }
+    }
+
+    return closest_point;
 }
 
 /** This function came with the code I grabbed from the internet. I'm leaving it

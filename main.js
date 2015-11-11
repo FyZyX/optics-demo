@@ -1,3 +1,8 @@
+/** This file contains the central logic for the game. The function startGame()
+  * gets called when the web page loads, and creates the CanvasState object
+  * that will contain (and render) our coordinate system and all of the objects
+  * in it. */
+
 function rayTrace(x, y, angle, canvasState) {
     var ray = new Ray(x, y, angle);
     var shapes = canvasState.getShapes();
@@ -15,17 +20,13 @@ function rayTrace(x, y, angle, canvasState) {
 
     var boundaries = canvasState.getBoundaries();
     for (var i = 0; i < boundaries.length; i += 1) {
-        if (boundaries[i].intersects(ray)) {
+        if (boundaries[i].intersection(ray)) {
             ray.interactWith(boundaries[i]);
             break;
         }
     }
 
     ray.drawPath();
-}
-
-function getIntersection(LineSegment1, LineSegment2) {
-
 }
 
 function startGame() {
@@ -38,9 +39,11 @@ function startGame() {
     ctx.moveTo(0,0);
 
     var s = new CanvasState(document.getElementById('myCanvas'));
-    var mirror = new Box(300, 300, 1.5, "blue", 200, 60);
-    s.addShape(mirror);
+    //var box = new Box(300, 300, 1.5, "blue", 200, 60);
+    //s.addShape(box);
 
-    rayTrace(0, 300, 0, s);
+    //test1();
+    //test2();
+    //rayTrace(0, 300, 0, s);
 
 }

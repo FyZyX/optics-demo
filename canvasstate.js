@@ -22,7 +22,7 @@ function CanvasState(canvas) {
     // **** Keep track of state! ****
 
     this.valid = false; // when set to false, the canvas will redraw everything
-    this.shapes = [];  // the collection of things to be drawn
+    this.opticalElements = [];  // the collection of things to be drawn
     this.dragging = false; // Keep track of when we are dragging
     // the current selected object. In the future we could turn this into an array for multiple selection
     this.selection = null;
@@ -40,11 +40,11 @@ function CanvasState(canvas) {
         var mouse = myState.getMouse(e);
         var mx = mouse.x;
         var my = mouse.y;
-        var shapes = myState.shapes;
-        var l = shapes.length;
+        var opticalElements = myState.opticalElements;
+        var l = opticalElements.length;
         for (var i = l-1; i >= 0; i--) {
-            if (shapes[i].contains(mx, my)) {
-                var mySel = shapes[i];
+            if (opticalElements[i].contains(mx, my)) {
+                var mySel = opticalElements[i];
                 // Keep track of where in the object we clicked
                 // so we can move it smoothly (see mousemove)
                 myState.dragoffx = mx - mySel.x;
@@ -80,7 +80,7 @@ function CanvasState(canvas) {
         myState.dragging = false;
     }, true);
 
-    // double click for making new shapes
+    // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
         myState.addShape(new Shape(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0,255,0,.6)'));
@@ -95,16 +95,46 @@ function CanvasState(canvas) {
 }
 
 CanvasState.prototype.addShape = function(object) {
-    this.shapes.push(object);
+    this.opticalElements.push(object);
     this.valid = false;
 }
 
-CanvasState.prototype.getShapes = function() {
-    return this.shapes;
+CanvasState.prototype.getOpticalElements = function() {
+    return this.opticalElements;
 }
 
 CanvasState.prototype.clear = function() {
     this.ctx.clearRect(0, 0, this.width, this.height);
+}
+
+CanvasState.prototype.rayTrace = function(x, y, angle) {
+    var ray = new Ray(x, y, angle);
+    var elements = this.getOpticalElements();
+
+    var intersection;
+    var hit = true;
+    while (hit == true) {
+        hit = false;
+        for (var i = 0; i < elements.length; i += 1) {
+            intersection = elements[i].intersection(ray);
+            if (intersection) {
+                ray.interactWith(elements[i]);
+                hit = true;
+            }
+        }
+    }
+
+    var boundaries = this.getBoundaries();
+    for (var i = 0; i < boundaries.length; i += 1) {
+        //console.log(boundaries[i]);
+        intersection = boundaries[i].intersection(ray);
+        if (intersection) {
+            console.log(intersection);
+            ray.addToPath(intersection[0]);
+        }
+    }
+
+    ray.drawPath();
 }
 
 // While draw is called as often as the INTERVAL variable demands,
@@ -113,19 +143,19 @@ CanvasState.prototype.draw = function() {
     // if our state is invalid, redraw and validate!
     if (!this.valid) {
         var ctx = this.ctx;
-        var shapes = this.shapes;
+        var opticalElements = this.opticalElements;
         this.clear();
 
         // ** Add stuff you want drawn in the background all the time here **
 
-        // draw all shapes
-        var l = shapes.length;
+        // draw all opticalElements
+        var l = opticalElements.length;
         for (var i = 0; i < l; i++) {
-            var shape = shapes[i];
+            var shape = opticalElements[i];
             // We can skip the drawing of elements that have moved off the screen:
             if (shape.x > this.width || shape.y > this.height ||
                 shape.x + shape.w < 0 || shape.y + shape.h < 0) continue;
-            shapes[i].draw(ctx);
+            opticalElements[i].draw(ctx);
         }
 
         // draw selection
@@ -138,6 +168,7 @@ CanvasState.prototype.draw = function() {
         }
 
         // ** Add stuff you want drawn on top all the time here **
+        this.rayTrace(300, 300, 0);
 
         this.valid = true;
     }
@@ -174,4 +205,10 @@ CanvasState.prototype.interactWith = function(ray) {
 }
 
 CanvasState.prototype.getBoundaries = function(ray) {
+    var boundaries = [];
+    boundaries.push(new LineSegment(0, 0, this.width, 0));
+    boundaries.push(new LineSegment(0, 0, 0, this.height));
+    boundaries.push(new LineSegment(this.width, 0, this.width, this.height));
+    boundaries.push(new LineSegment(0, this.height, this.width, this.height));
+    return boundaries;
 }

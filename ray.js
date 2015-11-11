@@ -1,7 +1,24 @@
+/** This file defines the Ray class. The ray specifies the beam of light that
+  * will be shot out from the starting point in our game. */
+
 var Ray = function(x, y, angle) {
     this.path = [[x, y]];
-    this.current_position = [x, y];
+    this.x = x;
+    this.y = y;
     this.angle = angle;
+}
+
+/** Returns [b, m], which specifies the equation of the line that this ray
+  * travels along. */
+Ray.prototype.getLine = function() {
+    var m = Math.tan(this.angle);
+    var b = this.y - m*this.x;
+    //console.log([b, m]);
+    return [b, m];
+}
+
+Ray.prototype.addToPath = function(x, y) {
+    this.path.push([x, y]);
 }
 
 /** Takes in a PATH (array of [x, y] coordinates), and draws lines between
