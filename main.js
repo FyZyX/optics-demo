@@ -12,10 +12,6 @@ function startGame() {
     ctx.canvas.width  = window.innerWidth - 10;
     ctx.canvas.height = window.innerHeight - 10;
 
-    // x = {}
-    // console.log(x);
-    // x.hello = "world";
-
     canvasState = new CanvasState(document.getElementById('myCanvas'));
     var box = new Box(300, 250, 1.5, "blue", 10, 100);
     canvasState.addShape(box);

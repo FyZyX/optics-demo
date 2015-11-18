@@ -1,4 +1,5 @@
-var cState;
+/** The CanvasState object is responsible for keeping track of and rendering
+  * all of the optical elements on the screen, as well as ray tracing a ray. */
 
 function CanvasState(canvas) {
     // **** First some setup! ****
@@ -33,7 +34,6 @@ function CanvasState(canvas) {
 
 
     var myState = this;
-    cState = this;
 
     // fixes a problem where double clicking causes text to get selected on the canvas
     canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
@@ -91,7 +91,7 @@ function CanvasState(canvas) {
 
     // **** Options! ****
 
-    this.selectionColor = '#CC0000';
+    this.selectionColor = '#660066';
     this.selectionWidth = 2;
     requestAnimationFrame(this.draw.bind(this));
 }
@@ -110,98 +110,8 @@ CanvasState.prototype.clear = function() {
 }
 
 
-function reflectPoint(p, q, x1, y1, x2, y2) {
-    function vector(x1, y1, x2, y2) { return [x2 - x1, y2 - y1];}
-    function dotProduct(v1, v2) {return v1[0]*v2[0] + v1[1]*v2[1];}
-
-    var v1 = vector(x1, y1, x2, y2);
-    var v2 = vector(x1, y1, p, q);
-    var c = dotProduct(v1, v2)/dotProduct(v1, v1);
-    return [2*x1 + (y1 - x1)*c, 2*y1 + (y2 - x2)*c];
-}
-
-function mirror(p, q, x1, y1, x2, y2) {
-
-   var dx,dy,a,b;
-   var x2,y2;
-
-   var new_x, new_y;
-
-   dx = x2 - x1;
-   dy = y2 - y1;
-
-   a = (dx * dx - dy * dy) / (dx * dx + dy*dy);
-   b = 2 * dx * dy / (dx*dx + dy*dy);
-
-   new_x = Math.round(a * (p - x1) + b*(q - y1) + x1);
-   new_y = Math.round(b * (p - x1) - a*(q - y1) + y1);
-
-   return [new_x, new_y];
-}
-
-function listAllProperties(o){
-    var objectToInspect;
-    var result = [];
-
-    for(objectToInspect = o; objectToInspect !== null; objectToInspect = Object.getPrototypeOf(objectToInspect)){
-        result = result.concat(Object.getOwnPropertyNames(objectToInspect));
-    }
-
-    return result;
-}
-
-CanvasState.prototype.rayTrace = function(ray) {
-    var elements = this.getOpticalElements();
-
-    var intersection;
-    var hit = true;
-    while (hit == true) {
-        hit = false;
-        for (var i = 0; i < elements.length; i += 1) {
-            intersection = elements[i].intersection(ray);
-            if (intersection && !(approxeq(intersection[0][0], ray.x1, 0.01) && approxeq(intersection[0][1], ray.y1, 0.01))) {
-                ray.addToPath(intersection[0][0], intersection[0][1]);
-
-                ray.x1 = intersection[0][0];
-                ray.y1 = intersection[0][1];
-                ray.setEndpoints();
-
-                var lineSeg = intersection[0][3];
-
-                var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
-                var x2 = p[0];
-                var y2 = p[1];
-                var m = (y2 - ray.y1)/(x2 - ray.x1);
-
-                var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
-                console.log(dot);
-                if (x2 - ray.x1 < 0) {
-                    ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
-                } else {
-                    ray.angle = mod(Math.atan(m), 2*Math.PI);
-                }
-
-                ray.setEndpoints();
-                console.log("new angle: " + ray.angle);
-
-                hit = true;
-            }
-        }
-    }
-
-    var boundaries = this.getBoundaries();
-    for (var i = 0; i < boundaries.length; i += 1) {
-        intersection = boundaries[i].intersection(ray);
-        if (intersection) {
-            ray.addToPath(intersection[0][0], intersection[0][1]);
-        }
-    }
-
-    ray.drawPath();
-}
-
-// While draw is called as often as the INTERVAL variable demands,
-// It only ever does something if the canvas gets invalidated by our code
+/** While draw is called as often as requestAnimationFrame demands, it only ever
+  * does something if the canvas gets invalidated by our code. */
 CanvasState.prototype.draw = function() {
     // if our state is invalid, redraw and validate!
     if (!this.valid) {
@@ -231,7 +141,7 @@ CanvasState.prototype.draw = function() {
         }
 
         // ** Add stuff you want drawn on top all the time here **
-        var ray = new Ray(0, 0, Math.PI/4);
+        var ray = new Ray(0, 0, Math.PI/8);
         this.rayTrace(ray);
 
         this.valid = true;
@@ -277,4 +187,77 @@ CanvasState.prototype.getBoundaries = function(ray) {
     boundaries.push(new LineSegment(this.width, 0, this.width, this.height));
     boundaries.push(new LineSegment(0, this.height, this.width, this.height));
     return boundaries;
+}
+
+
+/** Ray trace a ray object on the screen. */
+CanvasState.prototype.rayTrace = function(ray) {
+    var elements = this.getOpticalElements();
+
+    var intersections;
+    var intersection;
+    var hit = true;
+    while (hit == true) {
+        intersections = [];
+        hit = false;
+        for (var i = 0; i < elements.length; i += 1) {
+            intersection = elements[i].intersection(ray);
+            if (intersection && !(approxeq(intersection[0][0], ray.x1, 0.01) && approxeq(intersection[0][1], ray.y1, 0.01))) {
+                intersections.extend(intersection);
+            }
+        }
+
+        if (intersections.length > 0) {
+            hit = true;
+
+            // choose the intersection point that is closest to the ray's starting point
+            var cur_dist;
+            var cur_point;
+            var closest_point = intersections[0];
+            var min_dist = distance(closest_point[0], closest_point[1], ray.x1, ray.y1);
+            for (var i = 0; i < intersections.length; i += 1) {
+                cur_point = intersections[i];
+                cur_dist = distance(cur_point[0], cur_point[1], ray.x1, ray.y1);
+                if (cur_dist < min_dist) {
+                    closest_point = cur_point;
+                    min_dist = cur_dist;
+                }
+            }
+
+            ray.addToPath(closest_point[0], closest_point[1]);
+
+            ray.x1 = closest_point[0];
+            ray.y1 = closest_point[1];
+            ray.setEndpoints();
+
+            var lineSeg = closest_point[3];
+
+            var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
+            var x2 = p[0];
+            var y2 = p[1];
+            var m = (y2 - ray.y1)/(x2 - ray.x1);
+
+            var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
+            console.log(dot);
+            if (x2 - ray.x1 < 0) {
+                ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
+            } else {
+                ray.angle = mod(Math.atan(m), 2*Math.PI);
+            }
+
+            ray.setEndpoints();
+            // console.log("new angle: " + ray.angle);
+        }
+
+    }
+
+    var boundaries = this.getBoundaries();
+    for (var i = 0; i < boundaries.length; i += 1) {
+        intersection = boundaries[i].intersection(ray);
+        if (intersection) {
+            ray.addToPath(intersection[0][0], intersection[0][1]);
+        }
+    }
+
+    ray.drawPath();
 }
