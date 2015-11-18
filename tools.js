@@ -9,3 +9,14 @@ Array.prototype.extend = function (other_array) {
     /* you should include a test to check whether other_array really is an array */
     other_array.forEach(function(v) {this.push(v)}, this);
 }
+
+function mod(n, m) {
+        return ((n % m) + m) % m;
+}
+
+approxeq = function(v1, v2, epsilon) {
+  if (epsilon == null) {
+    epsilon = 0.001;
+  }
+  return Math.abs(v1 - v2) < epsilon;
+};

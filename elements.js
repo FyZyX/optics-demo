@@ -34,17 +34,15 @@ var Box = function(x, y, n, fill, w, h){
     Element.apply(this, arguments);
     this.w = w || 1;
     this.h = h || 1;
-
     this.generateLineSegments();
 }
 
 Box.prototype.generateLineSegments = function() {
     this.lineSegments = [];
-    this.lineSegments.push(new LineSegment(this.x - this.w/2, this.y + this.h/2, this.x + this.w/2, this.y + this.h/2));
-    this.lineSegments.push(new LineSegment(this.x - this.w/2, this.y + this.h/2, this.x - this.w/2, this.y - this.h/2));
-    this.lineSegments.push(new LineSegment(this.x - this.w/2, this.y - this.h/2, this.x + this.w/2, this.y - this.h/2));
-    this.lineSegments.push(new LineSegment(this.x + this.w/2, this.y + this.h/2, this.x + this.w/2, this.y - this.h/2));
-    console.log(this.lineSegments);
+    this.lineSegments.push(new LineSegment(this.x, this.y, this.x, this.y + this.h));
+    this.lineSegments.push(new LineSegment(this.x, this.y + this.h, this.x + this.w, this.y + this.h));
+    this.lineSegments.push(new LineSegment(this.x + this.w, this.y + this.h, this.x + this.w, this.y));
+    this.lineSegments.push(new LineSegment(this.x + this.w, this.y, this.x, this.y));
 }
 
 Box.prototype.draw = function(ctx) {
@@ -56,9 +54,13 @@ Box.prototype.draw = function(ctx) {
 Box.prototype.intersection = function(ray) {
     var intersections = [];
     var lineSegment;
+    var intersection;
     for (var i = 0; i < this.lineSegments.length; i +=1) {
         lineSegment = this.lineSegments[i];
-        intersections.extend(lineSegment.intersection(ray));
+        intersection = lineSegment.intersection(ray);
+        if (intersection) {
+            intersections.extend(intersection);
+        }
     }
 
     if (intersections.length == 0) {
@@ -67,17 +69,19 @@ Box.prototype.intersection = function(ray) {
 
     // choose the intersection point that is closest to the ray's starting point
     var cur_dist;
+    var cur_point;
     var closest_point = intersections[0];
-    var min_dist = distance(closest_point[0], closest_point[1], ray.x, ray.y);
-    for (var point in intersections) {
-        cur_dist = distance(point[0], point[1], ray.x, ray.y);
+    var min_dist = distance(closest_point[0], closest_point[1], ray.x1, ray.y1);
+    for (var i = 0; i < intersections.length; i += 1) {
+        cur_point = intersections[i];
+        cur_dist = distance(cur_point[0], cur_point[1], ray.x1, ray.y1);
         if (cur_dist < min_dist) {
-            closest_point = point;
+            closest_point = cur_point;
             min_dist = cur_dist;
         }
     }
 
-    return closest_point;
+    return [closest_point];
 }
 
 /** This function came with the code I grabbed from the internet. I'm leaving it

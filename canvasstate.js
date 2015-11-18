@@ -1,3 +1,5 @@
+var cState;
+
 function CanvasState(canvas) {
     // **** First some setup! ****
     this.canvas = canvas;
@@ -31,6 +33,7 @@ function CanvasState(canvas) {
 
 
     var myState = this;
+    cState = this;
 
     // fixes a problem where double clicking causes text to get selected on the canvas
     canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
@@ -90,8 +93,7 @@ function CanvasState(canvas) {
 
     this.selectionColor = '#CC0000';
     this.selectionWidth = 2;
-    this.interval = 10;
-    setInterval(function() { myState.draw(); }, myState.interval);
+    requestAnimationFrame(this.draw.bind(this));
 }
 
 CanvasState.prototype.addShape = function(object) {
@@ -107,8 +109,30 @@ CanvasState.prototype.clear = function() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 }
 
-CanvasState.prototype.rayTrace = function(x, y, angle) {
-    var ray = new Ray(x, y, angle);
+
+function reflectPoint(p, q, x1, y1, x2, y2) {
+    function vector(x1, y1, x2, y2) { return [x2 - x1, y2 - y1];}
+    function dotProduct(v1, v2) {return v1[0]*v2[0] + v1[1]*v2[1];}
+
+    var v1 = vector(x1, y1, x2, y2);
+    var v2 = vector(x1, y1, p, q);
+    var c = dotProduct(v1, v2)/dotProduct(v1, v1);
+    return [2*x1 + (y1 - x1)*c, 2*y1 + (y2 - x2)*c];
+}
+
+
+function reflectPoint2(p, q, x1, y1, x2, y2) {
+    function vector(x1, y1, x2, y2) {return [x2 - x1, y2 - y1];}
+    function normalVector(x1, y1, x2, y2) {return x2 >= x1 ? [-(y2 - y1), (x2 - x1)] : [(y2 - y1), -(x2 - x1)];}
+    function dotProduct(v1, v2) {return v1[0]*v2[0] + v1[1]*v2[1];}
+
+    var v1 = -vector(x1, y1, x2, y2);
+    var v2 = normalVector(x1, y1, p, q);
+    var c = dotProduct(v1, v2)/dotProduct(v1, v1);
+    return [2*x1 + (y1 - x1)*c, 2*y1 + (y2 - x2)*c];
+}
+
+CanvasState.prototype.rayTrace = function(ray) {
     var elements = this.getOpticalElements();
 
     var intersection;
@@ -117,8 +141,27 @@ CanvasState.prototype.rayTrace = function(x, y, angle) {
         hit = false;
         for (var i = 0; i < elements.length; i += 1) {
             intersection = elements[i].intersection(ray);
-            if (intersection) {
-                ray.interactWith(elements[i]);
+            if (intersection && !(approxeq(intersection[0][0], ray.x1, 0.01) && approxeq(intersection[0][1], ray.y1, 0.01))) {
+                ray.addToPath(intersection[0][0], intersection[0][1]);
+
+                ray.x1 = intersection[0][0];
+                ray.y1 = intersection[0][1];
+                ray.setEndpoints();
+
+                var lineSeg = intersection[0][3];
+                var p = reflectPoint(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
+                console.log(lineSeg);
+                console.log(ray);
+                console.log("original point: (" + ray.x2 + ", " + ray.y2 + ")");
+                console.log("reflection point: (" + p[0] + ", " + p[1] + ")");
+                var x2 = p[0];
+                var y2 = p[1];
+                var m = (y2 - ray.y1)/(x2 - ray.x2);
+                var new_angle = Math.atan(m);
+                ray.angle = new_angle;
+                ray.setEndpoints();
+                console.log("new angle: " + new_angle);
+
                 hit = true;
             }
         }
@@ -126,11 +169,9 @@ CanvasState.prototype.rayTrace = function(x, y, angle) {
 
     var boundaries = this.getBoundaries();
     for (var i = 0; i < boundaries.length; i += 1) {
-        //console.log(boundaries[i]);
         intersection = boundaries[i].intersection(ray);
         if (intersection) {
-            console.log(intersection);
-            ray.addToPath(intersection[0]);
+            ray.addToPath(intersection[0][0], intersection[0][1]);
         }
     }
 
@@ -168,10 +209,13 @@ CanvasState.prototype.draw = function() {
         }
 
         // ** Add stuff you want drawn on top all the time here **
-        this.rayTrace(300, 300, 0);
+        var ray = new Ray(0, 0, Math.PI/4);
+        this.rayTrace(ray);
 
         this.valid = true;
     }
+
+    requestAnimationFrame(this.draw.bind(this));
 }
 
 

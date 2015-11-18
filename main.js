@@ -3,31 +3,7 @@
   * that will contain (and render) our coordinate system and all of the objects
   * in it. */
 
-function rayTrace(x, y, angle, canvasState) {
-    var ray = new Ray(x, y, angle);
-    var shapes = canvasState.getShapes();
-
-    var interaction = true;
-    while (interaction == true) {
-        interaction = false;
-        for (var i = 0; i < shapes.length; i += 1) {
-            if (shapes[i].intersects(ray)) {
-                ray.interactWith(shapes[i]);
-                interaction = true;
-            }
-        }
-    }
-
-    var boundaries = canvasState.getBoundaries();
-    for (var i = 0; i < boundaries.length; i += 1) {
-        if (boundaries[i].intersection(ray)) {
-            ray.interactWith(boundaries[i]);
-            break;
-        }
-    }
-
-    ray.drawPath();
-}
+var canvasState;
 
 function startGame() {
     c = document.getElementById("myCanvas");
@@ -38,12 +14,12 @@ function startGame() {
 
     ctx.moveTo(0,0);
 
-    var s = new CanvasState(document.getElementById('myCanvas'));
-    //var box = new Box(300, 300, 1.5, "blue", 200, 60);
-    //s.addShape(box);
+    canvasState = new CanvasState(document.getElementById('myCanvas'));
+    var box = new Box(300, 300, 1.5, "blue", 100, 100);
+    canvasState.addShape(box);
 
     //test1();
     //test2();
-    //rayTrace(0, 300, 0, s);
+    //rayTrace(0, 300, 0, canvasState);
 
 }
