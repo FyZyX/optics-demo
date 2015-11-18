@@ -86,7 +86,7 @@ function CanvasState(canvas) {
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        myState.addShape(new Shape(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0,255,0,.6)'));
+        myState.addShape(new Box(mouse.x - 10, mouse.y - 10, 1.5, "blue", 10, 100));
     }, true);
 
     // **** Options! ****
@@ -120,16 +120,34 @@ function reflectPoint(p, q, x1, y1, x2, y2) {
     return [2*x1 + (y1 - x1)*c, 2*y1 + (y2 - x2)*c];
 }
 
+function mirror(p, q, x1, y1, x2, y2) {
 
-function reflectPoint2(p, q, x1, y1, x2, y2) {
-    function vector(x1, y1, x2, y2) {return [x2 - x1, y2 - y1];}
-    function normalVector(x1, y1, x2, y2) {return x2 >= x1 ? [-(y2 - y1), (x2 - x1)] : [(y2 - y1), -(x2 - x1)];}
-    function dotProduct(v1, v2) {return v1[0]*v2[0] + v1[1]*v2[1];}
+   var dx,dy,a,b;
+   var x2,y2;
 
-    var v1 = -vector(x1, y1, x2, y2);
-    var v2 = normalVector(x1, y1, p, q);
-    var c = dotProduct(v1, v2)/dotProduct(v1, v1);
-    return [2*x1 + (y1 - x1)*c, 2*y1 + (y2 - x2)*c];
+   var new_x, new_y;
+
+   dx = x2 - x1;
+   dy = y2 - y1;
+
+   a = (dx * dx - dy * dy) / (dx * dx + dy*dy);
+   b = 2 * dx * dy / (dx*dx + dy*dy);
+
+   new_x = Math.round(a * (p - x1) + b*(q - y1) + x1);
+   new_y = Math.round(b * (p - x1) - a*(q - y1) + y1);
+
+   return [new_x, new_y];
+}
+
+function listAllProperties(o){
+    var objectToInspect;
+    var result = [];
+
+    for(objectToInspect = o; objectToInspect !== null; objectToInspect = Object.getPrototypeOf(objectToInspect)){
+        result = result.concat(Object.getOwnPropertyNames(objectToInspect));
+    }
+
+    return result;
 }
 
 CanvasState.prototype.rayTrace = function(ray) {
@@ -149,18 +167,22 @@ CanvasState.prototype.rayTrace = function(ray) {
                 ray.setEndpoints();
 
                 var lineSeg = intersection[0][3];
-                var p = reflectPoint(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
-                console.log(lineSeg);
-                console.log(ray);
-                console.log("original point: (" + ray.x2 + ", " + ray.y2 + ")");
-                console.log("reflection point: (" + p[0] + ", " + p[1] + ")");
+
+                var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
                 var x2 = p[0];
                 var y2 = p[1];
-                var m = (y2 - ray.y1)/(x2 - ray.x2);
-                var new_angle = Math.atan(m);
-                ray.angle = new_angle;
+                var m = (y2 - ray.y1)/(x2 - ray.x1);
+
+                var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
+                console.log(dot);
+                if (x2 - ray.x1 < 0) {
+                    ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
+                } else {
+                    ray.angle = mod(Math.atan(m), 2*Math.PI);
+                }
+
                 ray.setEndpoints();
-                console.log("new angle: " + new_angle);
+                console.log("new angle: " + ray.angle);
 
                 hit = true;
             }

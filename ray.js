@@ -57,14 +57,12 @@ Ray.prototype.setEndpoints = function() {
     }
 
     if (rightward) {
-        x2 = canvasState.width;
+        var x2 = canvasState.width;
     } else {
-        x2 = 0;
+        var x2 = 0;
     }
 
     var y2 = m*(x2 - this.x1) + this.y1;
-    // console.log(m);
-    // console.log(y2);
     if (y2 >= 0 && y2 <= canvasState.height) {
         this.x2 = x2;
         this.y2 = y2;
@@ -76,11 +74,6 @@ Ray.prototype.setEndpoints = function() {
         this.x2 = (y2 - this.y1)/m + this.x1;
     }
     this.y2 = y2;
-
-    // console.log("ray x1: " + this.x1);
-    // console.log("ray y1: " + this.y1);
-    // console.log("ray x2: " + this.x2);
-    // console.log("ray y2: " + this.y2);
 }
 
 /** Takes in a PATH (array of [x, y] coordinates), and draws lines between
@@ -109,5 +102,4 @@ Ray.prototype.drawPath = function() {
         ctx.lineTo(x2, y2);
         ctx.stroke();
     }
-    console.log("\n");
 }

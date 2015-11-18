@@ -12,14 +12,11 @@ function startGame() {
     ctx.canvas.width  = window.innerWidth - 10;
     ctx.canvas.height = window.innerHeight - 10;
 
-    ctx.moveTo(0,0);
+    // x = {}
+    // console.log(x);
+    // x.hello = "world";
 
     canvasState = new CanvasState(document.getElementById('myCanvas'));
-    var box = new Box(300, 300, 1.5, "blue", 100, 100);
+    var box = new Box(300, 250, 1.5, "blue", 10, 100);
     canvasState.addShape(box);
-
-    //test1();
-    //test2();
-    //rayTrace(0, 300, 0, canvasState);
-
 }

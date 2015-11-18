@@ -20,3 +20,5 @@ approxeq = function(v1, v2, epsilon) {
   }
   return Math.abs(v1 - v2) < epsilon;
 };
+
+function dotProduct(v1, v2) {return v1[0]*v2[0] + v1[1]*v2[1];}
