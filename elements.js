@@ -1,15 +1,20 @@
 /** This file defines the classes for the optical elements that the user can
-  * drag around on the screen to interact with the ray of light. */
+  * drag around on the screen to interact with the ray of light (i.e. mirrors,
+  * lenses, etc).
 
+    The Chain of inheritance is as follows:
+        Element --> Box, Lens
+        Box     --> Mirror, Medium
+*/
 
 /** Defines the Element class. An optical element is specified by its x, y
   * position, an index of refraction n, and a color (for rendering). This
   * class is meant to be abstract. */
-var Element = function(x, y, n, fill) {
+var Element = function(x, y, n) {
     this.x = x || 0;
     this.y = y || 0;
     this.n = n;
-    this.fill = fill || '#AAAAAA';
+    this.fill = '#AAAAAA';
 }
 
 /** Draws this Element to a given context (render the object on the canvas). */
@@ -30,10 +35,11 @@ Element.prototype.intersects = function(ray) {
 /** Defines the Box class. A box is just a rectangular optical element, so it
   * needs a width and a height in addition to the parameters specified by the
   * abstract Element class above. */
-var Box = function(x, y, n, fill, w, h){
+var Box = function(x, y, n, w, h){
     Element.apply(this, arguments);
     this.w = w || 1;
     this.h = h || 1;
+    this.fill = "#669999";
     this.generateLineSegments();
 }
 
@@ -84,8 +90,6 @@ Box.prototype.intersection = function(ray) {
     return [closest_point];
 }
 
-/** This function came with the code I grabbed from the internet. I'm leaving it
-  * in for now. */
 Box.prototype.contains = function(mx, my) {
     // All we have to do is make sure the Mouse X,Y fall in the area between
     // the Element's X and (X + Width) and its Y and (Y + Height)
@@ -95,3 +99,22 @@ Box.prototype.contains = function(mx, my) {
 
 //Box.prototype = Element.prototype;        // Set prototype to Person's
 Box.prototype.constructor = Box;   // Set constructor back to Box
+
+
+
+
+
+
+
+/** Defines the Mirror class. A Mirror is a simply a box that reflects all
+  * incident rays. */
+var Mirror = function(x, y, n, w, h){
+    Box.apply(this, arguments);
+    this.w = w || 1;
+    this.h = h || 1;
+    this.fill = "#33cccc";
+    this.generateLineSegments();
+}
+
+Mirror.prototype = Box.prototype;        // Set prototype to Person's
+Mirror.prototype.constructor = Mirror;   // Set constructor back to Box

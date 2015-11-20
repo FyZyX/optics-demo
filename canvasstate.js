@@ -86,7 +86,7 @@ function CanvasState(canvas) {
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        myState.addShape(new Box(mouse.x - 10, mouse.y - 10, 1.5, "blue", 10, 100));
+        myState.addShape(new Mirror(mouse.x - 10, mouse.y - 10, 1.5, 10, 100));
     }, true);
 
     // **** Options! ****
