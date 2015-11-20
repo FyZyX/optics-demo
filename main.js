@@ -13,6 +13,6 @@ function startGame() {
     ctx.canvas.height = window.innerHeight - 10;
 
     canvasState = new CanvasState(document.getElementById('myCanvas'));
-    var box = new Mirror(300, 250, 1.5, 10, 100);
+    var box = new Mirror(300, 250, 1.5, 10, 100, Math.PI/2);
     canvasState.addShape(box);
 }

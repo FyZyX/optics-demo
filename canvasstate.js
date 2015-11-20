@@ -86,7 +86,7 @@ function CanvasState(canvas) {
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        myState.addShape(new Mirror(mouse.x - 10, mouse.y - 10, 1.5, 10, 100));
+        myState.addShape(new Mirror(mouse.x - 10, mouse.y - 10, 1.5, 10, 100, Math.PI/2));
     }, true);
 
     // **** Options! ****
@@ -134,10 +134,12 @@ CanvasState.prototype.draw = function() {
         // draw selection
         // right now this is just a stroke along the edge of the selected Shape
         if (this.selection != null) {
-          ctx.strokeStyle = this.selectionColor;
-          ctx.lineWidth = this.selectionWidth;
+          // ctx.strokeStyle = this.selectionColor;
+          // ctx.lineWidth = this.selectionWidth;
+          // var mySel = this.selection;
+          // ctx.strokeRect(mySel.x,mySel.y,mySel.w,mySel.h);
           var mySel = this.selection;
-          ctx.strokeRect(mySel.x,mySel.y,mySel.w,mySel.h);
+          mySel.highlight(ctx);
         }
 
         // ** Add stuff you want drawn on top all the time here **

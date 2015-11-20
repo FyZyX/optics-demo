@@ -15,6 +15,7 @@ var Element = function(x, y, n) {
     this.y = y || 0;
     this.n = n;
     this.fill = '#AAAAAA';
+    this.angle = 0;
 }
 
 /** Draws this Element to a given context (render the object on the canvas). */
@@ -44,17 +45,63 @@ var Box = function(x, y, n, w, h){
 }
 
 Box.prototype.generateLineSegments = function() {
+    var x1, x2, x3, x4;
+    var y1, y2, y3, y4;
+
+
+    this.x1 = this.x;
+    this.y1 = this.y;
+
+    this.x4 = this.x1 + this.w*Math.cos(this.angle);
+    this.y4 = this.y1 + this.w*Math.sin(this.angle);
+
+    this.x2 = this.x1 - this.h*Math.sin(this.angle);
+    this.y2 = this.y1 + this.h*Math.cos(this.angle);
+
+    this.x3 = this.x4 - this.h*Math.sin(this.angle);
+    this.y3 = this.y4 + this.h*Math.cos(this.angle);
+
     this.lineSegments = [];
-    this.lineSegments.push(new LineSegment(this.x, this.y, this.x, this.y + this.h));
-    this.lineSegments.push(new LineSegment(this.x, this.y + this.h, this.x + this.w, this.y + this.h));
-    this.lineSegments.push(new LineSegment(this.x + this.w, this.y + this.h, this.x + this.w, this.y));
-    this.lineSegments.push(new LineSegment(this.x + this.w, this.y, this.x, this.y));
+    this.lineSegments.push(new LineSegment(this.x1, this.y1, this.x2, this.y2));
+    this.lineSegments.push(new LineSegment(this.x2, this.y2, this.x3, this.y3));
+    this.lineSegments.push(new LineSegment(this.x3, this.y3, this.x4, this.y4));
+    this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
 }
 
 Box.prototype.draw = function(ctx) {
     this.generateLineSegments();
-    ctx.fillStyle = this.fill;
-    ctx.fillRect(this.x, this.y, this.w, this.h);
+
+    var grd = ctx.createLinearGradient(this.x,this.y,this.x,this.y+this.h);
+    grd.addColorStop(0,this.color1);
+    grd.addColorStop(1,this.color2);
+
+    ctx.fillStyle = grd;
+
+    ctx.beginPath();
+    ctx.moveTo(this.x1, this.y1);
+    ctx.lineTo(this.x2, this.y2);
+    ctx.lineTo(this.x3, this.y3);
+    ctx.lineTo(this.x4, this.y4);
+    ctx.lineTo(this.x1, this.y1);
+    ctx.fill();
+}
+
+Box.prototype.highlight = function(ctx) {
+    this.generateLineSegments();
+
+    ctx.strokeStyle = 'purple';
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+    ctx.moveTo(this.x1, this.y1);
+    ctx.lineTo(this.x2, this.y2);
+    ctx.stroke();
+    ctx.lineTo(this.x3, this.y3);
+    ctx.stroke();
+    ctx.lineTo(this.x4, this.y4);
+    ctx.stroke();
+    ctx.lineTo(this.x1, this.y1);
+    ctx.stroke();
 }
 
 Box.prototype.intersection = function(ray) {
@@ -90,11 +137,20 @@ Box.prototype.intersection = function(ray) {
     return [closest_point];
 }
 
-Box.prototype.contains = function(mx, my) {
-    // All we have to do is make sure the Mouse X,Y fall in the area between
-    // the Element's X and (X + Width) and its Y and (Y + Height)
-    return  (this.x <= mx) && (this.x + this.w >= mx) &&
-            (this.y <= my) && (this.y + this.h >= my);
+
+Box.prototype.contains = function(x, y) {
+    var vs = [[this.x1, this.y1], [this.x2, this.y2], [this.x3, this.y3], [this.x4, this.y4]];
+    var inside = false;
+    for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+        var xi = vs[i][0], yi = vs[i][1];
+        var xj = vs[j][0], yj = vs[j][1];
+
+        var intersect = ((yi > y) != (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+
+    return inside;
 }
 
 //Box.prototype = Element.prototype;        // Set prototype to Person's
@@ -108,11 +164,13 @@ Box.prototype.constructor = Box;   // Set constructor back to Box
 
 /** Defines the Mirror class. A Mirror is a simply a box that reflects all
   * incident rays. */
-var Mirror = function(x, y, n, w, h){
+var Mirror = function(x, y, n, w, h, angle){
     Box.apply(this, arguments);
     this.w = w || 1;
     this.h = h || 1;
-    this.fill = "#33cccc";
+    this.color1 = "#33cccc";
+    this.color2 = "#ccffcc";
+    this.angle = angle;
     this.generateLineSegments();
 }
 
