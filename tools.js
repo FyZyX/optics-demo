@@ -81,14 +81,3 @@ function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, l
     // if line1 and line2 are segments, they intersect if both of the above are true
     return result;
 };
-
-
-function fresnel_refraction(normal, vector, n1, n2):
-    var n = n1/n2
-    var dot = np.dot(norm(vector), norm(normal))
-    var c = np.sqrt(1 - n**2 * (1 - dot**2))
-    var sign = 1
-    if dot < 0.0:
-        sign = -1
-    var refraction = n * vector + sign*(c - sign*n*dot) * normal
-    return norm(refraction)
