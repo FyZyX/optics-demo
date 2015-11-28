@@ -4,10 +4,7 @@
   * in it. */
 
 var canvasState;
-<<<<<<< HEAD
 var mousePointer;
-=======
->>>>>>> 322ef23d4633e3fb96bbaab10bd6bd41af3aafc3
 
 function startGame() {
     c = document.getElementById("myCanvas");
@@ -17,11 +14,6 @@ function startGame() {
     ctx.canvas.height = window.innerHeight - 10;
 
     canvasState = new CanvasState(document.getElementById('myCanvas'));
-<<<<<<< HEAD
     // box = new Mirror(300, 250, 1.5, 10, 100, Math.PI/4);
     //canvasState.addShape(box);
-=======
-    var box = new Mirror(300, 250, 1.5, 10, 100, Math.PI/2);
-    canvasState.addShape(box);
->>>>>>> 322ef23d4633e3fb96bbaab10bd6bd41af3aafc3
 }

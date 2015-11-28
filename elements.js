@@ -191,7 +191,6 @@ var Mirror = function(x, y, n, w, h, angle){
     this.color2 = "#ccffcc";
     this.angle = angle;
     this.generateLineSegments();
-<<<<<<< HEAD
     this.generateCenter();
 
 
@@ -245,9 +244,4 @@ Mirror.prototype.intersection = function(ray) {
     closest_point.entering = entering;
     return closest_point;
 }
-=======
-}
 
-Mirror.prototype = Box.prototype;        // Set prototype to Person's
-Mirror.prototype.constructor = Mirror;   // Set constructor back to Box
->>>>>>> 322ef23d4633e3fb96bbaab10bd6bd41af3aafc3
