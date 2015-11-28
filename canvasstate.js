@@ -50,10 +50,12 @@ function CanvasState(canvas) {
                 var mySel = opticalElements[i];
                 // Keep track of where in the object we clicked
                 // so we can move it smoothly (see mousemove)
-                myState.dragoffx = mx - mySel.x;
-                myState.dragoffy = my - mySel.y;
-                myState.dragging = true;
+                myState.dragoffx = mx - mySel.center_x;
+                myState.dragoffy = my - mySel.center_y;
+                // myState.dragging = true;
+                myState.rotating = true;
                 myState.selection = mySel;
+                myState.last_angle = myState.selection.angle;
                 myState.valid = false;
                 return;
             }
@@ -65,28 +67,64 @@ function CanvasState(canvas) {
             myState.selection = null;
             myState.valid = false; // Need to clear the old selection border
         }
+
     }, true);
 
     canvas.addEventListener('mousemove', function(e) {
-        if (myState.dragging){
+        if (myState.dragging) {
             var mouse = myState.getMouse(e);
             // We don't want to drag the object by its top-left corner, we want to drag it
             // from where we clicked. Thats why we saved the offset and use it here
             myState.selection.x = mouse.x - myState.dragoffx;
             myState.selection.y = mouse.y - myState.dragoffy;
             myState.valid = false; // Something's dragging so we must redraw
+        } else if (myState.rotating) {
+            var mouse = myState.getMouse(e);
+            var original_angle = Math.atan((myState.dragoffy)/(myState.dragoffx));
+            // console.log("mx: " + mouse.x);
+            // console.log("my: " + mouse.y);
+            var new_angle = Math.atan((mouse.y - myState.selection.center_y)/(mouse.x - myState.selection.center_x));
+            console.log("mx: " + mouse.x);
+            console.log("my: " + mouse.y);
+            console.log("center x: " + myState.selection.center_x);
+            console.log("center y: " + myState.selection.center_y);
+            console.log("last angle: " + myState.last_angle);
+            console.log("original: " + original_angle);
+            console.log("new: " + new_angle);
+            console.log(myState.selection);
+            console.log("\n");
+            myState.selection.setAngle(myState.last_angle + new_angle - original_angle);
+            myState.valid = false;
+        } else {
+            var mouse = myState.getMouse(e);
+            var mx = mouse.x;
+            var my = mouse.y;
+            var opticalElements = myState.opticalElements;
+            var l = opticalElements.length;
+            for (var i = l-1; i >= 0; i--) {
+                if (opticalElements[i].contains(mx, my)) {
+                    var elementToChange = document.getElementsByTagName("body")[0];
+                    elementToChange.style.cursor = "url('images/cursor.png') 9 10, auto";
+                    return;
+                }
+            }
+
+            var elementToChange = document.getElementsByTagName("body")[0];
+            elementToChange.style.cursor = "default";
         }
     }, true);
 
 
     canvas.addEventListener('mouseup', function(e) {
         myState.dragging = false;
+        myState.rotating = false;
     }, true);
 
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        myState.addShape(new Mirror(mouse.x - 10, mouse.y - 10, 1.5, 10, 100, Math.PI/2));
+        var mirror = new Mirror(mouse.x - 10, mouse.y - 10, 1.5, 100, 10, Math.PI/4);
+        myState.addShape(mirror);
     }, true);
 
     // **** Options! ****
@@ -143,7 +181,7 @@ CanvasState.prototype.draw = function() {
         }
 
         // ** Add stuff you want drawn on top all the time here **
-        var ray = new Ray(0, 0, Math.PI/8);
+        var ray = new Ray(0, 0, Math.PI/4);
         this.rayTrace(ray);
 
         this.valid = true;
@@ -204,8 +242,8 @@ CanvasState.prototype.rayTrace = function(ray) {
         hit = false;
         for (var i = 0; i < elements.length; i += 1) {
             intersection = elements[i].intersection(ray);
-            if (intersection && !(approxeq(intersection[0][0], ray.x1, 0.01) && approxeq(intersection[0][1], ray.y1, 0.01))) {
-                intersections.extend(intersection);
+            if (intersection && !(approxeq(intersection.x, ray.x1, 0.01) && approxeq(intersection.y, ray.y1, 0.01))) {
+                intersections.push(intersection);
             }
         }
 
@@ -216,23 +254,30 @@ CanvasState.prototype.rayTrace = function(ray) {
             var cur_dist;
             var cur_point;
             var closest_point = intersections[0];
-            var min_dist = distance(closest_point[0], closest_point[1], ray.x1, ray.y1);
+            var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
             for (var i = 0; i < intersections.length; i += 1) {
                 cur_point = intersections[i];
-                cur_dist = distance(cur_point[0], cur_point[1], ray.x1, ray.y1);
+                cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
                 if (cur_dist < min_dist) {
                     closest_point = cur_point;
                     min_dist = cur_dist;
                 }
             }
 
-            ray.addToPath(closest_point[0], closest_point[1]);
+            ray.addToPath(closest_point.x, closest_point.y);
 
-            ray.x1 = closest_point[0];
-            ray.y1 = closest_point[1];
+            ray.x1 = closest_point.x;
+            ray.y1 = closest_point.y;
             ray.setEndpoints();
 
-            var lineSeg = closest_point[3];
+            var lineSeg = closest_point.lineSeg;
+
+
+
+
+
+
+
 
             var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
             var x2 = p[0];
@@ -240,7 +285,7 @@ CanvasState.prototype.rayTrace = function(ray) {
             var m = (y2 - ray.y1)/(x2 - ray.x1);
 
             var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
-            console.log(dot);
+
             if (x2 - ray.x1 < 0) {
                 ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
             } else {
@@ -257,7 +302,7 @@ CanvasState.prototype.rayTrace = function(ray) {
     for (var i = 0; i < boundaries.length; i += 1) {
         intersection = boundaries[i].intersection(ray);
         if (intersection) {
-            ray.addToPath(intersection[0][0], intersection[0][1]);
+            ray.addToPath(intersection.x, intersection.y);
         }
     }
 

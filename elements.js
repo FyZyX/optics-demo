@@ -42,12 +42,13 @@ var Box = function(x, y, n, w, h){
     this.h = h || 1;
     this.fill = "#669999";
     this.generateLineSegments();
+    this.generateCenter();
 }
+
 
 Box.prototype.generateLineSegments = function() {
     var x1, x2, x3, x4;
     var y1, y2, y3, y4;
-
 
     this.x1 = this.x;
     this.y1 = this.y;
@@ -67,6 +68,16 @@ Box.prototype.generateLineSegments = function() {
     this.lineSegments.push(new LineSegment(this.x3, this.y3, this.x4, this.y4));
     this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
 }
+
+
+Box.prototype.generateCenter = function() {
+    var x4 = this.x + this.w*Math.cos(this.angle)/2;
+    var y4 = this.y + this.w*Math.sin(this.angle)/2;
+
+    this.center_x = x4 - this.h*Math.sin(this.angle)/2;
+    this.center_y = y4 + this.h*Math.cos(this.angle)/2;
+}
+
 
 Box.prototype.draw = function(ctx) {
     this.generateLineSegments();
@@ -88,6 +99,7 @@ Box.prototype.draw = function(ctx) {
 
 Box.prototype.highlight = function(ctx) {
     this.generateLineSegments();
+    this.generateCenter();
 
     ctx.strokeStyle = 'purple';
     ctx.lineWidth = 1;
@@ -112,7 +124,7 @@ Box.prototype.intersection = function(ray) {
         lineSegment = this.lineSegments[i];
         intersection = lineSegment.intersection(ray);
         if (intersection) {
-            intersections.extend(intersection);
+            intersections.push(intersection);
         }
     }
 
@@ -120,21 +132,28 @@ Box.prototype.intersection = function(ray) {
         return false;
     }
 
+    var entering = false;
+    if (intersections.length > 1) {
+        entering = true;
+    }
+
     // choose the intersection point that is closest to the ray's starting point
     var cur_dist;
     var cur_point;
     var closest_point = intersections[0];
-    var min_dist = distance(closest_point[0], closest_point[1], ray.x1, ray.y1);
+    var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
     for (var i = 0; i < intersections.length; i += 1) {
         cur_point = intersections[i];
-        cur_dist = distance(cur_point[0], cur_point[1], ray.x1, ray.y1);
+        cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
+
         if (cur_dist < min_dist) {
             closest_point = cur_point;
             min_dist = cur_dist;
         }
     }
 
-    return [closest_point];
+    closest_point.entering = entering;
+    return closest_point;
 }
 
 
@@ -172,7 +191,57 @@ var Mirror = function(x, y, n, w, h, angle){
     this.color2 = "#ccffcc";
     this.angle = angle;
     this.generateLineSegments();
+    this.generateCenter();
+
+
+
+    // Up, down, and move are for dragging
 }
 
 Mirror.prototype = Box.prototype;        // Set prototype to Person's
 Mirror.prototype.constructor = Mirror;   // Set constructor back to Box
+
+Mirror.prototype.setAngle = function(angle) {
+    console.log("MIRROR ANGLE: " + mod(angle, 2*Math.PI))
+    this.angle = mod(angle, 2*Math.PI);
+}
+
+Mirror.prototype.intersection = function(ray) {
+    var intersections = [];
+    var lineSegment;
+    var intersection;
+    for (var i = 0; i < this.lineSegments.length; i +=1) {
+        lineSegment = this.lineSegments[i];
+        intersection = lineSegment.intersection(ray);
+        if (intersection) {
+            intersections.push(intersection);
+        }
+    }
+
+    if (intersections.length == 0) {
+        return false;
+    }
+
+    var entering = false;
+    if (intersections.length > 1) {
+        entering = true;
+    }
+
+    // choose the intersection point that is closest to the ray's starting point
+    var cur_dist;
+    var cur_point;
+    var closest_point = intersections[0];
+    var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
+    for (var i = 0; i < intersections.length; i += 1) {
+        cur_point = intersections[i];
+        cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
+        if (cur_dist < min_dist) {
+            closest_point = cur_point;
+            min_dist = cur_dist;
+        }
+    }
+
+    closest_point.entering = entering;
+    return closest_point;
+}
+

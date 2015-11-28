@@ -13,6 +13,10 @@ function mod(n, m) {
         return ((n % m) + m) % m;
 }
 
+function midpoint(x1, y1, x2, y2) {
+    return [(x1+x2)/2, (y1+y2)/2];
+}
+
 approxeq = function(v1, v2, epsilon) {
   if (epsilon == null) {
     epsilon = 0.001;
@@ -77,3 +81,4 @@ function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, l
     // if line1 and line2 are segments, they intersect if both of the above are true
     return result;
 };
+

@@ -33,7 +33,7 @@ var LineSegment = function(x1, y1, x2, y2) {
 LineSegment.prototype.intersection = function(ray) {
     var intersection = checkLineIntersection(ray.x1, ray.y1, ray.x2, ray.y2, this.x1, this.y1, this.x2, this.y2);
     if (intersection.onLine1 && intersection.onLine2) {
-        return [[intersection.x, intersection.y, true, this]];
+        return {"x": intersection.x, "y": intersection.y, "lineSeg": this};
     } else {
         return false;
     }
