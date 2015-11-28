@@ -152,9 +152,7 @@ CanvasState.prototype.clear = function() {
   * does something if the canvas gets invalidated by our code. */
 CanvasState.prototype.draw = function() {
     // if our state is invalid, redraw and validate!
-    console.log("HERE");
     if (!this.valid) {
-        console.log("DRAWING");
         var ctx = this.ctx;
         var opticalElements = this.opticalElements;
         this.clear();
@@ -287,6 +285,7 @@ CanvasState.prototype.rayTrace = function(ray) {
             var m = (y2 - ray.y1)/(x2 - ray.x1);
 
             var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
+
             if (x2 - ray.x1 < 0) {
                 ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
             } else {

@@ -45,7 +45,11 @@ var Box = function(x, y, n, w, h){
     this.generateCenter();
 }
 
+
 Box.prototype.generateLineSegments = function() {
+    var x1, x2, x3, x4;
+    var y1, y2, y3, y4;
+
     this.x1 = this.x;
     this.y1 = this.y;
 
@@ -65,13 +69,6 @@ Box.prototype.generateLineSegments = function() {
     this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
 }
 
-Box.prototype.generateCenter = function() {
-    var x4 = this.x + this.w*Math.cos(this.angle)/2;
-    var y4 = this.y + this.w*Math.sin(this.angle)/2;
-
-    this.center_x = x4 - this.h*Math.sin(this.angle)/2;
-    this.center_y = y4 + this.h*Math.cos(this.angle)/2;
-}
 
 Box.prototype.generateCenter = function() {
     var x4 = this.x + this.w*Math.cos(this.angle)/2;
@@ -80,15 +77,12 @@ Box.prototype.generateCenter = function() {
     this.center_x = x4 - this.h*Math.sin(this.angle)/2;
     this.center_y = y4 + this.h*Math.cos(this.angle)/2;
 }
+
 
 Box.prototype.draw = function(ctx) {
     this.generateLineSegments();
-    this.generateCenter();
 
-    var midpoint1 = midpoint(this.x1, this.y1, this.x4, this.y4);
-    var midpoint2 = midpoint(this.x2, this.y2, this.x3, this.y3);
-
-    var grd = ctx.createLinearGradient(midpoint1[0], midpoint1[1], midpoint2[0], midpoint2[1]);
+    var grd = ctx.createLinearGradient(this.x,this.y,this.x,this.y+this.h);
     grd.addColorStop(0,this.color1);
     grd.addColorStop(1,this.color2);
 
@@ -151,6 +145,7 @@ Box.prototype.intersection = function(ray) {
     for (var i = 0; i < intersections.length; i += 1) {
         cur_point = intersections[i];
         cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
+
         if (cur_dist < min_dist) {
             closest_point = cur_point;
             min_dist = cur_dist;
@@ -196,6 +191,7 @@ var Mirror = function(x, y, n, w, h, angle){
     this.color2 = "#ccffcc";
     this.angle = angle;
     this.generateLineSegments();
+<<<<<<< HEAD
     this.generateCenter();
 
 
@@ -249,3 +245,9 @@ Mirror.prototype.intersection = function(ray) {
     closest_point.entering = entering;
     return closest_point;
 }
+=======
+}
+
+Mirror.prototype = Box.prototype;        // Set prototype to Person's
+Mirror.prototype.constructor = Mirror;   // Set constructor back to Box
+>>>>>>> 322ef23d4633e3fb96bbaab10bd6bd41af3aafc3
