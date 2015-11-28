@@ -42,12 +42,10 @@ var Box = function(x, y, n, w, h){
     this.h = h || 1;
     this.fill = "#669999";
     this.generateLineSegments();
+    this.generateCenter();
 }
 
 Box.prototype.generateLineSegments = function() {
-    var x1, x2, x3, x4;
-    var y1, y2, y3, y4;
-
     this.x1 = this.x;
     this.y1 = this.y;
 
@@ -67,8 +65,25 @@ Box.prototype.generateLineSegments = function() {
     this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
 }
 
+Box.prototype.generateCenter = function() {
+    var x4 = this.x + this.w*Math.cos(this.angle)/2;
+    var y4 = this.y + this.w*Math.sin(this.angle)/2;
+
+    this.center_x = x4 - this.h*Math.sin(this.angle)/2;
+    this.center_y = y4 + this.h*Math.cos(this.angle)/2;
+}
+
+Box.prototype.generateCenter = function() {
+    var x4 = this.x + this.w*Math.cos(this.angle)/2;
+    var y4 = this.y + this.w*Math.sin(this.angle)/2;
+
+    this.center_x = x4 - this.h*Math.sin(this.angle)/2;
+    this.center_y = y4 + this.h*Math.cos(this.angle)/2;
+}
+
 Box.prototype.draw = function(ctx) {
     this.generateLineSegments();
+    this.generateCenter();
 
     var midpoint1 = midpoint(this.x1, this.y1, this.x4, this.y4);
     var midpoint2 = midpoint(this.x2, this.y2, this.x3, this.y3);
@@ -90,6 +105,7 @@ Box.prototype.draw = function(ctx) {
 
 Box.prototype.highlight = function(ctx) {
     this.generateLineSegments();
+    this.generateCenter();
 
     ctx.strokeStyle = 'purple';
     ctx.lineWidth = 1;
@@ -180,11 +196,20 @@ var Mirror = function(x, y, n, w, h, angle){
     this.color2 = "#ccffcc";
     this.angle = angle;
     this.generateLineSegments();
+    this.generateCenter();
+
+
+
+    // Up, down, and move are for dragging
 }
 
 Mirror.prototype = Box.prototype;        // Set prototype to Person's
 Mirror.prototype.constructor = Mirror;   // Set constructor back to Box
 
+Mirror.prototype.setAngle = function(angle) {
+    console.log("MIRROR ANGLE: " + mod(angle, 2*Math.PI))
+    this.angle = mod(angle, 2*Math.PI);
+}
 
 Mirror.prototype.intersection = function(ray) {
     var intersections = [];
