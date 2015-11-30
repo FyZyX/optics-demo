@@ -274,7 +274,7 @@ CanvasState.prototype.rayTrace = function(ray) {
             var lineSeg = closest_point.lineSeg;
 
 
-            ray.setAngle(refractedAngle(1, -1, ray, closest_point.element, closest_point.lineSeg, [closest_point.x, closest_point.y]));
+            ray.setAngle(refractedAngle(1, -1, ray, closest_point.lineSeg, [closest_point.x, closest_point.y]));
                         // console.log("new angle: " + ray.angle);
 
 
