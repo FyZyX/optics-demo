@@ -1,6 +1,8 @@
 /** The CanvasState object is responsible for keeping track of and rendering
   * all of the optical elements on the screen, as well as ray tracing a ray. */
 
+var mouseOverObject = false;
+
 function CanvasState(canvas) {
     // **** First some setup! ****
     this.canvas = canvas;
@@ -50,10 +52,13 @@ function CanvasState(canvas) {
                 var mySel = opticalElements[i];
                 // Keep track of where in the object we clicked
                 // so we can move it smoothly (see mousemove)
-                myState.dragoffx = mx - mySel.center_x;
-                myState.dragoffy = my - mySel.center_y;
-                // myState.dragging = true;
-                myState.rotating = true;
+                myState.dragoffx = mx - mySel.x;
+                myState.dragoffy = my - mySel.y;
+                if (keysDown) {
+                    myState.rotating = true;
+                } else {
+                    myState.dragging = true;
+                }
                 myState.selection = mySel;
                 myState.last_angle = myState.selection.angle;
                 myState.valid = false;
@@ -83,16 +88,7 @@ function CanvasState(canvas) {
             var original_angle = Math.atan((myState.dragoffy)/(myState.dragoffx));
             // console.log("mx: " + mouse.x);
             // console.log("my: " + mouse.y);
-            var new_angle = Math.atan((mouse.y - myState.selection.center_y)/(mouse.x - myState.selection.center_x));
-            console.log("mx: " + mouse.x);
-            console.log("my: " + mouse.y);
-            console.log("center x: " + myState.selection.center_x);
-            console.log("center y: " + myState.selection.center_y);
-            console.log("last angle: " + myState.last_angle);
-            console.log("original: " + original_angle);
-            console.log("new: " + new_angle);
-            console.log(myState.selection);
-            console.log("\n");
+            var new_angle = Math.atan((mouse.y - myState.selection.y)/(mouse.x - myState.selection.x));
             myState.selection.setAngle(myState.last_angle + new_angle - original_angle);
             myState.valid = false;
         } else {
@@ -103,14 +99,11 @@ function CanvasState(canvas) {
             var l = opticalElements.length;
             for (var i = l-1; i >= 0; i--) {
                 if (opticalElements[i].contains(mx, my)) {
-                    var elementToChange = document.getElementsByTagName("body")[0];
-                    elementToChange.style.cursor = "url('images/cursor.png') 9 10, auto";
+                    mouseOverObject = true;
                     return;
                 }
             }
-
-            var elementToChange = document.getElementsByTagName("body")[0];
-            elementToChange.style.cursor = "default";
+            mouseOverObject = false;
         }
     }, true);
 
@@ -123,7 +116,7 @@ function CanvasState(canvas) {
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        var mirror = new Mirror(mouse.x - 10, mouse.y - 10, 1.5, 100, 10, Math.PI/4);
+        var mirror = new Mirror(mouse.x - 10, mouse.y - 10, -1, 100, 10, Math.PI/4);
         myState.addShape(mirror);
     }, true);
 
@@ -151,6 +144,14 @@ CanvasState.prototype.clear = function() {
 /** While draw is called as often as requestAnimationFrame demands, it only ever
   * does something if the canvas gets invalidated by our code. */
 CanvasState.prototype.draw = function() {
+    if (keysDown && mouseOverObject) {
+        var elementToChange = document.getElementsByTagName("body")[0];
+        elementToChange.style.cursor = "url('images/cursor.png') 9 10, auto";
+    } else {
+        var elementToChange = document.getElementsByTagName("body")[0];
+        elementToChange.style.cursor = "default";
+    }
+
     // if our state is invalid, redraw and validate!
     if (!this.valid) {
         var ctx = this.ctx;
@@ -181,7 +182,7 @@ CanvasState.prototype.draw = function() {
         }
 
         // ** Add stuff you want drawn on top all the time here **
-        var ray = new Ray(0, 0, Math.PI/4);
+        var ray = new Ray(0, 0, Math.PI/8);
         this.rayTrace(ray);
 
         this.valid = true;
@@ -273,24 +274,23 @@ CanvasState.prototype.rayTrace = function(ray) {
             var lineSeg = closest_point.lineSeg;
 
 
+            ray.setAngle(refractedAngle(1, -1, ray, closest_point.element, closest_point.lineSeg, [closest_point.x, closest_point.y]));
+                        // console.log("new angle: " + ray.angle);
 
 
 
+            // var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
+            // var x2 = p[0];
+            // var y2 = p[1];
+            // var m = (y2 - ray.y1)/(x2 - ray.x1);
 
+            // var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
 
-
-            var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
-            var x2 = p[0];
-            var y2 = p[1];
-            var m = (y2 - ray.y1)/(x2 - ray.x1);
-
-            var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
-
-            if (x2 - ray.x1 < 0) {
-                ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
-            } else {
-                ray.angle = mod(Math.atan(m), 2*Math.PI);
-            }
+            // if (x2 - ray.x1 < 0) {
+            //     ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
+            // } else {
+            //     ray.angle = mod(Math.atan(m), 2*Math.PI);
+            // }
 
             ray.setEndpoints();
             // console.log("new angle: " + ray.angle);
@@ -308,3 +308,4 @@ CanvasState.prototype.rayTrace = function(ray) {
 
     ray.drawPath();
 }
+

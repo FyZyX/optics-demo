@@ -6,6 +6,20 @@
 var canvasState;
 var mousePointer;
 
+var keysDown = 0;
+
+window.addEventListener("keydown", function(e) {
+    if (e.shiftKey) {
+        keysDown += 1;
+    }
+}, true);
+
+window.addEventListener("keyup", function(e) {
+    if (!e.shiftKey && keysDown > 0) {
+        keysDown -= 1;
+    }
+}, true);
+
 function startGame() {
     c = document.getElementById("myCanvas");
     ctx = c.getContext("2d");
@@ -13,6 +27,7 @@ function startGame() {
     ctx.canvas.width  = window.innerWidth - 10;
     ctx.canvas.height = window.innerHeight - 10;
 
+    keysDown = 0;
     canvasState = new CanvasState(document.getElementById('myCanvas'));
     // box = new Mirror(300, 250, 1.5, 10, 100, Math.PI/4);
     //canvasState.addShape(box);

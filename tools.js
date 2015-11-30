@@ -82,3 +82,124 @@ function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, l
     return result;
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Updates the ray angle upon intersection with an optical element based on
+    n1:         the index of refraction of the first medium
+    n2:         the index of refraction of the second medium
+    ray:        the ray object
+    element:    the object that was intersected (line segment or circle)
+    P:          the intersection point represented as an array [x,y]
+*/
+
+function refractedAngle(n1, n2, ray, element, lineSeg, P) {
+
+    // --BEGIN INNER FUNCTIONS--
+
+    // returns a normal vector to a line segment given its endpoints
+    function normalVectorLine(x1, y1, x2, y2)
+        {return [-(y2 - y1), (x2 - x1)];}
+
+    // returns a normal vector to a circle given its center and a point on its circumference
+    function normalVectorCircle(x0, y0, x, y)
+        {return [x - x0, y - y0];}
+
+    // returns the magnitude of a vector that is represented by an array [x,y]
+    function magnitude(vector)
+        {return Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2));}
+
+    // returns the value of the dot product of two vectors (arrays [x,y])
+    function dotProduct(v1, v2)
+        {return v1[0]*v2[0] + v1[1]*v2[1];}
+
+    // --END INNER FUNCTIONS--
+
+    // --BEGIN COMPUTATIONS--
+
+    // create a vector from the ray's start and end points
+    var rayVec = [ray.x2 - ray.x1, ray.y2 - ray.y1];
+
+    /*
+    determine the appropriate normal vector depending on
+    the optical element being intersected
+
+    element.type is a text string variable that contains the kind of element being intersected
+    */
+    if (true)
+    // if (element.type === "line segment")
+        {var linSegNormVec = normalVectorLine(lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);}
+    else if (element.type === "circle")
+        {var circSegNormVec = noramlVectorCircle(element.x0, element.y0, P[0], P[1]);}
+
+    // find the dot product of the two vectors (needed for finding angle)
+    var dot = dotProduct(rayVec, linSegNormVec);
+    /*
+    use the geometric interpretation of the dot product to determine
+    the angle between the ray and line segment
+    */
+    var angle = Math.acos(dot/(magnitude(rayVec)*magnitude(linSegNormVec)));
+    // determine the appropriate incident angle (relative to the normal) from angle
+    var theta_i = dot > 0 ? angle : Math.PI - angle;
+
+    // compute the ray's new trajectory (transmitted angle) from the incident angle
+
+    // apply Snell's Law
+    var theta_t = Math.asin((n1/n2)*Math.sin(theta_i));
+    // determine the change in ray angle from incident to transmitted
+    var deflection = theta_i - theta_t;
+    // it is assumed that n2 >= n1. Deal with the remaining case
+    // if (n2 < n1) {deflection *= -1;}
+    // adjust the ray angle according to its deflection from the normal
+
+    var result = ray.angle + deflection;
+    // console.log("deflection = theta_t - theta_i = " + theta_t + " - " + theta_i + " = " + deflection);
+    // console.log("ray.angle + deflection = " + ray.angle + " + " + deflection + " = " + result);
+    return result
+
+    // --END COMPUTATIONS--
+
+}
