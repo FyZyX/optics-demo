@@ -116,6 +116,64 @@ Box.prototype.draw = function(ctx) {
     ctx.lineTo(this.x4, this.y4);
     ctx.lineTo(this.x1, this.y1);
     ctx.fill();
+
+
+    // FOR DRAWING NORMALS
+    var oldStyle = ctx.strokeStyle;
+    // ctx.lineWidth=10;
+    ctx.strokeStyle="green";
+    ctx.beginPath();
+    var midpoint1 = midpoint(this.x1, this.y1, this.x2, this.y2);
+    var midpoint2 = midpoint(this.x2, this.y2, this.x3, this.y3);
+    var midpoint3 = midpoint(this.x3, this.y3, this.x4, this.y4);
+    var midpoint4 = midpoint(this.x4, this.y4, this.x1, this.y1);
+
+    var normVec1 = normalVectorLine(this.x1, this.y1, this.x2, this.y2);
+    var normVec2 = normalVectorLine(this.x2, this.y2, this.x3, this.y3);
+    var normVec3 = normalVectorLine(this.x3, this.y3, this.x4, this.y4);
+    var normVec4 = normalVectorLine(this.x4, this.y4, this.x1, this.y1);
+
+    var normLine1 = {};
+    normLine1.x1 = midpoint1[0];
+    normLine1.y1 = midpoint1[1];
+    normLine1.x2 = midpoint1[0] + normVec1[0];
+    normLine1.y2 = midpoint1[1] + normVec1[1];
+
+    var normLine2 = {};
+    normLine2.x1 = midpoint2[0];
+    normLine2.y1 = midpoint2[1];
+    normLine2.x2 = midpoint2[0] + normVec2[0];
+    normLine2.y2 = midpoint2[1] + normVec2[1];
+
+    var normLine3 = {};
+    normLine3.x1 = midpoint3[0];
+    normLine3.y1 = midpoint3[1];
+    normLine3.x2 = midpoint3[0] + normVec3[0];
+    normLine3.y2 = midpoint3[1] + normVec3[1];
+
+    var normLine4 = {};
+    normLine4.x1 = midpoint4[0];
+    normLine4.y1 = midpoint4[1];
+    normLine4.x2 = midpoint4[0] + normVec4[0];
+    normLine4.y2 = midpoint4[1] + normVec4[1];
+
+
+    normalLines = [];
+    normalLines.push(normLine1);
+    normalLines.push(normLine2);
+    normalLines.push(normLine3);
+    normalLines.push(normLine4);
+
+    var curNormLine;
+    for (var i = 0; i < normalLines.length; i += 1) {
+        curNormLine = normalLines[i];
+        ctx.moveTo(curNormLine.x1, curNormLine.y1);
+        ctx.lineTo(curNormLine.x2, curNormLine.y2);
+        ctx.stroke();
+    }
+
+    ctx.strokeStyle = oldStyle;
+
 }
 
 Box.prototype.highlight = function(ctx) {

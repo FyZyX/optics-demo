@@ -9,6 +9,9 @@ Array.prototype.extend = function (other_array) {
     other_array.forEach(function(v) {this.push(v)}, this);
 }
 
+function normalVectorLine(x1, y1, x2, y2)
+    {return [-(y2 - y1), (x2 - x1)];}
+
 function mod(n, m) {
         return ((n % m) + m) % m;
 }
@@ -16,6 +19,10 @@ function mod(n, m) {
 function midpoint(x1, y1, x2, y2) {
     return [(x1+x2)/2, (y1+y2)/2];
 }
+
+// returns the magnitude of a vector that is represented by an array [x,y]
+function magnitude(vector)
+    {return Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2));}
 
 approxeq = function(v1, v2, epsilon) {
   if (epsilon == null) {
