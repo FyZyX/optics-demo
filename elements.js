@@ -164,13 +164,13 @@ Box.prototype.draw = function(ctx) {
     normalLines.push(normLine3);
     normalLines.push(normLine4);
 
-    var curNormLine;
-    for (var i = 0; i < normalLines.length; i += 1) {
-        curNormLine = normalLines[i];
-        ctx.moveTo(curNormLine.x1, curNormLine.y1);
-        ctx.lineTo(curNormLine.x2, curNormLine.y2);
-        ctx.stroke();
-    }
+    // var curNormLine;
+    // for (var i = 0; i < normalLines.length; i += 1) {
+    //     curNormLine = normalLines[i];
+    //     ctx.moveTo(curNormLine.x1, curNormLine.y1);
+    //     ctx.lineTo(curNormLine.x2, curNormLine.y2);
+    //     ctx.stroke();
+    // }
 
     ctx.strokeStyle = oldStyle;
 
@@ -201,10 +201,13 @@ Box.prototype.intersection = function(ray) {
     for (var i = 0; i < this.lineSegments.length; i +=1) {
         lineSegment = this.lineSegments[i];
         intersection = lineSegment.intersection(ray);
-        if (intersection) {
+
+        if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
             intersections.push(intersection);
         }
     }
+
+    console.log("intersection.length: " + intersections.length);
 
     if (intersections.length == 0) {
         return false;
@@ -288,7 +291,7 @@ Mirror.prototype.intersection = function(ray) {
     for (var i = 0; i < this.lineSegments.length; i +=1) {
         lineSegment = this.lineSegments[i];
         intersection = lineSegment.intersection(ray);
-        if (intersection) {
+        if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
             intersections.push(intersection);
         }
     }

@@ -116,7 +116,7 @@ function CanvasState(canvas) {
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        var mirror = new Mirror(mouse.x - 10, mouse.y - 10, -1, 100, 10, Math.PI/4);
+        var mirror = new Mirror(mouse.x - 10, mouse.y - 10, 1.5, 200, 200, 0);
         myState.addShape(mirror);
     }, true);
 
@@ -248,6 +248,8 @@ CanvasState.prototype.rayTrace = function(ray) {
             }
         }
 
+        // console.log("intersections: ");
+        // console.log(intersections.length);
         if (intersections.length > 0) {
             hit = true;
 
@@ -274,8 +276,33 @@ CanvasState.prototype.rayTrace = function(ray) {
             var lineSeg = closest_point.lineSeg;
 
 
-            ray.setAngle(refractedAngle(1, -1, ray, closest_point.lineSeg, [closest_point.x, closest_point.y]));
-                        // console.log("new angle: " + ray.angle);
+            var n2 = 1;
+
+            // create a vector from the ray's start and end points
+            var rayVec = [ray.x2 - ray.x1, ray.y2 - ray.y1];
+            var NormVec = normalVectorLine(lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
+
+            // console.log("dot: " + dotProduct(rayVec, NormVec));
+
+            if (dotProduct(rayVec, NormVec) < 0) {
+                n2 = closest_point.element.n;
+            }
+
+            console.log("ray's n: " + ray.n);
+            console.log("next medium's n: " + n2);
+
+            // refraction is an object with {"angle: " angle, "entering": true/false}
+            var refraction = refractedAngle(ray.n, n2, ray, closest_point.lineSeg, [closest_point.x, closest_point.y]);
+            ray.setAngle(refraction.angle);
+            console.log("ANGLE: " + ray.angle);
+            if (refraction.entering) {
+                console.log("ENTERING");
+                ray.n = closest_point.element.n;
+            } else {
+                console.log("LEAVING");
+                ray.n = 1;
+            }
+            console.log("\n");
 
 
 

@@ -7,6 +7,7 @@ var Ray = function(x, y, angle) {
     this.y1 = y;
     this.angle = angle;
     this.setEndpoints();
+    this.n = 1;
 }
 
 Ray.prototype.addToPath = function(x, y) {

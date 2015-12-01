@@ -9,8 +9,14 @@ Array.prototype.extend = function (other_array) {
     other_array.forEach(function(v) {this.push(v)}, this);
 }
 
+
+// returns a normal vector to a line segment given its endpoints
 function normalVectorLine(x1, y1, x2, y2)
     {return [-(y2 - y1), (x2 - x1)];}
+
+// returns the value of the dot product of two vectors (arrays [x,y])
+function dotProduct(v1, v2)
+    {return v1[0]*v2[0] + v1[1]*v2[1];}
 
 function mod(n, m) {
         return ((n % m) + m) % m;
@@ -90,6 +96,47 @@ function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, l
 };
 
 
+function circleLineIntersect(x1, y1, x2, y2, cx, cy, cr) {
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var a = dx * dx + dy * dy;
+    var b = 2 * (dx * (x1 - cx) + dy * (y1 - cy));
+    var c = cx * cx + cy * cy;
+
+    c += x1 * x1 + y1 * y1;
+    c -= 2 * (cx * x1 + cy * y1);
+    c -= cr * cr;
+
+    var bb4ac = b * b - 4 * a * c;
+
+    if (bb4ac < 0) {
+        return false;    // No collision
+    } else {
+        var p1 = (-b + Math.sqrt(bb4ac)) / (2*a);
+        var p2 = (-b - Math.sqrt(bb4ac)) / (2*a);
+
+        var q1, q2;
+        // vertical line
+        if (p1 == p2) {
+            q1 = Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
+            q2 = -Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
+        } else {
+            var m = (y2 - y1)/(x2 - x1);
+            q1 = m*(p1-x1) + y1;
+            q2 = m*(p2-x1) + y1;
+        }
+
+        var dist1 = distance(p1, q1, x1, y1);
+        var dist2 = distance(p2, q2, x1, y1);
+
+        if (dist1 < dist2) {
+            return {"x": p1, "y": q1};
+        } else {
+            return {"x": p2, "y": q2};
+        }
+    }
+
+}
 
 
 
@@ -107,12 +154,9 @@ function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, l
 
 
 
-
-
-
-
-
-
+function angleFromSegment(x1, y1, x2, y2) {
+    return mod(Math.atan2(y2 - y1, x2 - x1), 2*Math.PI);
+}
 
 
 
@@ -149,7 +193,7 @@ function refractedAngle(n1, n2, ray, element, P) {
 
     // returns a normal vector to a line segment given its endpoints
     function normalVectorLine(x1, y1, x2, y2)
-        {return x2 >= x1 ? [-(y2 - y1), (x2 - x1)] : [(y2 - y1), -(x2 - x1)];}
+        {return [-(y2 - y1), (x2 - x1)];}
 
     // returns a normal vector to a circle given its center and a point on its circumference
     function normalVectorCircle(x0, y0, x, y)
@@ -202,7 +246,22 @@ function refractedAngle(n1, n2, ray, element, P) {
     if (n2 < n1) {deflection *= -1;}
     // adjust the ray angle according to its deflection from the normal
 
-    return ray.angle + deflection;
+    var rotation = angleFromSegment(element.x1, element.y1, element.x2, element.y2);
+    var diff = mod(ray.angle - rotation, 2*Math.PI);
+
+    // console.log("rotation: " + rotation);
+    // console.log("(x1, y1) --> (x2, y2): (" + element.x1 + ", " + element.y1 + ") --> (" + element.x2 + ", " + element.y2 + ")");
+    // console.log("\n");
+
+    var refraction_angle;
+    if ((diff > 0 && diff < Math.PI/2) ||
+        (diff > 3*Math.PI/2 && diff < 2*Math.PI)) {
+        refraction_angle = ray.angle + deflection;
+    } else {
+        refraction_angle = ray.angle - deflection;
+    }
+
+    return {"angle": refraction_angle, "entering": dot < 0};
 
     // --END COMPUTATIONS--
 

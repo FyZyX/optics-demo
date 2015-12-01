@@ -26,6 +26,20 @@ var LineSegment = function(x1, y1, x2, y2) {
     this.y1 = y1;
     this.x2 = x2;
     this.y2 = y2;
+
+    // var angle = Math.atan((y2 - y1)/(x2 - x1));
+
+    // if (x2 - x1 == 0) {
+    //     angle = 3*Math.PI/2;
+    // }
+
+    // if (y2 <= y1) {
+    //     angle -= Math.PI;
+    // }
+
+    // this.angle = mod(angle, 2*Math.PI);
+
+
 }
 
 /** Returns an array of the intersection points of this line segment and a ray
