@@ -32,4 +32,16 @@ function startGame() {
     canvasState = new CanvasState(document.getElementById('myCanvas'));
     var mirror = new Mirror(600, 400, -1, 15, 150, 0);
     canvasState.addShape(mirror);
+
+    var mirror2 = new Mirror(700, 400, -1, 15, 150, 0);
+    canvasState.addShape(mirror2);
+
+    var mirror3 = new Mirror(500, 400, -1, 15, 150, 0);
+    canvasState.addShape(mirror3);
+
+    var mirror4 = new Mirror(400, 400, -1, 15, 150, 0);
+    canvasState.addShape(mirror4);
+
+    var mirror5 = new Mirror(300, 400, -1, 15, 150, 0);
+    canvasState.addShape(mirror5);
 }

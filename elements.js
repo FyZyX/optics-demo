@@ -78,6 +78,11 @@ Box.prototype.draw = function(ctx) {
 
     ctx.fillStyle = grd;
 
+    // var img = new Image();
+    // img.src = "images/water.gif";
+    // var pat=ctx.createPattern(img,"repeat");
+    // ctx.fillStyle=pat;
+
     ctx.beginPath();
     ctx.moveTo(this.x1, this.y1);
     ctx.lineTo(this.x2, this.y2);
