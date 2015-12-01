@@ -100,7 +100,7 @@ Ray.prototype.drawPath = function() {
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.strokeStyle = '#ff0000';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = rayLineWidth;
         // console.log("moving from (" + x1 + ", " + y1 + ") to (" + x2 + ", " + y2 +")");
         ctx.lineTo(x2, y2);
         ctx.stroke();

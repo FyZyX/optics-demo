@@ -1,9 +1,9 @@
 /** This file defines the classes for the optical elements that the user can
   * drag around on the screen to interact with the ray of light (i.e. mirrors,
-  * lenses, etc).
+  * CircleLenses, etc).
 
     The Chain of inheritance is as follows:
-        Element --> Box, Lens
+        Element --> Box, CircleLens
         Box     --> Mirror, Medium
 */
 
@@ -25,7 +25,7 @@ Element.prototype.draw = function(ctx) {
 
 /** Given a RAY object, returns the first (x, y) intersection point of this
   * object and the RAY, or returns FALSE if there is no intersection point. */
-Element.prototype.intersects = function(ray) {
+Element.prototype.intersection = function(ray) {
     // Implemented by subclasses
     return false;
 }
@@ -69,30 +69,8 @@ Box.prototype.generateLineSegments = function() {
     this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
 }
 
-Box.prototype.draw = function(ctx) {
-    this.generateLineSegments();
-
-    var grd = ctx.createLinearGradient(this.x,this.y,this.x,this.y+this.h);
-    grd.addColorStop(0,this.color1);
-    grd.addColorStop(1,this.color2);
-
-    ctx.fillStyle = grd;
-
-    // var img = new Image();
-    // img.src = "images/water.gif";
-    // var pat=ctx.createPattern(img,"repeat");
-    // ctx.fillStyle=pat;
-
-    ctx.beginPath();
-    ctx.moveTo(this.x1, this.y1);
-    ctx.lineTo(this.x2, this.y2);
-    ctx.lineTo(this.x3, this.y3);
-    ctx.lineTo(this.x4, this.y4);
-    ctx.lineTo(this.x1, this.y1);
-    ctx.fill();
-
-
-    // FOR DRAWING NORMALS
+Box.prototype.drawNormals = function(ctx) {
+// FOR DRAWING NORMALS
     var oldStyle = ctx.strokeStyle;
     // ctx.lineWidth=10;
     ctx.strokeStyle="green";
@@ -138,16 +116,40 @@ Box.prototype.draw = function(ctx) {
     normalLines.push(normLine3);
     normalLines.push(normLine4);
 
-    // var curNormLine;
-    // for (var i = 0; i < normalLines.length; i += 1) {
-    //     curNormLine = normalLines[i];
-    //     ctx.moveTo(curNormLine.x1, curNormLine.y1);
-    //     ctx.lineTo(curNormLine.x2, curNormLine.y2);
-    //     ctx.stroke();
-    // }
+    var curNormLine;
+    for (var i = 0; i < normalLines.length; i += 1) {
+        curNormLine = normalLines[i];
+        ctx.moveTo(curNormLine.x1, curNormLine.y1);
+        ctx.lineTo(curNormLine.x2, curNormLine.y2);
+        ctx.stroke();
+    }
 
     ctx.strokeStyle = oldStyle;
+}
 
+Box.prototype.draw = function(ctx) {
+    this.generateLineSegments();
+
+    var grd = ctx.createLinearGradient(this.x,this.y,this.x,this.y+this.h);
+    grd.addColorStop(0,this.color1);
+    grd.addColorStop(1,this.color2);
+
+    ctx.fillStyle = grd;
+
+    // var img = new Image();
+    // img.src = "images/water.gif";
+    // var pat=ctx.createPattern(img,"repeat");
+    // ctx.fillStyle=pat;
+
+    ctx.beginPath();
+    ctx.moveTo(this.x1, this.y1);
+    ctx.lineTo(this.x2, this.y2);
+    ctx.lineTo(this.x3, this.y3);
+    ctx.lineTo(this.x4, this.y4);
+    ctx.lineTo(this.x1, this.y1);
+    ctx.fill();
+
+    //this.drawNormals(ctx);
 }
 
 Box.prototype.highlight = function(ctx) {
@@ -175,7 +177,6 @@ Box.prototype.intersection = function(ray) {
     for (var i = 0; i < this.lineSegments.length; i +=1) {
         lineSegment = this.lineSegments[i];
         intersection = lineSegment.intersection(ray);
-
         if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
             intersections.push(intersection);
         }
@@ -284,3 +285,130 @@ Mirror.prototype.intersection = function(ray) {
     return closest_point;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** Defines the Mirror class. A Mirror is a simply a box that reflects all
+  * incident rays. */
+var CircleLens = function(x, y, n, r, angle){
+    this.x = x;
+    this.y = y;
+    this.n = n;
+    this.r = r;
+    this.fill = "#669999";
+    this.color1 = "#33cccc";
+    this.color2 = "#ccffcc";
+    this.angle = angle;
+
+    this.curves = [];
+    this.curves.push(new Arc(x, y, r, 0, 2*Math.PI));
+}
+
+CircleLens.prototype.recalculateCurves = function() {
+    for (var i = 0; i < this.curves.length; i += 1) {
+        this.curves[i].x = this.x;
+        this.curves[i].y = this.y;
+    }
+}
+
+CircleLens.prototype.draw = function(ctx) {
+    this.recalculateCurves();
+
+    var grd = ctx.createLinearGradient(this.x,this.y,this.x + this.r, this.y + this.r);
+    grd.addColorStop(0,this.color1);
+    grd.addColorStop(1,this.color2);
+
+    ctx.fillStyle = grd;
+
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 0.5;
+    for (var i = 0; i < this.curves.length; i += 1) {
+        this.curves[i].draw(ctx);
+        ctx.fill();
+    }
+}
+
+CircleLens.prototype.setAngle = function(angle) {
+    this.angle = mod(angle, 2*Math.PI);
+    for (var i = 0; i < this.curves.length; i += 1) {
+        this.curves[i].angle = this.angle;
+    }
+}
+
+CircleLens.prototype.contains = function(x, y) {
+    return Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2) <= this.r*this.r;
+}
+
+CircleLens.prototype.highlight = function(ctx) {
+    this.recalculateCurves();
+    ctx.strokeStyle = 'purple';
+    ctx.lineWidth = 1;
+
+    for (var i = 0; i < this.curves.length; i += 1) {
+        this.curves[i].draw(ctx);
+    }
+}
+
+CircleLens.prototype.intersection = function(ray) {
+    // var intersection = circleLineIntersect(ray.x1, ray.y1, ray.x2, ray.y2, this.x, this.y, this.r);
+    // if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
+    //     return {"x": intersection.x, "y": intersection.y, "curve": this.curves[0], "element":this};
+    // } else {
+    //     return false;
+    // }
+
+    var x1 = ray.x1;
+    var x2 = ray.x2;
+    var y1 = ray.y1;
+    var y2 = ray.y2;
+    var cx = this.x;
+    var cy = this.y;
+    var cr = this.r;
+
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var a = dx * dx + dy * dy;
+    var b = 2 * (dx * (x1 - cx) + dy * (y1 - cy));
+    var c = (x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy) - cr * cr;
+
+    var bb4ac = b * b - 4 * a * c;
+    var p1 = (-b + Math.sqrt(bb4ac)) / (2*a);
+    var p2 = (-b - Math.sqrt(bb4ac)) / (2*a);
+    p1 = x1 + p1*dx;
+    p2 = x1 + p2*dx;
+
+    if (!p1 && p1 != 0) {
+        return false;    // No collision
+    } else {
+        var q1, q2;
+        // vertical line
+        if (x2-x1==0) {
+            q1 = Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
+            q2 = -Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
+        } else {
+            var m = (y2 - y1)/(x2 - x1);
+            q1 = m*(p1-x1) + y1;
+            q2 = m*(p2-x1) + y1;
+        }
+
+        var dist1 = distance(p1, q1, x1, y1);
+        var dist2 = distance(p2, q2, x1, y1);
+
+        if (dist1 < dist2 || (approxeq(p2, ray.x1, 0.1) && approxeq(q2, ray.y1, 0.1))) {
+            return {"x": p1, "y": q1, "curve": this.curves[0], "element": this};
+        } else {
+            return {"x": p2, "y": q2, "curve": this.curves[0], "element": this};
+        }
+
+    }
+}

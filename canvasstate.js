@@ -2,6 +2,7 @@
   * all of the optical elements on the screen, as well as ray tracing a ray. */
 
 var mouseOverObject = false;
+var intersectionLimit = 1000;
 
 function CanvasState(canvas) {
     // **** First some setup! ****
@@ -86,9 +87,7 @@ function CanvasState(canvas) {
         } else if (myState.rotating) {
             var mouse = myState.getMouse(e);
             var original_angle = Math.atan((myState.dragoffy)/(myState.dragoffx));
-            // console.log("mx: " + mouse.x);
-            // console.log("my: " + mouse.y);
-            var new_angle = Math.atan((mouse.y - myState.selection.y)/(mouse.x - myState.selection.x));
+            var new_angle = Math.atan2((mouse.y - myState.selection.y),(mouse.x - myState.selection.x));
             myState.selection.setAngle(myState.last_angle + new_angle - original_angle);
             myState.valid = false;
         } else {
@@ -214,8 +213,6 @@ CanvasState.prototype.getMouse = function(e) {
     return {x: mx, y: my};
 }
 
-CanvasState.prototype.interactWith = function(ray) {
-}
 
 CanvasState.prototype.getBoundaries = function(ray) {
     var boundaries = [];
@@ -229,6 +226,7 @@ CanvasState.prototype.getBoundaries = function(ray) {
 
 /** Ray trace a ray object on the screen. */
 CanvasState.prototype.rayTrace = function(ray) {
+    var numIntersections = 0;
     var elements = this.getOpticalElements();
 
     var intersections;
@@ -244,8 +242,9 @@ CanvasState.prototype.rayTrace = function(ray) {
             }
         }
 
-        if (intersections.length > 0) {
+        if (intersections.length > 0 && numIntersections < intersectionLimit) {
             hit = true;
+            numIntersections += 1;
 
             // choose the intersection point that is closest to the ray's starting point
             var cur_dist;
@@ -267,11 +266,11 @@ CanvasState.prototype.rayTrace = function(ray) {
             ray.y1 = closest_point.y;
             ray.setEndpoints();
 
-            var lineSeg = closest_point.lineSeg;
+            var curve = closest_point.curve;
 
             // determine whether object is a mirror
             if (closest_point.element.n < 0) {
-                var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
+                var p = mirror(ray.x2, ray.y2, curve.x1, curve.y1, curve.x2, curve.y2);
                 var x2 = p[0];
                 var y2 = p[1];
                 var m = (y2 - ray.y1)/(x2 - ray.x1);
@@ -288,7 +287,13 @@ CanvasState.prototype.rayTrace = function(ray) {
 
                 // create a vector from the ray's start and end points
                 var rayVec = [ray.x2 - ray.x1, ray.y2 - ray.y1];
-                var NormVec = normalVectorLine(lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
+
+                if (closest_point.curve.type == "line") {
+                    var NormVec = normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
+                } else {
+                    var NormVec = normalVectorCircle(curve.x, curve.y, closest_point.x, closest_point.y);
+                }
+
                 var entering = dotProduct(rayVec, NormVec) < 0;
                 if (entering) {
                     n2 = closest_point.element.n;
@@ -297,10 +302,18 @@ CanvasState.prototype.rayTrace = function(ray) {
                 }
 
                 // refraction is an object with {"angle: " angle, "entering": true/false}
-                var new_angle = refractedAngle(ray.n, n2, ray, closest_point.lineSeg, [closest_point.x, closest_point.y]);
+                var new_angle = refractedAngle(ray.n, n2, ray, closest_point.curve, [closest_point.x, closest_point.y]);
 
                 if (!new_angle) {
-                    var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
+                    if (closest_point.curve.type == "arc") {
+                        var x = closest_point.x;
+                        var y = closest_point.y;
+                        var tanLine = normalVectorLine(x, y, x+NormVec[0], y+NormVec[1]);
+                        var p = mirror(ray.x2, ray.y2, x, y, x+tanLine[0], y+tanLine[1]);
+                        // var p = NaN;
+                    } else {
+                        var p = mirror(ray.x2, ray.y2, curve.x1, curve.y1, curve.x2, curve.y2);
+                    }
                     var x2 = p[0];
                     var y2 = p[1];
                     var m = (y2 - ray.y1)/(x2 - ray.x1);
@@ -327,11 +340,13 @@ CanvasState.prototype.rayTrace = function(ray) {
 
     }
 
-    var boundaries = this.getBoundaries();
-    for (var i = 0; i < boundaries.length; i += 1) {
-        intersection = boundaries[i].intersection(ray);
-        if (intersection) {
-            ray.addToPath(intersection.x, intersection.y);
+    if (numIntersections < intersectionLimit) {
+        var boundaries = this.getBoundaries();
+        for (var i = 0; i < boundaries.length; i += 1) {
+            intersection = boundaries[i].intersection(ray);
+            if (intersection) {
+                ray.addToPath(intersection.x, intersection.y);
+            }
         }
     }
 

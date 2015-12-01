@@ -5,16 +5,19 @@
 
 var canvasState;
 var mousePointer;
+var rayLineWidth = 3;
 var keysDown = 0;
 
 window.addEventListener("keydown", function(e) {
     if (e.shiftKey) {
         keysDown += 1;
+    } else if (keysDown > 0) {
+        keysDown += 1;
     }
 }, true);
 
 window.addEventListener("keyup", function(e) {
-    if (!e.shiftKey && keysDown > 0) {
+    if (keysDown > 0) {
         keysDown -= 1;
     }
 }, true);
@@ -44,4 +47,7 @@ function startGame() {
 
     var mirror5 = new Mirror(300, 400, -1, 15, 150, 0);
     canvasState.addShape(mirror5);
+
+    var lens = new CircleLens(200, 400, 3, 200, 0);
+    canvasState.addShape(lens);
 }

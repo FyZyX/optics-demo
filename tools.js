@@ -14,6 +14,10 @@ Array.prototype.extend = function (other_array) {
 function normalVectorLine(x1, y1, x2, y2)
     {return [-(y2 - y1), (x2 - x1)];}
 
+// returns a normal vector to a circle given its center and a point on its circumference
+function normalVectorCircle(x0, y0, x, y)
+    {return [x - x0, y - y0];}
+
 // returns the value of the dot product of two vectors (arrays [x,y])
 function dotProduct(v1, v2)
     {return v1[0]*v2[0] + v1[1]*v2[1];}
@@ -102,23 +106,20 @@ function circleLineIntersect(x1, y1, x2, y2, cx, cy, cr) {
     var dy = y2 - y1;
     var a = dx * dx + dy * dy;
     var b = 2 * (dx * (x1 - cx) + dy * (y1 - cy));
-    var c = cx * cx + cy * cy;
-
-    c += x1 * x1 + y1 * y1;
-    c -= 2 * (cx * x1 + cy * y1);
-    c -= cr * cr;
+    var c = (x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy) - cr * cr;
 
     var bb4ac = b * b - 4 * a * c;
+    var p1 = (-b + Math.sqrt(bb4ac)) / (2*a);
+    var p2 = (-b - Math.sqrt(bb4ac)) / (2*a);
+    p1 = x1 + p1*dx;
+    p2 = x1 + p2*dx;
 
-    if (bb4ac < 0) {
+    if (!p1 && p1 != 0) {
         return false;    // No collision
     } else {
-        var p1 = (-b + Math.sqrt(bb4ac)) / (2*a);
-        var p2 = (-b - Math.sqrt(bb4ac)) / (2*a);
-
         var q1, q2;
         // vertical line
-        if (p1 == p2) {
+        if (x2-x1==0) {
             q1 = Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
             q2 = -Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
         } else {
@@ -165,8 +166,9 @@ function refractedAngle(n1, n2, ray, element, P) {
         {return [-(y2 - y1), (x2 - x1)];}
 
     // returns a normal vector to a circle given its center and a point on its circumference
-    function normalVectorCircle(x0, y0, x, y)
-        {return [x - x0, y - y0];}
+    function normalVectorCircle(x0, y0, x, y) {
+        return [x - x0, y - y0];
+    }
 
     // returns the magnitude of a vector that is represented by an array [x,y]
     function magnitude(vector)
@@ -189,11 +191,11 @@ function refractedAngle(n1, n2, ray, element, P) {
 
     element.type is a text string variable that contains the kind of element being intersected
     */
-    // if (element.type === "line segment")
-    if (true)
-        {var NormVec = normalVectorLine(element.x1, element.y1, element.x2, element.y2);}
-    else if (element.type === "circle")
-        {var NormVec = noramlVectorCircle(element.x0, element.y0, P[0], P[1]);}
+    if (element.type === "line") {
+        var NormVec = normalVectorLine(element.x1, element.y1, element.x2, element.y2);
+    } else if (element.type === "arc") {
+        var NormVec = normalVectorCircle(element.x, element.y, P[0], P[1]);
+    }
 
     // find the dot product of the two vectors (needed for finding angle)
     var dot = dotProduct(rayVec, NormVec);
@@ -215,7 +217,12 @@ function refractedAngle(n1, n2, ray, element, P) {
     if (n2 < n1) {deflection *= -1;}
     // adjust the ray angle according to its deflection from the normal
 
-    var rotation = angleFromSegment(element.x1, element.y1, element.x2, element.y2);
+    if (element.type === "line") {
+        var rotation = angleFromSegment(element.x1, element.y1, element.x2, element.y2);
+    } else if (element.type === "arc") {
+        var rotation = mod(element.angle, Math.PI/2);
+    }
+
     var diff = mod(ray.angle - rotation, 2*Math.PI);
 
     if ((diff > 0 && diff < Math.PI/2) ||
