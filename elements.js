@@ -41,41 +41,10 @@ var Box = function(x, y, n, w, h){
     this.w = w || 1;
     this.h = h || 1;
     this.fill = "#669999";
+    this.color1 = "#33cccc";
+    this.color2 = "#ccffcc";
     this.generateLineSegments();
 }
-
-
-// Box.prototype.generateLineSegments = function() {
-//     var x1, x2, x3, x4;
-//     var y1, y2, y3, y4;
-
-//     this.x1 = this.x;
-//     this.y1 = this.y;
-
-//     this.x4 = this.x1 + this.w*Math.cos(this.angle);
-//     this.y4 = this.y1 + this.w*Math.sin(this.angle);
-
-//     this.x2 = this.x1 - this.h*Math.sin(this.angle);
-//     this.y2 = this.y1 + this.h*Math.cos(this.angle);
-
-//     this.x3 = this.x4 - this.h*Math.sin(this.angle);
-//     this.y3 = this.y4 + this.h*Math.cos(this.angle);
-
-//     this.lineSegments = [];
-//     this.lineSegments.push(new LineSegment(this.x1, this.y1, this.x2, this.y2));
-//     this.lineSegments.push(new LineSegment(this.x2, this.y2, this.x3, this.y3));
-//     this.lineSegments.push(new LineSegment(this.x3, this.y3, this.x4, this.y4));
-//     this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
-// }
-
-
-// Box.prototype.generateCenter = function() {
-//     var x4 = this.x + this.w*Math.cos(this.angle)/2;
-//     var y4 = this.y + this.w*Math.sin(this.angle)/2;
-
-//     this.center_x = x4 - this.h*Math.sin(this.angle)/2;
-//     this.center_y = y4 + this.h*Math.cos(this.angle)/2;
-// }
 
 Box.prototype.generateLineSegments = function() {
     var x4 = this.x + this.h*Math.sin(this.angle)/2;
@@ -207,15 +176,8 @@ Box.prototype.intersection = function(ray) {
         }
     }
 
-    console.log("intersection.length: " + intersections.length);
-
     if (intersections.length == 0) {
         return false;
-    }
-
-    var entering = false;
-    if (intersections.length > 1) {
-        entering = true;
     }
 
     // choose the intersection point that is closest to the ray's starting point
@@ -233,7 +195,6 @@ Box.prototype.intersection = function(ray) {
         }
     }
 
-    closest_point.entering = entering;
     return closest_point;
 }
 
@@ -300,11 +261,6 @@ Mirror.prototype.intersection = function(ray) {
         return false;
     }
 
-    var entering = false;
-    if (intersections.length > 1) {
-        entering = true;
-    }
-
     // choose the intersection point that is closest to the ray's starting point
     var cur_dist;
     var cur_point;
@@ -319,7 +275,6 @@ Mirror.prototype.intersection = function(ray) {
         }
     }
 
-    closest_point.entering = entering;
     closest_point.element = this;
     return closest_point;
 }

@@ -19,7 +19,7 @@ function dotProduct(v1, v2)
     {return v1[0]*v2[0] + v1[1]*v2[1];}
 
 function mod(n, m) {
-        return ((n % m) + m) % m;
+    return ((n % m) + m) % m;
 }
 
 function midpoint(x1, y1, x2, y2) {
@@ -30,7 +30,8 @@ function midpoint(x1, y1, x2, y2) {
 function magnitude(vector)
     {return Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2));}
 
-approxeq = function(v1, v2, epsilon) {
+// returns true if the V1 and V2 are within epsilon of each other
+function approxeq(v1, v2, epsilon) {
   if (epsilon == null) {
     epsilon = 0.001;
   }
@@ -141,41 +142,9 @@ function circleLineIntersect(x1, y1, x2, y2, cx, cy, cr) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 function angleFromSegment(x1, y1, x2, y2) {
     return mod(Math.atan2(y2 - y1, x2 - x1), 2*Math.PI);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*
@@ -249,19 +218,12 @@ function refractedAngle(n1, n2, ray, element, P) {
     var rotation = angleFromSegment(element.x1, element.y1, element.x2, element.y2);
     var diff = mod(ray.angle - rotation, 2*Math.PI);
 
-    // console.log("rotation: " + rotation);
-    // console.log("(x1, y1) --> (x2, y2): (" + element.x1 + ", " + element.y1 + ") --> (" + element.x2 + ", " + element.y2 + ")");
-    // console.log("\n");
-
-    var refraction_angle;
     if ((diff > 0 && diff < Math.PI/2) ||
         (diff > 3*Math.PI/2 && diff < 2*Math.PI)) {
-        refraction_angle = ray.angle + deflection;
+        return ray.angle + deflection;
     } else {
-        refraction_angle = ray.angle - deflection;
+        return ray.angle - deflection;
     }
-
-    return {"angle": refraction_angle, "entering": dot < 0};
 
     // --END COMPUTATIONS--
 
