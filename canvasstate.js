@@ -297,11 +297,28 @@ CanvasState.prototype.rayTrace = function(ray) {
                 }
 
                 // refraction is an object with {"angle: " angle, "entering": true/false}
-                ray.setAngle(refractedAngle(ray.n, n2, ray, closest_point.lineSeg, [closest_point.x, closest_point.y]));
-                if (entering) {
-                    ray.n = closest_point.element.n;
+                var new_angle = refractedAngle(ray.n, n2, ray, closest_point.lineSeg, [closest_point.x, closest_point.y]);
+
+                if (!new_angle) {
+                    var p = mirror(ray.x2, ray.y2, lineSeg.x1, lineSeg.y1, lineSeg.x2, lineSeg.y2);
+                    var x2 = p[0];
+                    var y2 = p[1];
+                    var m = (y2 - ray.y1)/(x2 - ray.x1);
+
+                    var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
+
+                    if (x2 - ray.x1 < 0) {
+                        ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
+                    } else {
+                        ray.angle = mod(Math.atan(m), 2*Math.PI);
+                    }
                 } else {
-                    ray.n = 1;
+                    ray.setAngle(new_angle);
+                    if (entering) {
+                        ray.n = closest_point.element.n;
+                    } else {
+                        ray.n = 1;
+                    }
                 }
             }
 
