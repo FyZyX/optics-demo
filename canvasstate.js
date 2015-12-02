@@ -2,7 +2,6 @@
   * all of the optical elements on the screen, as well as ray tracing a ray. */
 
 var mouseOverObject = false;
-var intersectionLimit = 1000;
 
 function CanvasState(canvas) {
     // **** First some setup! ****
@@ -87,7 +86,6 @@ function CanvasState(canvas) {
             myState.valid = false; // Something's dragging so we must redraw
         } else if (myState.rotating) {
             var mouse = myState.getMouse(e);
-            // console.log("myState.mouseAngle: " + myState.mouseAngle);
             var new_angle = Math.atan2((mouse.y - myState.selection.centerY),(mouse.x - myState.selection.centerX));
             myState.selection.setAngle(myState.last_angle + new_angle - myState.mouseAngle);
             myState.valid = false;
@@ -178,8 +176,11 @@ CanvasState.prototype.draw = function() {
         }
 
         // ** Add stuff you want drawn on top all the time here **
-        var ray = new Ray(0, 0, Math.PI/8);
-        this.rayTrace(ray);
+        // var ray = new Ray(0, 0, Math.PI/8);
+        // this.rayTrace(ray);
+
+        var laser = new Laser(0, 0, 50, Math.PI/8, 10);
+        this.shootLaser(laser);
 
         this.valid = true;
     }
@@ -226,137 +227,7 @@ CanvasState.prototype.getBoundaries = function(ray) {
 
 
 /** Ray trace a ray object on the screen. */
-CanvasState.prototype.rayTrace = function(ray) {
-    var numIntersections = 0;
-    var elements = this.getOpticalElements();
-
-    var intersections;
-    var intersection;
-    var hit = true;
-    while (hit == true) {
-        intersections = [];
-        hit = false;
-        for (var i = 0; i < elements.length; i += 1) {
-            intersection = elements[i].intersection(ray);
-            if (intersection && !(approxeq(intersection.x, ray.x1, 0.01) && approxeq(intersection.y, ray.y1, 0.01))) {
-                intersections.push(intersection);
-            }
-        }
-
-        if (intersections.length > 0 && numIntersections < intersectionLimit) {
-            hit = true;
-            numIntersections += 1;
-
-            // choose the intersection point that is closest to the ray's starting point
-            var cur_dist;
-            var cur_point;
-            var closest_point = intersections[0];
-            var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
-            for (var i = 0; i < intersections.length; i += 1) {
-                cur_point = intersections[i];
-                cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
-                if (cur_dist < min_dist) {
-                    closest_point = cur_point;
-                    min_dist = cur_dist;
-                }
-            }
-
-            ray.addToPath(closest_point.x, closest_point.y);
-            // console.log("closest_point_x: " + closest_point.x);
-            // console.log("closest_point_y: " + closest_point.y);
-            // ray.drawPath();
-            // return;
-
-            ray.x1 = closest_point.x;
-            ray.y1 = closest_point.y;
-            ray.setEndpoints();
-
-            var curve = closest_point.curve;
-
-            // determine whether object is a mirror
-            if (closest_point.element.n < 0) {
-                var p = mirror(ray.x2, ray.y2, curve.x1, curve.y1, curve.x2, curve.y2);
-                var x2 = p[0];
-                var y2 = p[1];
-                var m = (y2 - ray.y1)/(x2 - ray.x1);
-
-                var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
-
-                if (x2 - ray.x1 < 0) {
-                    ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
-                } else {
-                    ray.angle = mod(Math.atan(m), 2*Math.PI);
-                }
-            } else {
-                var n2;
-
-                // create a vector from the ray's start and end points
-                var rayVec = [ray.x2 - ray.x1, ray.y2 - ray.y1];
-
-                if (closest_point.curve.type == "line") {
-                    var NormVec = normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
-                } else {
-                    var NormVec = normalVectorCircle(curve.centerX, curve.centerY, closest_point.x, closest_point.y);
-                }
-
-                var entering = dotProduct(rayVec, NormVec) < 0;
-                if (entering) {
-                    n2 = closest_point.element.n;
-                } else {
-                    n2 = 1;
-                }
-
-                // refraction is an object with {"angle: " angle, "entering": true/false}
-                var new_angle = refractedAngle(ray.n, n2, ray, closest_point.curve, [closest_point.x, closest_point.y]);
-
-                if (!new_angle) {
-                    if (closest_point.curve.type == "arc") {
-                        var x = closest_point.x;
-                        var y = closest_point.y;
-                        var tanLine = normalVectorLine(x, y, x+NormVec[0], y+NormVec[1]);
-                        var p = mirror(ray.x2, ray.y2, x, y, x+tanLine[0], y+tanLine[1]);
-                    } else {
-                        var p = mirror(ray.x2, ray.y2, curve.x1, curve.y1, curve.x2, curve.y2);
-                    }
-                    var x2 = p[0];
-                    var y2 = p[1];
-                    var m = (y2 - ray.y1)/(x2 - ray.x1);
-
-                    var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
-
-                    if (x2 - ray.x1 < 0) {
-                        ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
-                    } else {
-                        ray.angle = mod(Math.atan(m), 2*Math.PI);
-                    }
-                } else {
-                    console.log("REFRACT");
-                    console.log("ray.n: " + ray.n);
-                    console.log("n2: " + n2);
-                    ray.setAngle(new_angle);
-                    if (entering) {
-                        ray.n = closest_point.element.n;
-                    } else {
-                        ray.n = 1;
-                    }
-                }
-            }
-
-            ray.setEndpoints();
-        }
-
-    }
-
-    if (numIntersections < intersectionLimit) {
-        var boundaries = this.getBoundaries();
-        for (var i = 0; i < boundaries.length; i += 1) {
-            intersection = boundaries[i].intersection(ray);
-            if (intersection) {
-                ray.addToPath(intersection.x, intersection.y);
-            }
-        }
-    }
-
-    ray.drawPath();
+CanvasState.prototype.shootLaser = function(laser) {
+    laser.shootLaser(this.opticalElements, this.getBoundaries());
 }
 

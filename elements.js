@@ -1,9 +1,9 @@
 /** This file defines the classes for the optical elements that the user can
   * drag around on the screen to interact with the ray of light (i.e. mirrors,
-  * CircleLenses, etc).
+  * PlanoConvexLenses, etc).
 
     The Chain of inheritance is as follows:
-        Element --> Box, CircleLens
+        Element --> Box, PlanoConvexLens
         Box     --> Mirror, Medium
 */
 
@@ -236,38 +236,62 @@ GlassBox.prototype.constructor = GlassBox;   // Set constructor back to Box
 
 /** Defines the Mirror class. A Mirror is a simply a box that reflects all
   * incident rays. */
-var CircleLens = function(x, y, r, angle, n){
+var PlanoConvexLens = function(x, y, r, angle, n, d){
     this.x = x;
     this.y = y;
     this.r = r;
     this.color1 = "#33cccc";
     this.color2 = "#ccffcc";
-    this.angle = angle;
+    this.original_angle = angle;
     this.n = n;
     this.extent = Math.PI/2;
+    this.d = d;
+    this.w = 0.5*d;
 
-    this.angle += (Math.PI/2 - this.extent/2)
+    this.angle = this.original_angle + (Math.PI/2 - this.extent/2);
 
     this.curves = [];
-    this.curves.push(new Arc(x, y, r, this.angle, this.extent));
+    this.curves.push(new Arc(x - d*Math.sin(this.angle), y + d*Math.cos(this.angle), r, this.angle, this.extent));
 
+    this.generateLineSegments();
     this.recalculateCurves();
     this.generateCenter();
 }
 
-CircleLens.prototype.recalculateCurves = function() {
+PlanoConvexLens.prototype.generateLineSegments = function() {
+    var x1 = this.curves[0].p1;
+    var y1 = this.curves[0].q1;
+
+    var x2 = x1 + this.w*Math.sin(this.angle - (Math.PI/2 - this.extent/2));
+    var y2 = y1 - this.w*Math.cos(this.angle - (Math.PI/2 - this.extent/2));
+
+    var x4 = this.curves[0].p2;
+    var y4 = this.curves[0].q2;
+
+    var x3 = x4 + this.w*Math.sin(this.angle - (Math.PI/2 - this.extent/2));
+    var y3 = y4 - this.w*Math.cos(this.angle - (Math.PI/2 - this.extent/2));
+
+    this.lineSegments = [];
+    this.lineSegments.push(new LineSegment(x1, y1, x2, y2));
+    this.lineSegments.push(new LineSegment(x2, y2, x3, y3));
+    this.lineSegments.push(new LineSegment(x3, y3, x4, y4));
+
+}
+
+PlanoConvexLens.prototype.recalculateCurves = function() {
     for (var i = 0; i < this.curves.length; i += 1) {
         this.curves[i].x = this.x;
         this.curves[i].y = this.y;
     }
 }
 
-CircleLens.prototype.generateCenter = function() {
+PlanoConvexLens.prototype.generateCenter = function() {
     this.centerX = this.curves[0].centerX;
     this.centerY = this.curves[0].centerY;
 }
 
-CircleLens.prototype.draw = function(ctx) {
+PlanoConvexLens.prototype.draw = function(ctx) {
+    this.generateLineSegments();
     this.recalculateCurves();
     this.generateCenter();
 
@@ -279,34 +303,119 @@ CircleLens.prototype.draw = function(ctx) {
 
     ctx.strokeStyle = "black";
     ctx.lineWidth = 0.5;
+
+    ctx.beginPath();
+
+    var arc = this.curves[0];
     for (var i = 0; i < this.curves.length; i += 1) {
-        this.curves[i].draw(ctx);
-        ctx.fill();
+        ctx.arc(arc.centerX, arc.centerY, arc.r, arc.angle, arc.angle + arc.extent);
     }
+
+    var curLineSeg = this.lineSegments[0];
+    for (var i = this.lineSegments.length - 1; i >= 0; i -= 1) {
+        curLineSeg = this.lineSegments[i];
+        ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
+        ctx.stroke();
+    }
+
+    ctx.fill();
 }
 
-CircleLens.prototype.setAngle = function(angle) {
+PlanoConvexLens.prototype.setAngle = function(angle) {
     this.angle = mod(angle, 2*Math.PI);
     for (var i = 0; i < this.curves.length; i += 1) {
         this.curves[i].angle = this.angle;
     }
 }
 
-CircleLens.prototype.contains = function(x, y) {
-    return this.curves[0].contains(x, y);
+PlanoConvexLens.prototype.contains = function(x, y) {
+    var x1 = this.lineSegments[0].x1;
+    var y1 = this.lineSegments[0].y1;
+    var x2 = this.lineSegments[0].x2;
+    var y2 = this.lineSegments[0].y2;
+    var x3 = this.lineSegments[2].x1;
+    var y3 = this.lineSegments[2].y1;
+    var x4 = this.lineSegments[2].x2;
+    var y4 = this.lineSegments[2].y2;
+    return this.curves[0].contains(x, y) || boxContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
 }
 
-CircleLens.prototype.highlight = function(ctx) {
+PlanoConvexLens.prototype.highlight = function(ctx) {
     this.recalculateCurves();
     ctx.strokeStyle = 'purple';
     ctx.lineWidth = 1;
+
+    var curLineSeg = this.lineSegments[0];
+    ctx.moveTo(curLineSeg.x1, curLineSeg.y1);
+    for (var i = 0; i < this.lineSegments.length; i += 1) {
+        curLineSeg = this.lineSegments[i];
+        ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
+        ctx.stroke();
+    }
 
     for (var i = 0; i < this.curves.length; i += 1) {
         this.curves[i].draw(ctx);
     }
 }
 
-CircleLens.prototype.intersection = function(ray) {
+PlanoConvexLens.prototype.intersectionBox = function(ray) {
+    var intersections = [];
+    var lineSegment;
+    var intersection;
+    for (var i = 0; i < this.lineSegments.length; i +=1) {
+        lineSegment = this.lineSegments[i];
+        intersection = lineSegment.intersection(ray);
+        if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
+            intersections.push(intersection);
+        }
+    }
+
+    if (intersections.length == 0) {
+        return false;
+    }
+
+    // choose the intersection point that is closest to the ray's starting point
+    var cur_dist;
+    var cur_point;
+    var closest_point = intersections[0];
+    var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
+    for (var i = 0; i < intersections.length; i += 1) {
+        cur_point = intersections[i];
+        cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
+        if (cur_dist < min_dist) {
+            closest_point = cur_point;
+            min_dist = cur_dist;
+        }
+    }
+
+    closest_point.element = this;
+    return closest_point;
+}
+
+PlanoConvexLens.prototype.intersection = function(ray) {
+    var boxInt = this.intersectionBox(ray);
+    var arcInt = this.intersectionArc(ray);
+
+    boxDist = distance(boxInt.x, boxInt.y, ray.x1, ray.y1);
+    arcDist = distance(arcInt.x, arcInt.y, ray.x1, ray.y1);
+
+    if (boxInt === false && arcInt === false) {
+        return false;
+    } else if (boxInt === false) {
+        return arcInt;
+    } else if (arcInt === false) {
+        return boxInt;
+    }
+
+    if (boxDist < arcDist) {
+        return boxInt;
+    } else {
+        return arcInt;
+    }
+
+}
+
+PlanoConvexLens.prototype.intersectionArc = function(ray) {
     var x1 = ray.x1;
     var x2 = ray.x2;
     var y1 = ray.y1;
@@ -356,8 +465,10 @@ CircleLens.prototype.intersection = function(ray) {
             further_intersection = intersection1;
         }
 
+
         var a = angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y);
-        if (a >= this.angle && a <= this.angle + this.extent) {
+
+        if (isInRange(this.angle, this.angle + this.extent, a)) {
             return closer_intersection;
         } else {
             a = angleFromSegment(cx, cy, further_intersection.x, further_intersection.y);
@@ -365,23 +476,9 @@ CircleLens.prototype.intersection = function(ray) {
                 return further_intersection;
             }
         }
+
         return false;
 
     }
 }
 
-
-
-
-
-function slopeOfEdges(circle, rotation) {
-    var r = circle.r;
-    var angle = circle.extent/2;
-    var p = r*Math.cos(rotation + angle);
-    var q = r*Math.sin(rotation + angle);
-    if (p === circle.x) {
-        if (q > circle.y) {return Math.PI/2;}
-        else {return 3*Math.PI/2;}
-    }
-    else {return (q - circle.y)/(p - circle.x);}
-}

@@ -141,6 +141,18 @@ function circleLineIntersect(x1, y1, x2, y2, cx, cy, cr) {
 }
 
 
+function isInRange(from, to, angle){
+   var from = mod(from, 2*Math.PI);
+   var to = mod(to, 2*Math.PI);
+
+    if(from > to) {
+        return ((angle > from) || ( angle < to));
+    } else if ( to > from) {
+        return ((angle < to) && ( angle > from));
+    } else { // to == from
+        return (angle == to);
+    }
+}
 
 
 function angleFromSegment(x1, y1, x2, y2) {
@@ -245,3 +257,18 @@ function refractedAngle(n1, n2, ray, element, P) {
 function normalVector(x1, y1, x2, y2) {return [-(y2 - y1), (x2 - x1)];}
 
 function dotProduct(v1, v2) {return v1[0]*v2[0] + v1[1]*v2[1];}
+
+function boxContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y) {
+    var vs = [[x1, y1], [x2, y2], [x3, y3], [x4, y4]];
+    var inside = false;
+    for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+        var xi = vs[i][0], yi = vs[i][1];
+        var xj = vs[j][0], yj = vs[j][1];
+
+        var intersect = ((yi > y) != (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+
+    return inside;
+}
