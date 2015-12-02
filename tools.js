@@ -220,7 +220,10 @@ function refractedAngle(n1, n2, ray, element, P) {
     if (element.type === "line") {
         var rotation = angleFromSegment(element.x1, element.y1, element.x2, element.y2);
     } else if (element.type === "arc") {
-        var rotation = mod(element.angle, Math.PI/2);
+        var x = P[0];
+        var y = P[1];
+        var tanLineVec = normalVectorLine(x, y, x+NormVec[0], y+NormVec[1]);
+        var rotation = Math.atan2(-tanLineVec[1], -tanLineVec[0]);
     }
 
     var diff = mod(ray.angle - rotation, 2*Math.PI);

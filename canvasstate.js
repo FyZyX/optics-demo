@@ -244,6 +244,7 @@ CanvasState.prototype.rayTrace = function(ray) {
 
         if (intersections.length > 0 && numIntersections < intersectionLimit) {
             hit = true;
+            console.log("INTERSECT");
             numIntersections += 1;
 
             // choose the intersection point that is closest to the ray's starting point
@@ -310,7 +311,6 @@ CanvasState.prototype.rayTrace = function(ray) {
                         var y = closest_point.y;
                         var tanLine = normalVectorLine(x, y, x+NormVec[0], y+NormVec[1]);
                         var p = mirror(ray.x2, ray.y2, x, y, x+tanLine[0], y+tanLine[1]);
-                        // var p = NaN;
                     } else {
                         var p = mirror(ray.x2, ray.y2, curve.x1, curve.y1, curve.x2, curve.y2);
                     }

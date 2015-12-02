@@ -309,9 +309,10 @@ var CircleLens = function(x, y, n, r, angle){
     this.color1 = "#33cccc";
     this.color2 = "#ccffcc";
     this.angle = angle;
+    this.extent = Math.PI;
 
     this.curves = [];
-    this.curves.push(new Arc(x, y, r, 0, 2*Math.PI));
+    this.curves.push(new Arc(x, y, r, 0, Math.PI));
 }
 
 CircleLens.prototype.recalculateCurves = function() {
@@ -404,11 +405,46 @@ CircleLens.prototype.intersection = function(ray) {
         var dist1 = distance(p1, q1, x1, y1);
         var dist2 = distance(p2, q2, x1, y1);
 
+        var intersection1 = {"x": p1, "y": q1, "curve": this.curves[0], "element": this};
+        var intersection2 = {"x": p2, "y": q2, "curve": this.curves[0], "element": this};
+        var closer_intersection;
+        var further_intersection;
         if (dist1 < dist2 || (approxeq(p2, ray.x1, 0.1) && approxeq(q2, ray.y1, 0.1))) {
-            return {"x": p1, "y": q1, "curve": this.curves[0], "element": this};
+            closer_intersection = intersection1;
+            further_intersection = intersection2;
         } else {
-            return {"x": p2, "y": q2, "curve": this.curves[0], "element": this};
+            closer_intersection = intersection2;
+            further_intersection = intersection1;
         }
 
+        var a = angleFromSegment(this.x, this.y, closer_intersection.x, closer_intersection.y);
+        if (a >= this.angle && a <= this.angle + this.extent) {
+            // console.log("INTERSECTION1");
+            return closer_intersection;
+        } else {
+            a = angleFromSegment(this.x, this.y, further_intersection.x, further_intersection.y);
+            if (a >= this.angle && a <= this.angle + this.extent) {
+                // console.log("INTERSECTION2");
+                return further_intersection;
+            }
+        }
+        return false;
+
     }
+}
+
+
+
+
+
+function slopeOfEdges(circle, rotation) {
+    var r = circle.r;
+    var angle = circle.extent/2;
+    var p = r*Math.cos(rotation + angle);
+    var q = r*Math.sin(rotation + angle);
+    if (p === circle.x) {
+        if (q > circle.y) {return Math.PI/2;}
+        else {return 3*Math.PI/2;}
+    }
+    else {return (q - circle.y)/(p - circle.x);}
 }
