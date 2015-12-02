@@ -53,11 +53,12 @@ function CanvasState(canvas) {
                 var mySel = opticalElements[i];
                 // Keep track of where in the object we clicked
                 // so we can move it smoothly (see mousemove)
-                myState.dragoffx = mx - mySel.x;
-                myState.dragoffy = my - mySel.y;
                 if (keysDown) {
+                    myState.mouseAngle = Math.atan2(my - mySel.centerY, mx - mySel.centerX);
                     myState.rotating = true;
                 } else {
+                    myState.dragoffx = mx - mySel.x;
+                    myState.dragoffy = my - mySel.y;
                     myState.dragging = true;
                 }
                 myState.selection = mySel;
@@ -86,9 +87,9 @@ function CanvasState(canvas) {
             myState.valid = false; // Something's dragging so we must redraw
         } else if (myState.rotating) {
             var mouse = myState.getMouse(e);
-            var original_angle = Math.atan((myState.dragoffy)/(myState.dragoffx));
-            var new_angle = Math.atan2((mouse.y - myState.selection.y),(mouse.x - myState.selection.x));
-            myState.selection.setAngle(myState.last_angle + new_angle - original_angle);
+            // console.log("myState.mouseAngle: " + myState.mouseAngle);
+            var new_angle = Math.atan2((mouse.y - myState.selection.centerY),(mouse.x - myState.selection.centerX));
+            myState.selection.setAngle(myState.last_angle + new_angle - myState.mouseAngle);
             myState.valid = false;
         } else {
             var mouse = myState.getMouse(e);
@@ -244,7 +245,6 @@ CanvasState.prototype.rayTrace = function(ray) {
 
         if (intersections.length > 0 && numIntersections < intersectionLimit) {
             hit = true;
-            console.log("INTERSECT");
             numIntersections += 1;
 
             // choose the intersection point that is closest to the ray's starting point
@@ -262,6 +262,10 @@ CanvasState.prototype.rayTrace = function(ray) {
             }
 
             ray.addToPath(closest_point.x, closest_point.y);
+            // console.log("closest_point_x: " + closest_point.x);
+            // console.log("closest_point_y: " + closest_point.y);
+            // ray.drawPath();
+            // return;
 
             ray.x1 = closest_point.x;
             ray.y1 = closest_point.y;

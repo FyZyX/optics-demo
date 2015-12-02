@@ -18,7 +18,6 @@ var Box = function(x, y, w, h, angle, n, color1, color2) {
     this.h = h || 1;
     this.angle = 0;
     this.n = n;
-    console.log("this.color1 = " + color1);
     this.color1 = color1;
     this.color2 = color2;
     this.generateLineSegments();
@@ -108,6 +107,8 @@ Box.prototype.drawNormals = function(ctx) {
 
 Box.prototype.draw = function(ctx) {
     this.generateLineSegments();
+    this.centerX = this.x;
+    this.centerY = this.y;
 
     var grd = ctx.createLinearGradient(this.x,this.y,this.x,this.y+this.h);
     grd.addColorStop(0,this.color1);
@@ -239,7 +240,6 @@ var CircleLens = function(x, y, r, angle, n){
     this.x = x;
     this.y = y;
     this.r = r;
-    this.fill = "#669999";
     this.color1 = "#33cccc";
     this.color2 = "#ccffcc";
     this.angle = angle;
@@ -247,7 +247,10 @@ var CircleLens = function(x, y, r, angle, n){
     this.extent = Math.PI/2;
 
     this.curves = [];
-    this.curves.push(new Arc(x, y, r, 0, Math.PI/2));
+    this.curves.push(new Arc(x, y, r, this.angle, this.extent));
+
+    this.recalculateCurves();
+    this.generateCenter();
 }
 
 CircleLens.prototype.recalculateCurves = function() {
@@ -257,8 +260,14 @@ CircleLens.prototype.recalculateCurves = function() {
     }
 }
 
+CircleLens.prototype.generateCenter = function() {
+    this.centerX = this.curves[0].centerX;
+    this.centerY = this.curves[0].centerY;
+}
+
 CircleLens.prototype.draw = function(ctx) {
     this.recalculateCurves();
+    this.generateCenter();
 
     var grd = ctx.createLinearGradient(this.x,this.y,this.x + this.r, this.y + this.r);
     grd.addColorStop(0,this.color1);
@@ -282,7 +291,7 @@ CircleLens.prototype.setAngle = function(angle) {
 }
 
 CircleLens.prototype.contains = function(x, y) {
-    return Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2) <= this.r*this.r;
+    return this.curves[0].contains(x, y);
 }
 
 CircleLens.prototype.highlight = function(ctx) {
@@ -300,8 +309,8 @@ CircleLens.prototype.intersection = function(ray) {
     var x2 = ray.x2;
     var y1 = ray.y1;
     var y2 = ray.y2;
-    var cx = this.x;
-    var cy = this.y;
+    var cx = this.centerX;
+    var cy = this.centerY;
     var cr = this.r;
 
     var dx = x2 - x1;
@@ -345,14 +354,12 @@ CircleLens.prototype.intersection = function(ray) {
             further_intersection = intersection1;
         }
 
-        var a = angleFromSegment(this.x, this.y, closer_intersection.x, closer_intersection.y);
+        var a = angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y);
         if (a >= this.angle && a <= this.angle + this.extent) {
-            // console.log("INTERSECTION1");
             return closer_intersection;
         } else {
-            a = angleFromSegment(this.x, this.y, further_intersection.x, further_intersection.y);
+            a = angleFromSegment(cx, cy, further_intersection.x, further_intersection.y);
             if (a >= this.angle && a <= this.angle + this.extent) {
-                // console.log("INTERSECTION2");
                 return further_intersection;
             }
         }
@@ -360,6 +367,18 @@ CircleLens.prototype.intersection = function(ray) {
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

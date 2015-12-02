@@ -194,7 +194,7 @@ function refractedAngle(n1, n2, ray, element, P) {
     if (element.type === "line") {
         var NormVec = normalVectorLine(element.x1, element.y1, element.x2, element.y2);
     } else if (element.type === "arc") {
-        var NormVec = normalVectorCircle(element.x, element.y, P[0], P[1]);
+        var NormVec = normalVectorCircle(element.centerX, element.centerY, P[0], P[1]);
     }
 
     // find the dot product of the two vectors (needed for finding angle)
