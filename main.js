@@ -48,6 +48,6 @@ function startGame() {
     // var mirror5 = new Mirror(300, 400, -1, 15, 150, 0);
     // canvasState.addShape(mirror5);
 
-    var lens = new CircleLens(400, 250, 100, 0, 1.5);
+    var lens = new CircleLens(200, 300, 100, 0, 1.5);
     canvasState.addShape(lens);
 }

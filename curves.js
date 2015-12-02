@@ -43,27 +43,67 @@ var Arc = function(x0, y0, r, angle, extent) {
 }
 
 Arc.prototype.generateCenterOfCircle = function() {
-    var alpha = 1 - Math.pow((this.extent)/(2*Math.PI) + 0.25, 2) ;
+    var alpha = Math.pow(1 - (this.extent)/(2*Math.PI), 2) + 0.25;
     this.centerX = this.x*alpha - alpha*this.r*Math.cos(this.angle + this.extent/2);
     this.centerY = this.y*alpha - alpha*this.r*Math.sin(this.angle + this.extent/2);
+    console.log("this.centerX: " + this.centerX);
+    console.log("this.centerY: " + this.centerY);
 }
 
 Arc.prototype.draw = function(ctx) {
     this.generateCenterOfCircle();
+    // console.log("angle: " + this.angle);
+    // console.log("this.x: " + this.x);
+    // console.log("this.y: " + this.y);
 
     ctx.beginPath();
+    console.log("extent: " + this.extent);
     ctx.arc(this.centerX, this.centerY, this.r, this.angle, this.angle + this.extent);
     ctx.stroke();
 }
 
 Arc.prototype.contains = function(x, y) {
-    var a = angleFromSegment(this.centerX, this.centerY, x, y);
-    if (a >= this.angle && a <= this.angle + this.extent) {
-        var s = Math.abs(this.r*Math.cos(this.extent/2));
-        var d = distance(this.centerX, this.centerY, x, y);
-        if (d > s) {
-            return true;
-        }
+    // var a = angleFromSegment(this.centerX, this.centerY, x, y);
+    // if (a >= this.angle && a <= this.angle + this.extent) {
+    //     var s = Math.abs(this.r*Math.cos(this.extent/2));
+    //     var d = distance(this.centerX, this.centerY, x, y);
+    //     if (d > s && d < this.r) {
+    //         return true;
+    //     }
+    // }
+    // return false;
+
+    var p1 = this.r*Math.cos(this.angle) + this.centerX;
+    var q1 = this.r*Math.sin(this.angle) + this.centerY;
+    var p2 = this.r*Math.cos(this.angle + this.extent) + this.centerX;
+    var q2 = this.r*Math.sin(this.angle + this.extent) + this.centerY;
+    if (p1 === p2) {
+        var pastLine = Math.abs(x - this.centerX) >= Math.abs(p1 - this.centerX);
+        console.log("pastLine");
     }
+    else {
+        var vecToPoint = [x - p1, y - q1];
+        var vecToCenter = [this.centerX - p1, this.centerY - q1];
+        var normal = normalVector(p1, q1, p2, q2);
+        var dot1 = dotProduct(vecToPoint, normal) > 0;
+        var dot2 = dotProduct(vecToCenter, normal) >= 0;
+
+        if (approxeq(dot2, 0, 0.001)) {
+            dot2 = 0;
+        }
+        var pastLine = dot1 != dot2;
+        console.log("p1: " + p1);
+        console.log("q1: " + q1);
+        console.log("x: " + x);
+        console.log("y: " + y);
+        console.log("vecToPoint: (" + vecToPoint[0] + ", " + vecToPoint[1] + ")");
+        console.log("dot1: "+ dotProduct(vecToPoint, normal));
+        console.log("dot2: "+ dotProduct(vecToCenter, normal));
+        console.log("\n");
+    }
+    var inCircle = Math.pow((x - this.centerX), 2) + Math.pow((y - this.centerY), 2) <= Math.pow(this.r, 2);
+    console.log("inCircle");
+    if (pastLine && inCircle) {return true}
+
     return false;
 }

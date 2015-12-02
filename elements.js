@@ -246,6 +246,8 @@ var CircleLens = function(x, y, r, angle, n){
     this.n = n;
     this.extent = Math.PI/2;
 
+    this.angle += (Math.PI/2 - this.extent/2)
+
     this.curves = [];
     this.curves.push(new Arc(x, y, r, this.angle, this.extent));
 
@@ -367,18 +369,6 @@ CircleLens.prototype.intersection = function(ray) {
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

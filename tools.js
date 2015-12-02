@@ -238,3 +238,10 @@ function refractedAngle(n1, n2, ray, element, P) {
     // --END COMPUTATIONS--
 
 }
+
+
+
+
+function normalVector(x1, y1, x2, y2) {return [-(y2 - y1), (x2 - x1)];}
+
+function dotProduct(v1, v2) {return v1[0]*v2[0] + v1[1]*v2[1];}

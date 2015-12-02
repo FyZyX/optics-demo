@@ -296,7 +296,7 @@ CanvasState.prototype.rayTrace = function(ray) {
                 if (closest_point.curve.type == "line") {
                     var NormVec = normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
                 } else {
-                    var NormVec = normalVectorCircle(curve.x, curve.y, closest_point.x, closest_point.y);
+                    var NormVec = normalVectorCircle(curve.centerX, curve.centerY, closest_point.x, closest_point.y);
                 }
 
                 var entering = dotProduct(rayVec, NormVec) < 0;
@@ -330,6 +330,9 @@ CanvasState.prototype.rayTrace = function(ray) {
                         ray.angle = mod(Math.atan(m), 2*Math.PI);
                     }
                 } else {
+                    console.log("REFRACT");
+                    console.log("ray.n: " + ray.n);
+                    console.log("n2: " + n2);
                     ray.setAngle(new_angle);
                     if (entering) {
                         ray.n = closest_point.element.n;
