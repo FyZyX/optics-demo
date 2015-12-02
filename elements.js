@@ -7,51 +7,26 @@
         Box     --> Mirror, Medium
 */
 
-/** Defines the Element class. An optical element is specified by its x, y
-  * position, an index of refraction n, and a color (for rendering). This
-  * class is meant to be abstract. */
-var Element = function(x, y, n) {
-    this.x = x || 0;
-    this.y = y || 0;
-    this.n = n;
-    this.fill = '#AAAAAA';
-    this.angle = 0;
-}
-
-/** Draws this Element to a given context (render the object on the canvas). */
-Element.prototype.draw = function(ctx) {
-    // Implemented by subclasses
-}
-
-/** Given a RAY object, returns the first (x, y) intersection point of this
-  * object and the RAY, or returns FALSE if there is no intersection point. */
-Element.prototype.intersection = function(ray) {
-    // Implemented by subclasses
-    return false;
-}
-
-
-
 
 /** Defines the Box class. A box is just a rectangular optical element, so it
   * needs a width and a height in addition to the parameters specified by the
   * abstract Element class above. */
-var Box = function(x, y, n, w, h){
-    Element.apply(this, arguments);
+var Box = function(x, y, w, h, angle, n, color1, color2) {
+    this.x = x || 0;
+    this.y = y || 0;
     this.w = w || 1;
     this.h = h || 1;
-    this.fill = "#669999";
-    this.color1 = "#33cccc";
-    this.color2 = "#ccffcc";
+    this.angle = 0;
+    this.n = n;
+    console.log("this.color1 = " + color1);
+    this.color1 = color1;
+    this.color2 = color2;
     this.generateLineSegments();
 }
 
 Box.prototype.generateLineSegments = function() {
-    var x4 = this.x + this.h*Math.sin(this.angle)/2;
-    var y4 = this.y - this.h*Math.cos(this.angle)/2;
-
-    this.x1 = x4 - this.w*Math.cos(this.angle)/2;
-    this.y1 = y4 - this.w*Math.sin(this.angle)/2;
+    this.x1 = this.x + this.h*Math.sin(this.angle)/2 - this.w*Math.cos(this.angle)/2;
+    this.y1 = this.y - this.h*Math.cos(this.angle)/2 - this.w*Math.sin(this.angle)/2;
 
     this.x4 = this.x1 + this.w*Math.cos(this.angle);
     this.y4 = this.y1 + this.w*Math.sin(this.angle);
@@ -67,6 +42,10 @@ Box.prototype.generateLineSegments = function() {
     this.lineSegments.push(new LineSegment(this.x2, this.y2, this.x3, this.y3));
     this.lineSegments.push(new LineSegment(this.x3, this.y3, this.x4, this.y4));
     this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
+}
+
+Box.prototype.setAngle = function(angle) {
+    this.angle = mod(angle, 2*Math.PI);
 }
 
 Box.prototype.drawNormals = function(ctx) {
@@ -157,7 +136,6 @@ Box.prototype.highlight = function(ctx) {
 
     ctx.strokeStyle = 'purple';
     ctx.lineWidth = 1;
-
     ctx.beginPath();
     ctx.moveTo(this.x1, this.y1);
     ctx.lineTo(this.x2, this.y2);
@@ -194,13 +172,13 @@ Box.prototype.intersection = function(ray) {
     for (var i = 0; i < intersections.length; i += 1) {
         cur_point = intersections[i];
         cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
-
         if (cur_dist < min_dist) {
             closest_point = cur_point;
             min_dist = cur_dist;
         }
     }
 
+    closest_point.element = this;
     return closest_point;
 }
 
@@ -220,9 +198,6 @@ Box.prototype.contains = function(x, y) {
     return inside;
 }
 
-//Box.prototype = Element.prototype;        // Set prototype to Person's
-Box.prototype.constructor = Box;   // Set constructor back to Box
-
 
 
 
@@ -230,65 +205,25 @@ Box.prototype.constructor = Box;   // Set constructor back to Box
 
 
 /** Defines the Mirror class. A Mirror is a simply a box that reflects all
-  * incident rays. */
-var Mirror = function(x, y, n, w, h, angle){
-    Box.apply(this, arguments);
-    this.w = w || 1;
-    this.h = h || 1;
-    this.color1 = "#33cccc";
-    this.color2 = "#ccffcc";
-    this.angle = angle;
-    this.generateLineSegments();
-
-
-    // Up, down, and move are for dragging
+  * incident rays (index of refraction -1). */
+var Mirror = function(x, y, w, h, angle){
+    Box.apply(this, [x, y, w, h, angle, -1, "#a3c2c2", "#d1e0e0"]);
 }
 
 Mirror.prototype = Box.prototype;        // Set prototype to Person's
 Mirror.prototype.constructor = Mirror;   // Set constructor back to Box
 
-Mirror.prototype.setAngle = function(angle) {
-    this.angle = mod(angle, 2*Math.PI);
+
+
+
+/** Defines the GlassBox class. A GlassBox is a simply a box with an index
+  * of refraction of 1.5. */
+var GlassBox = function(x, y, w, h, angle){
+    Box.apply(this, [x, y, w, h, angle, 1.5, "#33cccc", "#ccffcc"]);
 }
 
-Mirror.prototype.intersection = function(ray) {
-    var intersections = [];
-    var lineSegment;
-    var intersection;
-    for (var i = 0; i < this.lineSegments.length; i +=1) {
-        lineSegment = this.lineSegments[i];
-        intersection = lineSegment.intersection(ray);
-        if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
-            intersections.push(intersection);
-        }
-    }
-
-    if (intersections.length == 0) {
-        return false;
-    }
-
-    // choose the intersection point that is closest to the ray's starting point
-    var cur_dist;
-    var cur_point;
-    var closest_point = intersections[0];
-    var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
-    for (var i = 0; i < intersections.length; i += 1) {
-        cur_point = intersections[i];
-        cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
-        if (cur_dist < min_dist) {
-            closest_point = cur_point;
-            min_dist = cur_dist;
-        }
-    }
-
-    closest_point.element = this;
-    return closest_point;
-}
-
-
-
-
-
+GlassBox.prototype = Box.prototype;   // Set constructor back to Box
+GlassBox.prototype.constructor = GlassBox;   // Set constructor back to Box
 
 
 
@@ -300,19 +235,19 @@ Mirror.prototype.intersection = function(ray) {
 
 /** Defines the Mirror class. A Mirror is a simply a box that reflects all
   * incident rays. */
-var CircleLens = function(x, y, n, r, angle){
+var CircleLens = function(x, y, r, angle, n){
     this.x = x;
     this.y = y;
-    this.n = n;
     this.r = r;
     this.fill = "#669999";
     this.color1 = "#33cccc";
     this.color2 = "#ccffcc";
     this.angle = angle;
-    this.extent = Math.PI;
+    this.n = n;
+    this.extent = Math.PI/2;
 
     this.curves = [];
-    this.curves.push(new Arc(x, y, r, 0, Math.PI));
+    this.curves.push(new Arc(x, y, r, 0, Math.PI/2));
 }
 
 CircleLens.prototype.recalculateCurves = function() {
@@ -361,13 +296,6 @@ CircleLens.prototype.highlight = function(ctx) {
 }
 
 CircleLens.prototype.intersection = function(ray) {
-    // var intersection = circleLineIntersect(ray.x1, ray.y1, ray.x2, ray.y2, this.x, this.y, this.r);
-    // if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
-    //     return {"x": intersection.x, "y": intersection.y, "curve": this.curves[0], "element":this};
-    // } else {
-    //     return false;
-    // }
-
     var x1 = ray.x1;
     var x2 = ray.x2;
     var y1 = ray.y1;

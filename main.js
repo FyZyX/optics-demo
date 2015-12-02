@@ -33,7 +33,7 @@ function startGame() {
     ctx.canvas.height = window.innerHeight - 10;
 
     canvasState = new CanvasState(document.getElementById('myCanvas'));
-    var mirror = new Mirror(600, 400, -1, 15, 150, 0);
+    var mirror = new Mirror(600, 400, 15, 150, 0);
     canvasState.addShape(mirror);
 
     // var mirror2 = new Mirror(700, 400, -1, 15, 150, 0);
@@ -48,6 +48,6 @@ function startGame() {
     // var mirror5 = new Mirror(300, 400, -1, 15, 150, 0);
     // canvasState.addShape(mirror5);
 
-    var lens = new CircleLens(200, 400, 1.5, 100, 0);
+    var lens = new CircleLens(200, 400, 100, 0, 1.5);
     canvasState.addShape(lens);
 }

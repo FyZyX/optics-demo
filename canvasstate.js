@@ -115,7 +115,7 @@ function CanvasState(canvas) {
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        var glass_box = new Box(mouse.x - 10, mouse.y - 10, 1.5, 200, 200, 0);
+        var glass_box = new GlassBox(mouse.x - 10, mouse.y - 10, 200, 200, 0);
         myState.addShape(glass_box);
     }, true);
 
