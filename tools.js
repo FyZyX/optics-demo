@@ -9,6 +9,10 @@ Array.prototype.extend = function (other_array) {
     other_array.forEach(function(v) {this.push(v)}, this);
 }
 
+function onLineSeg(x, y, endx, endy, px, py) {
+    return approxeq(distance(x, y, px, py)+distance(endx, endy, px, py), distance(x, y, endx, endy));
+}
+
 
 // returns a normal vector to a line segment given its endpoints
 function normalVectorLine(x1, y1, x2, y2)

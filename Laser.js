@@ -17,5 +17,4 @@ Laser.prototype.shootLaser = function(elements, boundaries) {
     for (var i = 0; i < this.rays.length; i += 1) {
         this.rays[i].rayTrace(elements, boundaries);
     }
-    console.log("\n");
 }

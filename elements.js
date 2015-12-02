@@ -206,9 +206,9 @@ Box.prototype.contains = function(x, y) {
 
 
 /** Defines the Mirror class. A Mirror is a simply a box that reflects all
-  * incident rays (index of refraction -1). */
+  * incident rays (index of refraction 0). */
 var Mirror = function(x, y, w, h, angle){
-    Box.apply(this, [x, y, w, h, angle, -1, "#a3c2c2", "#d1e0e0"]);
+    Box.apply(this, [x, y, w, h, angle, 0, "#a3c2c2", "#d1e0e0"]);
 }
 
 Mirror.prototype = Box.prototype;        // Set prototype to Person's
@@ -220,11 +220,20 @@ Mirror.prototype.constructor = Mirror;   // Set constructor back to Box
 /** Defines the GlassBox class. A GlassBox is a simply a box with an index
   * of refraction of 1.5. */
 var GlassBox = function(x, y, w, h, angle){
-    Box.apply(this, [x, y, w, h, angle, 1.5, "#33cccc", "#ccffcc"]);
+    Box.apply(this, [x, y, w, h, angle, 1.33, "#33cccc", "#ccffcc"]);
 }
 
 GlassBox.prototype = Box.prototype;   // Set constructor back to Box
 GlassBox.prototype.constructor = GlassBox;   // Set constructor back to Box
+
+/** Defines the Wall class. A Wall is a simply a box with an index
+  * of refraction of -1. */
+var Wall = function(x, y, w, h, angle){
+    Box.apply(this, [x, y, w, h, angle, -1, "#1f2e2e", "#1f2e2e"]);
+}
+
+Wall.prototype = Box.prototype;   // Set constructor back to Box
+Wall.prototype.constructor = Wall;   // Set constructor back to Box
 
 
 
@@ -256,6 +265,7 @@ var PlanoConvexLens = function(x, y, r, angle, n, d){
     this.generateLineSegments();
     this.recalculateCurves();
     this.generateCenter();
+    this.draw(canvasState.ctx);
 }
 
 PlanoConvexLens.prototype.generateLineSegments = function() {
@@ -271,6 +281,10 @@ PlanoConvexLens.prototype.generateLineSegments = function() {
     var x3 = x4 + this.w*Math.sin(this.angle - (Math.PI/2 - this.extent/2));
     var y3 = y4 - this.w*Math.cos(this.angle - (Math.PI/2 - this.extent/2));
 
+    // console.log("point1: (" + x1 + ", " + y1 + ")");
+    // console.log("point2: (" + x2 + ", " + y2 + ")");
+    // console.log("point3: (" + x3 + ", " + y3 + ")");
+    // console.log("point4: (" + x4 + ", " + y4 + ")");
     this.lineSegments = [];
     this.lineSegments.push(new LineSegment(x1, y1, x2, y2));
     this.lineSegments.push(new LineSegment(x2, y2, x3, y3));
@@ -291,6 +305,7 @@ PlanoConvexLens.prototype.generateCenter = function() {
 }
 
 PlanoConvexLens.prototype.draw = function(ctx) {
+    console.log("HERE");
     this.generateLineSegments();
     this.recalculateCurves();
     this.generateCenter();
@@ -399,15 +414,24 @@ PlanoConvexLens.prototype.intersection = function(ray) {
     boxDist = distance(boxInt.x, boxInt.y, ray.x1, ray.y1);
     arcDist = distance(arcInt.x, arcInt.y, ray.x1, ray.y1);
 
+    if (boxDist < 0.001) {
+        boxInt = false;
+    }
+    if (arcDist < 0.001) {
+        arcInt = false;
+    }
+
     if (boxInt === false && arcInt === false) {
         return false;
     } else if (boxInt === false) {
         return arcInt;
     } else if (arcInt === false) {
+        // console.log("INTERSECT WITH BOX");
         return boxInt;
     }
 
     if (boxDist < arcDist) {
+        // console.log("INTERSECT WITH BOX");
         return boxInt;
     } else {
         return arcInt;
@@ -465,14 +489,13 @@ PlanoConvexLens.prototype.intersectionArc = function(ray) {
             further_intersection = intersection1;
         }
 
-
         var a = angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y);
 
-        if (isInRange(this.angle, this.angle + this.extent, a)) {
+        if (isInRange(this.angle, this.angle + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
             return closer_intersection;
         } else {
             a = angleFromSegment(cx, cy, further_intersection.x, further_intersection.y);
-            if (a >= this.angle && a <= this.angle + this.extent) {
+            if (isInRange(this.angle, this.angle + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, further_intersection.x, further_intersection.y)) {
                 return further_intersection;
             }
         }

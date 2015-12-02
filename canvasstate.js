@@ -179,7 +179,7 @@ CanvasState.prototype.draw = function() {
         // var ray = new Ray(0, 0, Math.PI/8);
         // this.rayTrace(ray);
 
-        var laser = new Laser(0, 0, 50, Math.PI/8, 10);
+        var laser = new Laser(0, 0, 100, Math.PI/8, 10);
         this.shootLaser(laser);
 
         this.valid = true;
