@@ -39,8 +39,14 @@ function startGame() {
     var wall = new Wall(700, 450, 15, 150, 0);
     canvasState.addShape(wall);
 
-    // var mirror2 = new Mirror(700, 400, -1, 15, 150, 0);
-    // canvasState.addShape(mirror2);
+    var wall2 = new Wall(800, 150, 15, 150, 0);
+    canvasState.addShape(wall2);
+
+    var wall3 = new Wall(900, 250, 15, 150, 0);
+    canvasState.addShape(wall3);
+
+    var mirror2 = new Mirror(800, 400, 15, 150, 0);
+    canvasState.addShape(mirror2);
 
     // var mirror3 = new Mirror(500, 400, -1, 15, 150, 0);
     // canvasState.addShape(mirror3);
@@ -51,6 +57,15 @@ function startGame() {
     // var mirror5 = new Mirror(300, 400, -1, 15, 150, 0);
     // canvasState.addShape(mirror5);
 
-    var lens = new PlanoConvexLens(400, 600, 200, 0, 1.5, 50);
-    canvasState.addShape(lens);
+    var planoConcave = new PlanoConcaveLens(510, 200, 100, Math.PI, 1.5, 100);
+    canvasState.addShape(planoConcave);
+
+    var planoConvex = new PlanoConvexLens(510, 400, 100, Math.PI, 1.5, 100);
+    canvasState.addShape(planoConvex);
+
+    var planoConcave2 = new PlanoConcaveLens(710, 200, 100, 0, 1.5, 120);
+    canvasState.addShape(planoConcave2);
+
+    var planoConvex2 = new PlanoConvexLens(610, 500, 150, Math.PI, 1.5, 50);
+    canvasState.addShape(planoConvex2);
 }

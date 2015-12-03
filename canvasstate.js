@@ -163,8 +163,8 @@ CanvasState.prototype.draw = function() {
         for (var i = 0; i < l; i++) {
             var shape = opticalElements[i];
             // We can skip the drawing of elements that have moved off the screen:
-            if (shape.centerX > this.width || shape.centerY > this.height ||
-                shape.centerX + shape.w < 0 || shape.centerY + shape.h < 0) continue;
+            // if (shape.centerX > this.width || shape.centerY > this.height ||
+            //     shape.centerX + shape.w < 0 || shape.centerY + shape.h < 0) continue;
             opticalElements[i].draw(ctx);
         }
 

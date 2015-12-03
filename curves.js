@@ -43,6 +43,9 @@ var Arc = function(x0, y0, r, angle, extent) {
 }
 
 Arc.prototype.generateCenterOfCircle = function() {
+    // console.log("x: " + this.x);
+    // console.log("y: " + this.y);
+    // console.log("extent: " + this.extent);
     var alpha = 1 - (this.extent)/(2*Math.PI);
     this.centerX = this.x*alpha - alpha*this.r*Math.cos(this.angle + this.extent/2);
     this.centerY = this.y*alpha - alpha*this.r*Math.sin(this.angle + this.extent/2);

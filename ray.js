@@ -115,7 +115,7 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
     var intersection;
     var hit = true;
 
-    // console.log("START");
+    console.log("START");
     this.clearPath();
     while (hit == true) {
         intersections = [];
@@ -170,18 +170,27 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
                 }
 
                 var entering = dotProduct(rayVec, NormVec) < 0;
+
+                // UPDATE THIS
+                console.log(closest_point.element.type);
+                if (closest_point.element.type == "concave") {
+                    entering = !entering;
+                }
                 if (entering) {
                     n2 = closest_point.element.n;
                 } else {
                     n2 = 1;
                 }
 
-                // refraction is an object with {"angle: " angle, "entering": true/false}
-                var new_angle = refractedAngle(ray.n, n2, ray, closest_point.curve, [closest_point.x, closest_point.y]);
+                var new_angle;
+                if (closest_point.element.type == "concave") {
+                    new_angle = refractedAngle2(ray.n, n2, ray, closest_point.curve, [closest_point.x, closest_point.y]);
+                } else {
+                    new_angle = refractedAngle(ray.n, n2, ray, closest_point.curve, [closest_point.x, closest_point.y]);
+                }
 
                 // CHECK FOR TIR
                 if (!new_angle) {
-                    // console.log("REFLECTING, current n = " + ray.n);
                     if (closest_point.curve.type == "arc") {
                         var x = closest_point.x;
                         var y = closest_point.y;
@@ -194,8 +203,6 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
                     var y2 = p[1];
                     var m = (y2 - ray.y1)/(x2 - ray.x1);
 
-                    // var dot = dotProduct([ray.x2 - ray.x1, ray.y2 - ray.y1], [x2 - ray.x1, y2 - ray.y2]);
-
                     if (x2 - ray.x1 < 0) {
                         ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
                     } else {
@@ -204,10 +211,10 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
                 } else {
                     ray.setAngle(new_angle);
                     if (entering) {
-                        // console.log("ENTERING medium with n = " + n2);
+                        console.log("ENTERING medium with n = " + n2);
                         ray.n = closest_point.element.n;
                     } else {
-                        // console.log("LEAVING to air, n = " + 1);
+                        console.log("LEAVING to air, n = " + 1);
                         ray.n = 1;
                     }
                 }
@@ -226,7 +233,7 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
             }
         }
     }
-    // console.log("\n");
+    console.log("\n");
 
     ray.drawPath();
 }
