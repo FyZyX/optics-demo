@@ -30,6 +30,9 @@ Box.prototype.print = function() {
     } else if (this.type == "winwall") {
         return "var b = new WinWall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle +");" +
                 "canvasState.addShape(b);";
+    } else if (this.type == "losewall") {
+        return "var b = new LoseWall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle +");" +
+                "canvasState.addShape(b);";
     }
     return "var b = new Box(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle + "," + this.n + ",'" + this.color1 + "','" + this.color2 +"');" +
             "canvasState.addShape(b);";

@@ -2,6 +2,7 @@
   * all of the optical elements on the screen, as well as ray tracing a ray. */
 
 var mouseOverObject = false;
+var c = 0;
 
 function CanvasState(canvas) {
     // **** First some setup! ****
@@ -152,6 +153,7 @@ CanvasState.prototype.draw = function() {
 
     // if our state is invalid, redraw and validate!
     if (!this.valid) {
+        c = 1;
         var ctx = this.ctx;
         var opticalElements = this.opticalElements;
         this.clear();
@@ -180,6 +182,8 @@ CanvasState.prototype.draw = function() {
         var result;
         if (this.laser) {
             result = this.shootLaser(this.laser);
+            console.log("result");
+            console.log(result);
             if (result.win && playing) {
                 var nextLevel = window.confirm("You Win!");
                 if (nextLevel) {
@@ -188,8 +192,10 @@ CanvasState.prototype.draw = function() {
                 }
                 startLevel(curLevel);
             } else if (result.lose && playing) {
-                alert("You Lose!");
-                startLevel(curLevel);
+                if (c != 0) {
+                    // alert("You Lose!");
+                    // startLevel(curLevel);
+                }
             }
         }
 
