@@ -184,6 +184,7 @@ CanvasState.prototype.draw = function() {
                 var nextLevel = window.confirm("You Win!");
                 if (nextLevel) {
                     curLevel += 1;
+                    curLevel = mod(curLevel, numLevels);
                 }
                 startLevel(curLevel);
             } else if (result.lose && playing) {
