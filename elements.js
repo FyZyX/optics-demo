@@ -243,6 +243,7 @@ GlassBox.prototype.constructor = GlassBox;   // Set constructor back to Box
 var Wall = function(x, y, w, h, angle){
     Box.apply(this, [x, y, w, h, angle, -1, "#1f2e2e", "#1f2e2e"]);
     this.type = "wall";
+    this.wall = true;
 }
 
 Wall.prototype = Box.prototype;   // Set constructor back to Box
@@ -255,6 +256,7 @@ Wall.prototype.constructor = Wall;   // Set constructor back to Box
 var WinWall = function(x, y, w, h, angle){
     Box.apply(this, [x, y, w, h, angle, -1, "#00cc00", "#00cc00"]);
     this.type = "winwall";
+    this.wall = true;
 }
 
 WinWall.prototype = Box.prototype;   // Set constructor back to Box
@@ -266,6 +268,7 @@ WinWall.prototype.constructor = WinWall;   // Set constructor back to Box
 var LoseWall = function(x, y, w, h, angle){
     Box.apply(this, [x, y, w, h, angle, -1, "#ff0000", "#ff0000"]);
     this.type = "losewall";
+    this.wall = true;
 }
 
 LoseWall.prototype = Box.prototype;   // Set constructor back to Box
