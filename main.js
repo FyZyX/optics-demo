@@ -132,7 +132,7 @@ function startPlaying() {
 
     // canvasState.setLaser(new Laser(0, 120, 70, 0, 10));
     // default_load();
-    startLevel(1);
+    startLevel(2);
 }
 
 
