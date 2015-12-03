@@ -4,12 +4,18 @@
 var intersectionLimit = 50;
 
 var Ray = function(x, y, angle) {
+    this.x = x;
+    this.y = y;
+    this.original_angle = angle;
     this.path = [[x, y]];
     this.x1 = x;
     this.y1 = y;
     this.angle = angle;
     this.setEndpoints();
     this.n = 1;
+
+    this.hittingWinWall = false;
+    this.hittingLoseWall = false;
 }
 
 Ray.prototype.addToPath = function(x, y) {
@@ -17,7 +23,12 @@ Ray.prototype.addToPath = function(x, y) {
 }
 
 Ray.prototype.clearPath = function() {
+    this.x1 = this.x;
+    this.y1 = this.y;
+    this.angle = this.original_angle;
     this.path = [[this.x1, this.y1]];
+    this.n = 1;
+    this.setEndpoints();
 }
 
 Ray.prototype.setAngle = function(angle) {
@@ -99,7 +110,7 @@ Ray.prototype.drawPath = function() {
 
         ctx.beginPath();
         ctx.moveTo(x1, y1);
-        ctx.strokeStyle = '#ff0000';
+        ctx.strokeStyle = '#e600e5';
         ctx.lineWidth = rayLineWidth;
         ctx.lineTo(x2, y2);
         ctx.stroke();
@@ -115,7 +126,6 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
     var intersection;
     var hit = true;
 
-    console.log("START");
     this.clearPath();
     while (hit == true) {
         intersections = [];
@@ -155,9 +165,17 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
 
             // determine whether object is a wall
             if (closest_point.element.n < 0) {
+                if (closest_point.element.type == "winwall") {
+                    this.hittingWinWall = true;
+                } else if (closest_point.element.type == "losewall") {
+                    this.hittingLoseWall = true;
+                }
                 ray.drawPath();
                 return;
             } else {
+                this.hittingWinWall = false;
+                this.hittingLoseWall = false;
+
                 var n2;
 
                 // create a vector from the ray's start and end points
@@ -211,10 +229,10 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
                 } else {
                     ray.setAngle(new_angle);
                     if (entering) {
-                        console.log("ENTERING medium with n = " + n2);
+                        // console.log("ENTERING medium with n = " + n2);
                         ray.n = closest_point.element.n;
                     } else {
-                        console.log("LEAVING to air, n = " + 1);
+                        // console.log("LEAVING to air, n = " + 1);
                         ray.n = 1;
                     }
                 }
@@ -233,7 +251,7 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
             }
         }
     }
-    console.log("\n");
+    // console.log("\n");
 
     ray.drawPath();
 }

@@ -114,8 +114,8 @@ function CanvasState(canvas) {
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        var glass_box = new GlassBox(mouse.x - 10, mouse.y - 10, 200, 200, 0);
-        myState.addShape(glass_box);
+        // var glass_box = new GlassBox(mouse.x - 10, mouse.y - 10, 200, 200, 0);
+        // myState.addShape(glass_box);
     }, true);
 
     // **** Options! ****
@@ -176,11 +176,21 @@ CanvasState.prototype.draw = function() {
         }
 
         // ** Add stuff you want drawn on top all the time here **
-        // var ray = new Ray(0, 0, Math.PI/8);
-        // this.rayTrace(ray);
 
-        var laser = new Laser(0, 0, 100, Math.PI/8, 10);
-        this.shootLaser(laser);
+        var result;
+        if (this.laser) {
+            result = this.shootLaser(this.laser);
+            if (result.win && playing) {
+                var nextLevel = window.confirm("You Win!");
+                if (nextLevel) {
+                    curLevel += 1;
+                }
+                startLevel(curLevel);
+            } else if (result.lose && playing) {
+                alert("You Lose!");
+                startLevel(curLevel);
+            }
+        }
 
         this.valid = true;
     }
@@ -228,6 +238,14 @@ CanvasState.prototype.getBoundaries = function(ray) {
 
 /** Ray trace a ray object on the screen. */
 CanvasState.prototype.shootLaser = function(laser) {
-    laser.shootLaser(this.opticalElements, this.getBoundaries());
+    return laser.shootLaser(this.opticalElements, this.getBoundaries());
+}
+
+CanvasState.prototype.clearElements = function() {
+    this.opticalElements = [];
+}
+
+CanvasState.prototype.setLaser = function(laser) {
+    this.laser = laser;
 }
 

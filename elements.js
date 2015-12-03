@@ -16,11 +16,20 @@ var Box = function(x, y, w, h, angle, n, color1, color2) {
     this.y = y || 0;
     this.w = w || 1;
     this.h = h || 1;
-    this.angle = 0;
+    this.angle = angle;
     this.n = n;
     this.color1 = color1;
     this.color2 = color2;
     this.generateLineSegments();
+}
+
+Box.prototype.print = function() {
+    if (this.type == "wall") {
+        return "var b = new Wall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle +");" +
+                "canvasState.addShape(b);";
+    }
+    return "var b = new Box(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle + "," + this.n + ",'" + this.color1 + "','" + this.color2 +"');" +
+            "canvasState.addShape(b);";
 }
 
 Box.prototype.generateLineSegments = function() {
@@ -230,10 +239,34 @@ GlassBox.prototype.constructor = GlassBox;   // Set constructor back to Box
   * of refraction of -1. */
 var Wall = function(x, y, w, h, angle){
     Box.apply(this, [x, y, w, h, angle, -1, "#1f2e2e", "#1f2e2e"]);
+    this.type = "wall";
 }
 
 Wall.prototype = Box.prototype;   // Set constructor back to Box
 Wall.prototype.constructor = Wall;   // Set constructor back to Box
+
+
+
+/** Defines the Wall class. A Wall is a simply a box with an index
+  * of refraction of -1. */
+var WinWall = function(x, y, w, h, angle){
+    Box.apply(this, [x, y, w, h, angle, -1, "#00cc00", "#00cc00"]);
+    this.type = "winwall";
+}
+
+WinWall.prototype = Box.prototype;   // Set constructor back to Box
+WinWall.prototype.constructor = WinWall;   // Set constructor back to Box
+
+
+/** Defines the Wall class. A Wall is a simply a box with an index
+  * of refraction of -1. */
+var LoseWall = function(x, y, w, h, angle){
+    Box.apply(this, [x, y, w, h, angle, -1, "#ff0000", "#ff0000"]);
+    this.type = "losewall";
+}
+
+LoseWall.prototype = Box.prototype;   // Set constructor back to Box
+LoseWall.prototype.constructor = LoseWall;   // Set constructor back to Box
 
 
 
@@ -266,6 +299,11 @@ var PlanoConvexLens = function(x, y, r, angle, n, d){
     this.recalculateCurves();
     this.generateCenter();
     this.draw(canvasState.ctx);
+}
+
+PlanoConvexLens.prototype.print = function() {
+    return "var pcv = new PlanoConvexLens(" + this.x + "," + this.y + "," + this.r + "," + this.angle + "," + this.n + "," + this.d + ");" +
+            "canvasState.addShape(pcv);";
 }
 
 PlanoConvexLens.prototype.generateLineSegments = function() {
@@ -849,6 +887,11 @@ var PlanoConcaveLens = function(x, y, r, angle, n, d){
     this.recalculateCurves();
     this.generateCenter();
     this.draw(canvasState.ctx);
+}
+
+PlanoConcaveLens.prototype.print = function() {
+    return "var pcc = new PlanoConcaveLens(" + this.x + "," + this.y + "," + this.r + "," + this.original_angle + "," + this.n + "," + this.d + ");" +
+            "canvasState.addShape(pcc);";
 }
 
 PlanoConcaveLens.prototype.generateLineSegments = function() {
