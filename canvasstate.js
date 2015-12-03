@@ -48,7 +48,7 @@ function CanvasState(canvas) {
         var opticalElements = myState.opticalElements;
         var l = opticalElements.length;
         for (var i = l-1; i >= 0; i--) {
-            if (opticalElements[i].contains(mx, my)) {
+            if (opticalElements[i].contains(mx, my) && !(opticalElements[i].type && playing)) {
                 var mySel = opticalElements[i];
                 // Keep track of where in the object we clicked
                 // so we can move it smoothly (see mousemove)
@@ -96,7 +96,7 @@ function CanvasState(canvas) {
             var opticalElements = myState.opticalElements;
             var l = opticalElements.length;
             for (var i = l-1; i >= 0; i--) {
-                if (opticalElements[i].contains(mx, my)) {
+                if (opticalElements[i].contains(mx, my) && !(opticalElements[i].type && playing)) {
                     mouseOverObject = true;
                     return;
                 }
