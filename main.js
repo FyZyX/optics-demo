@@ -51,6 +51,6 @@ function startGame() {
     // var mirror5 = new Mirror(300, 400, -1, 15, 150, 0);
     // canvasState.addShape(mirror5);
 
-    var lens = new PlanoConvexLens(1000, 300, 200, 0, 1.5, 50);
+    var lens = new PlanoConvexLens(400, 600, 200, 0, 1.5, 50);
     canvasState.addShape(lens);
 }

@@ -281,10 +281,7 @@ PlanoConvexLens.prototype.generateLineSegments = function() {
     var x3 = x4 + this.w*Math.sin(this.angle - (Math.PI/2 - this.extent/2));
     var y3 = y4 - this.w*Math.cos(this.angle - (Math.PI/2 - this.extent/2));
 
-    // console.log("point1: (" + x1 + ", " + y1 + ")");
-    // console.log("point2: (" + x2 + ", " + y2 + ")");
-    // console.log("point3: (" + x3 + ", " + y3 + ")");
-    // console.log("point4: (" + x4 + ", " + y4 + ")");
+
     this.lineSegments = [];
     this.lineSegments.push(new LineSegment(x1, y1, x2, y2));
     this.lineSegments.push(new LineSegment(x2, y2, x3, y3));
@@ -300,15 +297,18 @@ PlanoConvexLens.prototype.recalculateCurves = function() {
 }
 
 PlanoConvexLens.prototype.generateCenter = function() {
+    this.curves[0].generateCenterOfCircle();
     this.centerX = this.curves[0].centerX;
     this.centerY = this.curves[0].centerY;
 }
 
 PlanoConvexLens.prototype.draw = function(ctx) {
-    console.log("HERE");
-    this.generateLineSegments();
+
+    console.log("draw");
+
     this.recalculateCurves();
     this.generateCenter();
+    this.generateLineSegments();
 
     var grd = ctx.createLinearGradient(this.x,this.y,this.x + this.r, this.y + this.r);
     grd.addColorStop(0,this.color1);
@@ -316,24 +316,22 @@ PlanoConvexLens.prototype.draw = function(ctx) {
 
     ctx.fillStyle = grd;
 
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 0.5;
-
-    ctx.beginPath();
-
     var arc = this.curves[0];
     for (var i = 0; i < this.curves.length; i += 1) {
-        ctx.arc(arc.centerX, arc.centerY, arc.r, arc.angle, arc.angle + arc.extent);
+        ctx.beginPath();
+        ctx.arc(this.centerX, this.centerY, arc.r, arc.angle, arc.angle + arc.extent);
+        ctx.stroke();
     }
 
-    var curLineSeg = this.lineSegments[0];
+    var curLineSeg = this.lineSegments[2];
     for (var i = this.lineSegments.length - 1; i >= 0; i -= 1) {
         curLineSeg = this.lineSegments[i];
-        ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
+        ctx.lineTo(curLineSeg.x1, curLineSeg.y1);
         ctx.stroke();
     }
 
     ctx.fill();
+    // ctx.closePath();
 }
 
 PlanoConvexLens.prototype.setAngle = function(angle) {
@@ -356,7 +354,8 @@ PlanoConvexLens.prototype.contains = function(x, y) {
 }
 
 PlanoConvexLens.prototype.highlight = function(ctx) {
-    this.recalculateCurves();
+    console.log("highlight");
+
     ctx.strokeStyle = 'purple';
     ctx.lineWidth = 1;
 

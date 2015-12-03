@@ -115,7 +115,7 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
     var intersection;
     var hit = true;
 
-    console.log("START");
+    // console.log("START");
     this.clearPath();
     while (hit == true) {
         intersections = [];
@@ -181,7 +181,7 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
 
                 // CHECK FOR TIR
                 if (!new_angle) {
-                    console.log("REFLECTING, current n = " + ray.n);
+                    // console.log("REFLECTING, current n = " + ray.n);
                     if (closest_point.curve.type == "arc") {
                         var x = closest_point.x;
                         var y = closest_point.y;
@@ -204,10 +204,10 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
                 } else {
                     ray.setAngle(new_angle);
                     if (entering) {
-                        console.log("ENTERING medium with n = " + n2);
+                        // console.log("ENTERING medium with n = " + n2);
                         ray.n = closest_point.element.n;
                     } else {
-                        console.log("LEAVING to air, n = " + 1);
+                        // console.log("LEAVING to air, n = " + 1);
                         ray.n = 1;
                     }
                 }
@@ -226,7 +226,7 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
             }
         }
     }
-    console.log("\n");
+    // console.log("\n");
 
     ray.drawPath();
 }
