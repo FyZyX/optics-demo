@@ -7,7 +7,7 @@ var canvasState;
 var mousePointer;
 var rayLineWidth = 3;
 var keysDown = 0;
-var curLevel = 1;
+var curLevel = 0;
 var numLevels = 2;
 
 
@@ -58,12 +58,10 @@ function generateLevelFile() {
 }
 
 
-
-var level0 = "var b = new Box(796,526,15,150,4.06609060451356,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new WinWall(9,515,15,35,0);canvasState.addShape(b);var b = new Wall(308,435,15,150,0);canvasState.addShape(b);var b = new Wall(308,595,15,150,0);canvasState.addShape(b);var b = new Wall(61,353,15,150,1.5707963267948966);canvasState.addShape(b);var b = new Wall(241,353,15,150,1.5707963267948966);canvasState.addShape(b);var b = new Wall(61,600,15,150,1.5707963267948966);canvasState.addShape(b);var b = new Wall(241,600,15,150,1.5707963267948966);canvasState.addShape(b);var b = new Box(453,301,15,150,2.502010470300501,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var pcc = new PlanoConcaveLens(1028,421,100,0,1.5,120);canvasState.addShape(pcc);var pcv = new PlanoConvexLens(747,670,150,3.6716097343392304,1.5,50);canvasState.addShape(pcv);var l = new Laser(0,120,70,0,10);canvasState.setLaser(l);";
-var level1 = "var b = new Box(185,469,15,250,5.492932526690764,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new WinWall(1076,530,15,250,4.709338659392787);canvasState.addShape(b);var b = new Wall(597,185,15,10,0);canvasState.addShape(b);var b = new Wall(596,132,15,10,0);canvasState.addShape(b);var b = new Wall(595,72,15,10,0);canvasState.addShape(b);var b = new Wall(597,205,15,10,0);canvasState.addShape(b);var b = new Wall(596,167,15,10,0);canvasState.addShape(b);var b = new Wall(596,150,15,10,0);canvasState.addShape(b);var b = new Wall(597,223,15,10,0);canvasState.addShape(b);var b = new Wall(596,114,15,10,0);canvasState.addShape(b);var b = new Wall(595,94,15,10,0);canvasState.addShape(b);var b = new Wall(902,424,15,350,0);canvasState.addShape(b);var b = new Wall(1071,590,15,350,1.5674842972683347);canvasState.addShape(b);var pcc = new PlanoConcaveLens(769,548,60,0,1.5,120);canvasState.addShape(pcc);var pcv = new PlanoConvexLens(1415,476,150,6.285375236212544,1.5,50);canvasState.addShape(pcv);var l = new Laser(0,120,70,0,10);canvasState.setLaser(l);";
-var level2;
+var level0 = "var b = new Box(298,187,15,80,0.07760492258740825,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new Box(481,210,15,80,2.654072175223533,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new Box(272,437,270,230,6.193728413012803,1.33,'#33cccc','#ccffcc');canvasState.addShape(b);var b = new Wall(895,348,15,300,0);canvasState.addShape(b);var b = new Wall(587,81,15,300,0);canvasState.addShape(b);var b = new Wall(590,409,15,300,0);canvasState.addShape(b);var b = new Wall(895,680,15,300,0);canvasState.addShape(b);var b = new Wall(998,113,15,300,0);canvasState.addShape(b);var b = new WinWall(1075,382,15,100,0);canvasState.addShape(b);var l = new Laser(0,200,70,5.890486225480862,1);canvasState.setLaser(l);";
+var level1 = "var b = new Box(796,526,15,150,4.06609060451356,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new WinWall(9,515,15,35,0);canvasState.addShape(b);var b = new Wall(308,435,15,150,0);canvasState.addShape(b);var b = new Wall(308,595,15,150,0);canvasState.addShape(b);var b = new Wall(61,353,15,150,1.5707963267948966);canvasState.addShape(b);var b = new Wall(241,353,15,150,1.5707963267948966);canvasState.addShape(b);var b = new Wall(61,600,15,150,1.5707963267948966);canvasState.addShape(b);var b = new Wall(241,600,15,150,1.5707963267948966);canvasState.addShape(b);var b = new Box(453,301,15,150,2.502010470300501,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var pcc = new PlanoConcaveLens(1028,421,100,0,1.5,120);canvasState.addShape(pcc);var pcv = new PlanoConvexLens(747,670,150,3.6716097343392304,1.5,50);canvasState.addShape(pcv);var l = new Laser(0,120,70,0,10);canvasState.setLaser(l);";
+var level2 = "var b = new Box(185,469,15,250,5.492932526690764,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new WinWall(1076,530,15,250,4.709338659392787);canvasState.addShape(b);var b = new Wall(597,185,15,10,0);canvasState.addShape(b);var b = new Wall(596,132,15,10,0);canvasState.addShape(b);var b = new Wall(595,72,15,10,0);canvasState.addShape(b);var b = new Wall(597,205,15,10,0);canvasState.addShape(b);var b = new Wall(596,167,15,10,0);canvasState.addShape(b);var b = new Wall(596,150,15,10,0);canvasState.addShape(b);var b = new Wall(597,223,15,10,0);canvasState.addShape(b);var b = new Wall(596,114,15,10,0);canvasState.addShape(b);var b = new Wall(595,94,15,10,0);canvasState.addShape(b);var b = new Wall(902,424,15,350,0);canvasState.addShape(b);var b = new Wall(1071,590,15,350,1.5674842972683347);canvasState.addShape(b);var pcc = new PlanoConcaveLens(769,548,60,0,1.5,120);canvasState.addShape(pcc);var pcv = new PlanoConvexLens(1415,476,150,6.285375236212544,1.5,50);canvasState.addShape(pcv);var l = new Laser(0,120,70,0,10);canvasState.setLaser(l);";
 var level3;
-
 
 var playing = true;
 
@@ -77,56 +75,35 @@ function startLevel(level) {
 var vid = {};
 
 function default_load() {
-    var mirror = new Mirror(600, 400, 15, 250, 0);
+    var mirror = new Mirror(750, 400, 15, 80, 0);
     canvasState.addShape(mirror);
 
-    var winWall = new WinWall(700, 550, 15, 250, 0);
-    canvasState.addShape(winWall);
+    var mirror = new Mirror(650, 400, 15, 80, 0);
+    canvasState.addShape(mirror);
 
-    var wall = new Wall(200, 150, 15, 10, 0);
+    var glassBox = new GlassBox(800, 300, 270, 230, 0);
+    canvasState.addShape(glassBox);
+
+    var wall = new Wall(400, 400, 15, 300, 0);
     canvasState.addShape(wall);
 
-    var wall2 = new Wall(300, 250, 15, 10, 0);
-    canvasState.addShape(wall2);
+    var wall = new Wall(500, 400, 15, 300, 0);
+    canvasState.addShape(wall);
 
-    var wall3 = new Wall(300, 250, 15, 10, 0);
-    canvasState.addShape(wall3);
+    var wall = new Wall(600, 400, 15, 300, 0);
+    canvasState.addShape(wall);
 
-    var wall4 = new Wall(500, 250, 15, 10, 0);
-    canvasState.addShape(wall4);
+    var wall = new Wall(700, 400, 15, 300, 0);
+    canvasState.addShape(wall);
 
-    var wall5 = new Wall(200, 150, 15, 10, 0);
-    canvasState.addShape(wall5);
+    var wall = new Wall(800, 400, 15, 300, 0);
+    canvasState.addShape(wall);
 
-    var wall6 = new Wall(300, 250, 15, 10, 0);
-    canvasState.addShape(wall6);
-
-    var wall7 = new Wall(500, 250, 15, 10, 0);
-    canvasState.addShape(wall7);
-
-    var wall8 = new Wall(600, 250, 15, 10, 0);
-    canvasState.addShape(wall8);
-
-    var wall9 = new Wall(600, 250, 15, 10, 0);
-    canvasState.addShape(wall9);
-
-
-
-
-    var wall10 = new Wall(600, 250, 15, 350, 0);
-    canvasState.addShape(wall10);
-
-    var wall11 = new Wall(600, 250, 15, 350, Math.PI);
-    canvasState.addShape(wall11);
-
-    var planoConcave2 = new PlanoConcaveLens(710, 200, 60, 0, 1.5, 120);
-    canvasState.addShape(planoConcave2);
-
-    var planoConvex3 = new PlanoConvexLens(310, 500, 150, Math.PI, 1.5, 50);
-    canvasState.addShape(planoConvex3);
+    var wall = new WinWall(900, 400, 15, 100, 0);
+    canvasState.addShape(wall);
 
     // canvasState.addShape(pcv);
-    var l = new Laser(0,120,70,0,10);
+    var l = new Laser(0,200,70,15*Math.PI/8,1);
     canvasState.setLaser(l);
 
 
@@ -177,7 +154,7 @@ function startPlaying() {
 
     // canvasState.setLaser(new Laser(0, 120, 70, 0, 10));
     // default_load();
-    startLevel(1);
+    startLevel(0);
 }
 
 
