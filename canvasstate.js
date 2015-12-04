@@ -97,7 +97,7 @@ function CanvasState(canvas) {
             var opticalElements = myState.opticalElements;
             var l = opticalElements.length;
             for (var i = l-1; i >= 0; i--) {
-                if (opticalElements[i].contains(mx, my) && !(opticalElements[i].type && playing)) {
+                if (opticalElements[i].contains(mx, my) && !(opticalElements[i].wall && playing)) {
                     mouseOverObject = true;
                     return;
                 }
