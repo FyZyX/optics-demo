@@ -12,7 +12,6 @@ var numLevels = 3;
 
 
 window.addEventListener("keydown", function(e) {
-    console.log("HERE");
     if (e.keyCode == 13) {
         generateLevelFile();
     }
@@ -20,6 +19,10 @@ window.addEventListener("keydown", function(e) {
         keysDown += 1;
     } else if (keysDown > 0) {
         keysDown += 1;
+    }
+
+    if (e.keyCode > 47 && e.keyCode < 51) {
+        startLevel(e.keyCode - 48);
     }
 }, true);
 
