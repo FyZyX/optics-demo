@@ -182,8 +182,6 @@ CanvasState.prototype.draw = function() {
         var result;
         if (this.laser) {
             result = this.shootLaser(this.laser);
-            console.log("result");
-            console.log(result);
             if (result.win && playing) {
                 var nextLevel = window.confirm("You Win!");
                 if (nextLevel) {

@@ -72,6 +72,8 @@ var levels = {0: level0, 1: level1, 2: level2, 3: level3};
 
 function startLevel(level) {
     canvasState.clearElements();
+    canvasState.dragging = false;
+    canvasState.rotating = false;
     eval(levels[level]);
 }
 
