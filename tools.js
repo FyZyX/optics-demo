@@ -69,17 +69,21 @@ function mirror(p, q, x1, y1, x2, y2) {
 }
 
 
+
+function quadraticFormula(a, b, c) {
+    return ((-b - Math.sqrt(b*b - 4*a*c))/(2*a));
+}
+
+
 function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
     // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
     var denominator, a, b, numerator1, numerator2, result = {
         x: null,
-        y: null,
-        onLine1: false,
-        onLine2: false
+        y: null
     };
     denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - ((line2EndX - line2StartX) * (line1EndY - line1StartY));
     if (denominator == 0) {
-        return result;
+        return false
     }
     a = line1StartY - line2StartY;
     b = line1StartX - line2StartX;
@@ -92,17 +96,17 @@ function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, l
     result.x = line1StartX + (a * (line1EndX - line1StartX));
     result.y = line1StartY + (a * (line1EndY - line1StartY));
 
-    // if line1 is a segment and line2 is infinite, they intersect if:
-    if (a >= 0 && a <= 1) {
-        result.onLine1 = true;
+    if (a >= 0 && a <= 1 && b >= 0 && b <= 1) {
+        return result;
+    } else {
+        return false;
     }
-    // if line2 is a segment and line1 is infinite, they intersect if:
-    if (b >= 0 && b <= 1) {
-        result.onLine2 = true;
-    }
-    // if line1 and line2 are segments, they intersect if both of the above are true
-    return result;
-};
+}
+
+
+function lineSegIntersection(lineSeg1, lineSeg2) {
+    return checkLineIntersection(lineSeg1.x1, lineSeg1.y1, lineSeg1.x2, lineSeg1.y2, lineSeg2.x1, lineSeg2.y1, lineSeg2.x2, lineSeg2.y2);
+}
 
 
 function circleLineIntersect(x1, y1, x2, y2, cx, cy, cr) {
@@ -230,6 +234,7 @@ function refractedAngle(n1, n2, ray, element, P) {
     var theta_t = Math.asin((n1/n2)*Math.sin(theta_i));
     // determine the change in ray angle from incident to transmitted
     var deflection = theta_t - theta_i;
+
     // it is assumed that n2 >= n1. Deal with the remaining case
     if (n2 < n1) {deflection *= -1;}
     // adjust the ray angle according to its deflection from the normal

@@ -1,34 +1,27 @@
 /** This file defines the Ray class. The ray specifies the beam of light that
   * will be shot out from the starting point in our game. */
 
-var intersectionLimit = 50;
-
 var Ray = function(x, y, angle) {
     this.x = x;
     this.y = y;
     this.original_angle = angle;
-    this.path = [[x, y]];
-    this.x1 = x;
-    this.y1 = y;
-    this.angle = angle;
-    this.setEndpoints();
-    this.n = 1;
-
-    this.hittingWinWall = false;
-    this.hittingLoseWall = false;
+    this.intersectionLimit = 50;
+    this.reset();
 }
 
 Ray.prototype.addToPath = function(x, y) {
     this.path.push([x, y]);
 }
 
-Ray.prototype.clearPath = function() {
+Ray.prototype.reset = function() {
     this.x1 = this.x;
     this.y1 = this.y;
     this.angle = this.original_angle;
     this.path = [[this.x1, this.y1]];
     this.n = 1;
     this.setEndpoints();
+    this.hittingWinWall = false;
+    this.hittingLoseWall = false;
 }
 
 Ray.prototype.setAngle = function(angle) {
@@ -36,222 +29,145 @@ Ray.prototype.setAngle = function(angle) {
 }
 
 Ray.prototype.setEndpoints = function() {
-    var m = Math.tan(this.angle);
+    var x1 = this.x1;
+    var y1 = this.y1;
+    var x2 = this.x1 + Number.MAX_SAFE_INTEGER*Math.cos(this.angle);
+    var y2 = this.y1 + Number.MAX_SAFE_INTEGER*Math.sin(this.angle);
 
-    // handle edge cases when ray is either a horizontal or vertical line
-    if (this.angle == 0) {
-        this.x2 = canvasState.width;
-        this.y2 = this.y1;
-        return;
-    }
-    if (this.angle == Math.PI/2) {
-        this.x2 = this.x1;
-        this.y2 = canvasState.height;
-        return;
-    } else if (this.angle == Math.PI) {
-        this.x2 = 0;
-        this.y2 = this.y1;
-        return;
-    } else if (this.angle == 3*Math.PI/2) {
-        this.x2 = this.x1;
-        this.y2 = 0;
-        return;
-    }
+    var boundaries = canvasState.getBoundaries();
+    var curLineSeg, curIntersectPt;
+    for (var i = 0; i < 4; i += 1) {
+        curLineSeg = boundaries[i];
+        curIntersectPt = checkLineIntersection(x1, y1, x2, y2, curLineSeg.x1, curLineSeg.y1, curLineSeg.x2, curLineSeg.y2);
 
-    // rightward will be true if the ray is traveling to the right
-    var rightward = false;
-    // upward will be true if the ray is traveling upward
-    var upward = false;
-
-    if (this.angle < Math.PI/2 || this.angle > 3*Math.PI/2) {
-        rightward = true;
+        if (curIntersectPt && !(approxeq(curIntersectPt.x, x1, 0.001) && approxeq(curIntersectPt.y, y1, 0.001))) {
+            this.x2 = Math.round(curIntersectPt.x);
+            this.y2 = Math.round(curIntersectPt.y);
+            return;
+        }
     }
-    if (this.angle < Math.PI) {
-        upward = true;
-    }
-
-    if (rightward) {
-        var x2 = canvasState.width;
-    } else {
-        var x2 = 0;
-    }
-
-    var y2 = m*(x2 - this.x1) + this.y1;
-    if (y2 >= 0 && y2 <= canvasState.height) {
-        this.x2 = x2;
-        this.y2 = y2;
-    } else if (upward) {
-        y2 = canvasState.height;
-        this.x2 = (y2 - this.y1)/m + this.x1;
-    } else {
-        y2 = 0;
-        this.x2 = (y2 - this.y1)/m + this.x1;
-    }
-    this.y2 = y2;
 }
 
 /** Takes in a PATH (array of [x, y] coordinates), and draws lines between
   * them. */
 Ray.prototype.drawPath = function() {
-
-    // coordinate vars
-    var x1;
-    var y1;
-    var x2;
-    var y2;
-
-    for (var i = 0; i < (this.path.length-1); i += 1) {
-
-        x1 = this.path[i][0];
-        y1 = this.path[i][1];
-
-        x2 = this.path[i+1][0];
-        y2 = this.path[i+1][1];
-
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.strokeStyle = '#e600e5';
-        ctx.lineWidth = rayLineWidth;
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+    ctx.strokeStyle = '#e600e5';
+    ctx.lineWidth = rayLineWidth;
+    ctx.beginPath();
+    ctx.moveTo(this.path[0][0], this.path[0][1]);
+    for (var i = 1; i < this.path.length; i += 1) {
+        ctx.lineTo(this.path[i][0], this.path[i][1]);
+        ctx.moveTo(this.path[i][0], this.path[i][1]);
     }
+    ctx.stroke();
 }
 
-/** Ray trace a ray object on the screen. */
-Ray.prototype.rayTrace = function(elements, boundaries) {
-    var numIntersections = 0;
+Ray.prototype.getIntersection = function(elements) {
+    var intersection, intersections = [];
     var ray = this;
+    var numElements = elements.length;
+    for (var i = 0; i < numElements; i += 1) {
+        intersection = elements[i].intersection(ray);
+        if (intersection && !(approxeq(intersection.x, ray.x1, 0.01) && approxeq(intersection.y, ray.y1, 0.01))) {
+            intersections.push(intersection);
+        }
+    }
 
-    var intersections;
-    var intersection;
-    var hit = true;
-
-    this.clearPath();
-    while (hit == true) {
-        intersections = [];
-        hit = false;
-        for (var i = 0; i < elements.length; i += 1) {
-            intersection = elements[i].intersection(ray);
-            if (intersection && !(approxeq(intersection.x, ray.x1, 0.01) && approxeq(intersection.y, ray.y1, 0.01))) {
-                intersections.push(intersection);
+    if (intersections.length > 0) {
+        // choose the intersection point that is closest to the ray's starting point
+        var cur_dist, cur_point;
+        var closest_point = intersections[0];
+        var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
+        for (var i = 0; i < intersections.length; i += 1) {
+            cur_point = intersections[i];
+            cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
+            if (cur_dist < min_dist) {
+                closest_point = cur_point;
+                min_dist = cur_dist;
             }
         }
 
-        if (intersections.length > 0 && numIntersections < intersectionLimit) {
-            hit = true;
-            numIntersections += 1;
+        return closest_point;
+    } else {
+        return false;
+    }
+}
 
-            // choose the intersection point that is closest to the ray's starting point
-            var cur_dist;
-            var cur_point;
-            var closest_point = intersections[0];
-            var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
-            for (var i = 0; i < intersections.length; i += 1) {
-                cur_point = intersections[i];
-                cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
-                if (cur_dist < min_dist) {
-                    closest_point = cur_point;
-                    min_dist = cur_dist;
-                }
-            }
 
-            ray.addToPath(closest_point.x, closest_point.y);
+Ray.prototype.getReflectionAngle = function(intersection, normVec) {
+    var ray = this;
+    var curve = intersection.curve;
 
-            ray.x1 = closest_point.x;
-            ray.y1 = closest_point.y;
-            ray.setEndpoints();
+    if (curve.type == "arc") {
+        var x = intersection.x;
+        var y = intersection.y;
+        var tanLine = normalVectorLine(x, y, x+normVec[0], y+normVec[1]);
+        var p = mirror(ray.x2, ray.y2, x, y, x+tanLine[0], y+tanLine[1]);
+    } else {
+        var p = mirror(ray.x2, ray.y2, curve.x1, curve.y1, curve.x2, curve.y2);
+    }
+    var x2 = p[0];
+    var y2 = p[1];
 
-            var curve = closest_point.curve;
+    return Math.atan2(y2 - intersection.y, x2 - intersection.x);
+}
 
-            // determine whether object is a wall
-            if (closest_point.element.n < 0) {
-                if (closest_point.element.type == "winwall") {
+
+/** Ray trace a ray object on the screen. */
+Ray.prototype.rayTrace = function(elements, boundaries) {
+    var intersection, new_angle, curve;
+    var ray = this;
+    this.reset();
+
+    for (var i = 0; i < this.intersectionLimit; i += 1) {
+        intersection = this.getIntersection(elements);
+
+        if (intersection) {
+            ray.addToPath(intersection.x, intersection.y);
+            curve = intersection.curve;
+
+            // If the ray intersects with a wall, we are done.
+            if (intersection.element.n < 0) {
+                if (intersection.element.type == "winwall") {
                     this.hittingWinWall = true;
-                } else if (closest_point.element.type == "losewall") {
+                } else if (intersection.element.type == "losewall") {
                     this.hittingLoseWall = true;
                 }
                 ray.drawPath();
                 return;
             } else {
-                this.hittingWinWall = false;
-                this.hittingLoseWall = false;
-
-                var n2;
-
                 // create a vector from the ray's start and end points
                 var rayVec = [ray.x2 - ray.x1, ray.y2 - ray.y1];
+                var normVec = intersection.element.getNormVec(curve, intersection.x, intersection.y);
+                var entering = dotProduct(rayVec, normVec) < 0;
+                var n2 = (entering && intersection.element.n != 0) ? intersection.element.n : 1;
+                new_angle = refractedAngle(ray.n, n2, ray, intersection.curve, [intersection.x, intersection.y]);
 
-                if (closest_point.curve.type == "line") {
-                    var NormVec = normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
+                // CHECK FOR TIR and mirrors
+                if (new_angle == undefined || isNaN(new_angle) || intersection.element.n == 0) {
+                    new_angle = this.getReflectionAngle(intersection, normVec);
                 } else {
-                    var NormVec = normalVectorCircle(curve.centerX, curve.centerY, closest_point.x, closest_point.y);
+                    ray.n = n2;
                 }
 
-                var entering = dotProduct(rayVec, NormVec) < 0;
-
-                // UPDATE THIS
-                console.log(closest_point.element.type);
-                if (closest_point.element.type == "concave") {
-                    entering = !entering;
-                }
-                if (entering) {
-                    n2 = closest_point.element.n;
-                } else {
-                    n2 = 1;
-                }
-
-                var new_angle;
-                if (closest_point.element.type == "concave") {
-                    new_angle = refractedAngle2(ray.n, n2, ray, closest_point.curve, [closest_point.x, closest_point.y]);
-                } else {
-                    new_angle = refractedAngle(ray.n, n2, ray, closest_point.curve, [closest_point.x, closest_point.y]);
-                }
-
-                // CHECK FOR TIR
-                if (!new_angle) {
-                    if (closest_point.curve.type == "arc") {
-                        var x = closest_point.x;
-                        var y = closest_point.y;
-                        var tanLine = normalVectorLine(x, y, x+NormVec[0], y+NormVec[1]);
-                        var p = mirror(ray.x2, ray.y2, x, y, x+tanLine[0], y+tanLine[1]);
-                    } else {
-                        var p = mirror(ray.x2, ray.y2, curve.x1, curve.y1, curve.x2, curve.y2);
-                    }
-                    var x2 = p[0];
-                    var y2 = p[1];
-                    var m = (y2 - ray.y1)/(x2 - ray.x1);
-
-                    if (x2 - ray.x1 < 0) {
-                        ray.angle = mod(Math.atan(m) + Math.PI, 2*Math.PI);
-                    } else {
-                        ray.angle = mod(Math.atan(m), 2*Math.PI);
-                    }
-                } else {
-                    ray.setAngle(new_angle);
-                    if (entering) {
-                        // console.log("ENTERING medium with n = " + n2);
-                        ray.n = closest_point.element.n;
-                    } else {
-                        // console.log("LEAVING to air, n = " + 1);
-                        ray.n = 1;
-                    }
-                }
+                ray.setAngle(new_angle);
             }
 
+            ray.x1 = intersection.x;
+            ray.y1 = intersection.y;
             ray.setEndpoints();
-        }
-
-    }
-
-    if (numIntersections < intersectionLimit) {
-        for (var i = 0; i < boundaries.length; i += 1) {
-            intersection = boundaries[i].intersection(ray);
-            if (intersection) {
-                ray.addToPath(intersection.x, intersection.y);
-            }
+        } else {
+            break;
         }
     }
-    // console.log("\n");
+
+    for (var i = 0; i < boundaries.length; i += 1) {
+        intersection = boundaries[i].intersection(ray);
+        if (intersection && !(approxeq(intersection.x, ray.x1, 0.01) && approxeq(intersection.y, ray.y1, 0.01))) {
+            ray.addToPath(intersection.x, intersection.y);
+            break;
+        }
+    }
 
     ray.drawPath();
 }

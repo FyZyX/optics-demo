@@ -16,7 +16,7 @@ var LineSegment = function(x1, y1, x2, y2) {
   * object. */
 LineSegment.prototype.intersection = function(ray) {
     var intersection = checkLineIntersection(ray.x1, ray.y1, ray.x2, ray.y2, this.x1, this.y1, this.x2, this.y2);
-    if (intersection.onLine1 && intersection.onLine2) {
+    if (intersection) {
         return {"x": intersection.x, "y": intersection.y, "curve": this};
     } else {
         return false;
@@ -31,43 +31,60 @@ LineSegment.prototype.intersection = function(ray) {
 
 
 /** Defines the LineSegment class, a subclass of the Curve class. */
-var Arc = function(x0, y0, r, angle, extent) {
+var Arc = function(x0, y0, r, rotation, extent) {
     this.x = x0;
     this.y = y0;
     this.r = r;
-    this.angle = angle;
+    this.rotation = rotation;
     this.extent = extent;
     this.type = "arc";
 
     this.generateCenterOfCircle();
 }
 
-Arc.prototype.generateCenterOfCircle = function() {
-    // console.log("x: " + this.x);
-    // console.log("y: " + this.y);
-    // console.log("extent: " + this.extent);
-    var alpha = 1 - (this.extent)/(2*Math.PI);
-    this.centerX = this.x*alpha - alpha*this.r*Math.cos(this.angle + this.extent/2);
-    this.centerY = this.y*alpha - alpha*this.r*Math.sin(this.angle + this.extent/2);
 
-    this.p1 = this.r*Math.cos(this.angle) + this.centerX;
-    this.q1 = this.r*Math.sin(this.angle) + this.centerY;
-    this.p2 = this.r*Math.cos(this.angle + this.extent) + this.centerX;
-    this.q2 = this.r*Math.sin(this.angle + this.extent) + this.centerY;
+Arc.prototype.generateCenterOfCircle = function() {
+    var r = this.r;
+    var w = 2*r*Math.sin(this.extent/2);
+    // console.log("r: " + r);
+    // console.log("w: " + w);
+    var h;
+
+    var a = 1;
+    var b = -2*r;
+    var c = w*w/4;
+
+    h = quadraticFormula(a, b, c);
+    // console.log("a: " +a);
+    // console.log("b: " + b);
+    // console.log("c: " + c);
+    // console.log("h: " + h);
+
+    var d = r - h/2;
+    // console.log("d: " + d);
+
+    this.centerX = this.x + d*Math.sin(this.rotation);
+    this.centerY = this.y - d*Math.cos(this.rotation);
+
+    this.p1 = this.r*Math.cos(this.rotation) + this.centerX;
+    this.q1 = this.r*Math.sin(this.rotation) + this.centerY;
+    this.p2 = this.r*Math.cos(this.rotation + this.extent) + this.centerX;
+    this.q2 = this.r*Math.sin(this.rotation + this.extent) + this.centerY;
+    // console.log("\n");
 }
 
 Arc.prototype.draw = function(ctx) {
     this.generateCenterOfCircle();
     ctx.beginPath();
-    ctx.arc(this.centerX, this.centerY, this.r, this.angle, this.angle + this.extent);
+    ctx.arc(this.centerX, this.centerY, this.r, this.rotation, this.rotation + this.extent);
     ctx.stroke();
 }
 
 Arc.prototype.contains = function(x, y) {
-    var p1 = this.r*Math.cos(this.angle) + this.centerX;
-    var q1 = this.r*Math.sin(this.angle) + this.centerY;
-    var p2 = this.r*Math.cos(this.angle + this.extent) + this.centerX;
-    var q2 = this.r*Math.sin(this.angle + this.extent) + this.centerY;
+    var p1 = this.r*Math.cos(this.rotation) + this.centerX;
+    var q1 = this.r*Math.sin(this.rotation) + this.centerY;
+    var p2 = this.r*Math.cos(this.rotation + this.extent) + this.centerX;
+    var q2 = this.r*Math.sin(this.rotation + this.extent) + this.centerY;
     if (p1 === p2) {
         var pastLine = Math.abs(x - this.centerX) >= Math.abs(p1 - this.centerX);
     }

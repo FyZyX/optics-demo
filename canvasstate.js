@@ -35,7 +35,6 @@ function CanvasState(canvas) {
     this.dragoffx = 0; // See mousedown and mousemove events for explanation
     this.dragoffy = 0;
 
-
     var myState = this;
 
     // fixes a problem where double clicking causes text to get selected on the canvas
@@ -62,7 +61,7 @@ function CanvasState(canvas) {
                     myState.dragging = true;
                 }
                 myState.selection = mySel;
-                myState.last_angle = myState.selection.angle;
+                myState.last_angle = myState.selection.rotation;
                 myState.valid = false;
                 return;
             }
@@ -87,8 +86,8 @@ function CanvasState(canvas) {
             myState.valid = false; // Something's dragging so we must redraw
         } else if (myState.rotating) {
             var mouse = myState.getMouse(e);
-            var new_angle = Math.atan2((mouse.y - myState.selection.centerY),(mouse.x - myState.selection.centerX));
-            myState.selection.setAngle(myState.last_angle + new_angle - myState.mouseAngle);
+            var new_angle = Math.atan2(mouse.y - myState.selection.y, mouse.x - myState.selection.x);
+            myState.selection.setRotation(myState.last_angle + new_angle - myState.mouseAngle);
             myState.valid = false;
         } else {
             var mouse = myState.getMouse(e);
@@ -106,7 +105,6 @@ function CanvasState(canvas) {
         }
     }, true);
 
-
     canvas.addEventListener('mouseup', function(e) {
         myState.dragging = false;
         myState.rotating = false;
@@ -115,8 +113,8 @@ function CanvasState(canvas) {
     // double click for making new opticalElements
     canvas.addEventListener('dblclick', function(e) {
         var mouse = myState.getMouse(e);
-        // var glass_box = new GlassBox(mouse.x - 10, mouse.y - 10, 200, 200, 0);
-        // myState.addShape(glass_box);
+        var glass_box = new GlassBox(mouse.x - 10, mouse.y - 10, 200, 200, 0);
+        myState.addShape(glass_box);
     }, true);
 
     // **** Options! ****
@@ -191,8 +189,8 @@ CanvasState.prototype.draw = function() {
                 startLevel(curLevel);
             } else if (result.lose && playing) {
                 if (c != 0) {
-                    // alert("You Lose!");
-                    // startLevel(curLevel);
+                    alert("You Lose!");
+                    startLevel(curLevel);
                 }
             }
         }

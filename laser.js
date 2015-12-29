@@ -1,14 +1,17 @@
-var Laser = function(x, y, h, angle, numRays) {
+/** Defines the Laser class. A Laser is defined by an (X, Y) position, an ANGLE,
+  * the NUMBER OF RAYS in it, and the height H over which those rays are spread
+  * evenly between. */
+var Laser = function(x, y, h, rotation, numRays) {
     this.x = x;
     this.y = y;
     this.h = h;
-    this.angle = angle;
+    this.rotation = rotation;
     this.numRays = numRays;
 
     this.rays = [];
     var spacing = h/numRays;
     for (var i = 0; i < this.numRays; i += 1) {
-        this.rays.push(new Ray(x - i*spacing*Math.sin(angle), y + i*spacing*Math.cos(angle), angle));
+        this.rays.push(new Ray(x - i*spacing*Math.sin(rotation), y + i*spacing*Math.cos(rotation), rotation));
     }
 
 }
@@ -18,16 +21,16 @@ Laser.prototype.shootLaser = function(elements, boundaries) {
         this.rays[i].rayTrace(elements, boundaries);
     }
 
-    var count = 0;
+    var numRaysHittingWinWall = 0;
     for (var i = 0; i < this.rays.length; i += 1) {
         if (this.rays[i].hittingWinWall) {
-            count += 1;
+            numRaysHittingWinWall += 1;
         } else if (this.rays[i].hittingLoseWall) {
             return {"win": false, "lose": true};
         }
     }
 
-    if (count == this.numRays) {
+    if (numRaysHittingWinWall == this.numRays) {
         return {"win": true, "lose": false};
     } else {
         return {"win": false, "lose": false}
@@ -35,6 +38,6 @@ Laser.prototype.shootLaser = function(elements, boundaries) {
 }
 
 Laser.prototype.print = function() {
-    return "var l = new Laser(" + this.x + "," + this.y + "," + this.h + "," + this.angle + "," + this.numRays +");" +
+    return "var l = new Laser(" + this.x + "," + this.y + "," + this.h + "," + this.rotation + "," + this.numRays +");" +
             "canvasState.setLaser(l);";
 }

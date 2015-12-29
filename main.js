@@ -14,14 +14,9 @@ var numLevels = 3;
 window.addEventListener("keydown", function(e) {
     if (e.keyCode == 13) {
         generateLevelFile();
-    }
-    if (e.shiftKey) {
+    } else if (e.shiftKey) {
         keysDown += 1;
-    } else if (keysDown > 0) {
-        keysDown += 1;
-    }
-
-    if (e.keyCode > 47 && e.keyCode < 51) {
+    } else if (e.keyCode > 47 && e.keyCode < 51) {
         startLevel(e.keyCode - 48);
     }
 }, true);
@@ -66,7 +61,7 @@ var level1 = "var b = new Box(796,526,15,150,4.06609060451356,0,'#a3c2c2','#d1e0
 var level2 = "var b = new Box(185,469,15,250,5.492932526690764,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new WinWall(1076,530,15,250,4.709338659392787);canvasState.addShape(b);var b = new Wall(597,185,15,10,0);canvasState.addShape(b);var b = new Wall(596,132,15,10,0);canvasState.addShape(b);var b = new Wall(595,72,15,10,0);canvasState.addShape(b);var b = new Wall(597,205,15,10,0);canvasState.addShape(b);var b = new Wall(596,167,15,10,0);canvasState.addShape(b);var b = new Wall(596,150,15,10,0);canvasState.addShape(b);var b = new Wall(597,223,15,10,0);canvasState.addShape(b);var b = new Wall(596,114,15,10,0);canvasState.addShape(b);var b = new Wall(595,94,15,10,0);canvasState.addShape(b);var b = new Wall(902,424,15,350,0);canvasState.addShape(b);var b = new Wall(1071,590,15,350,1.5674842972683347);canvasState.addShape(b);var pcc = new PlanoConcaveLens(769,548,60,0.1,1.5,120);canvasState.addShape(pcc);var pcv = new PlanoConvexLens(1415,476,150,6.285375236212544,1.5,50);canvasState.addShape(pcv);var l = new Laser(0,120,70,0,10);canvasState.setLaser(l);";
 // var level3 ="var b = new Box(608,187,15,150,5.488266980067955,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new Box(100,509,15,150,5.487717770714354,0,'#a3c2c2','#d1e0e0');canvasState.addShape(b);var b = new Wall(948,522,15,300,4.716022391928867);canvasState.addShape(b);var b = new Wall(1100,398,15,300,0);canvasState.addShape(b);var b = new Wall(946,277,15,300,4.71238898038469);canvasState.addShape(b);var b = new Box(804,335,15,100,0,-1,'#ff0000','#ff0000');canvasState.addShape(b);var b = new Box(804,475,15,100,0,-1,'#ff0000','#ff0000');canvasState.addShape(b);var b = new WinWall(931,414,15,100,0);canvasState.addShape(b);var pcv = new PlanoConvexLens(107,349,100,1.1864593813835507,1.5,20);canvasState.addShape(pcv);var pcv = new PlanoConvexLens(733,491,200,4.83479520174107,1.5,50);canvasState.addShape(pcv);var pcc = new PlanoConcaveLens(348,372,150,1.5707963267948966,1.5,130);canvasState.addShape(pcc);var pcc = new PlanoConcaveLens(332,723,100,1.5707963267948966,1.5,160);canvasState.addShape(pcc);var l = new Laser(0,50,70,0,10);canvasState.setLaser(l);";
 var level3;
-var playing = true;
+var playing = false;
 
 var levels = {0: level0, 1: level1, 2: level2, 3: level3};
 
@@ -89,39 +84,14 @@ function default_load() {
     var wall = new Wall(400, 400, 15, 300, 0);
     canvasState.addShape(wall);
 
-    var wall = new Wall(500, 400, 15, 300, 0);
-    canvasState.addShape(wall);
-
-    var wall = new Wall(600, 400, 15, 300, 0);
-    canvasState.addShape(wall);
-
-    var wall = new LoseWall(900, 400, 15, 100, 0);
-    canvasState.addShape(wall);
-
-    var wall = new LoseWall(800, 400, 15, 100, 0);
-    canvasState.addShape(wall);
-
-    var wall = new WinWall(1000, 400, 15, 100, 0);
-    canvasState.addShape(wall);
-
-
-
-    var planoConvex1 = new PlanoConvexLens(100, 200, 100, 0, 1.5, 20);
+    var planoConvex1 = new PlanoConvexLens(100, 200, 0, 1.5, 100, 0);
     canvasState.addShape(planoConvex1);
 
-    var planoConvex1 = new PlanoConvexLens(200, 200, 200, 0, 1.5, 50);
-    canvasState.addShape(planoConvex1);
-
-    var planoConvex1 = new PlanoConcaveLens(200, 200, 150, Math.PI/2, 1.5, 130);
-    canvasState.addShape(planoConvex1);
-
-    var planoConvex1 = new PlanoConcaveLens(200, 200, 100, Math.PI/2, 1.5, 160);
-    canvasState.addShape(planoConvex1);
-
-
+    // var planoConcave1 = new PlanoConcaveLens(400, 200, 0, 1.5, 100, 10);
+    // canvasState.addShape(planoConcave1);
 
     // canvasState.addShape(pcv);
-    var l = new Laser(0,50,70,0,10);
+    var l = new Laser(0,50,80,0,15);
     canvasState.setLaser(l);
 
 }
@@ -129,15 +99,12 @@ function default_load() {
 function startPlaying() {
     c = document.getElementById("myCanvas");
     ctx = c.getContext("2d");
-
     ctx.canvas.width  = window.innerWidth - 10;
     ctx.canvas.height = window.innerHeight - 10;
-
     canvasState = new CanvasState(document.getElementById('myCanvas'));
 
-    // canvasState.setLaser(new Laser(0, 120, 70, 0, 10));
-    // default_load();
-    startLevel(0);
+    default_load();
+    // startLevel(1);
 }
 
 

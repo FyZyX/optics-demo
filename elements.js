@@ -7,49 +7,62 @@
         Box     --> Mirror, Medium
 */
 
+/** Defines the Element class. An Element (short for optical element) is defined
+  * by an (X, Y) position, a ROTATION, and an index of refraction N. */
+var Element = function(x, y, rotation, n) {
+    this.x = x;
+    this.y = y;
+    this.rotation = rotation;
+    this.n = n;
+}
+
+
+
+
+
+
+
 
 /** Defines the Box class. A box is just a rectangular optical element, so it
-  * needs a width and a height in addition to the parameters specified by the
+  * needs a width W and a height H in addition to the parameters specified by the
   * abstract Element class above. */
-var Box = function(x, y, w, h, angle, n, color1, color2) {
-    this.x = x || 0;
-    this.y = y || 0;
-    this.w = w || 1;
-    this.h = h || 1;
-    this.angle = angle;
-    this.n = n;
+var Box = function(x, y, rotation, n, w, h, color1, color2) {
+    Element.apply(this, arguments);
+    this.w = w;
+    this.h = h;
     this.color1 = color1;
     this.color2 = color2;
     this.generateLineSegments();
 }
 
+// TODO: fix this to match new constructor
 Box.prototype.print = function() {
     if (this.type == "wall") {
-        return "var b = new Wall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle +");" +
+        return "var b = new Wall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.rotation +");" +
                 "canvasState.addShape(b);";
     } else if (this.type == "winwall") {
-        return "var b = new WinWall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle +");" +
+        return "var b = new WinWall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.rotation +");" +
                 "canvasState.addShape(b);";
     } else if (this.type == "losewall") {
-        return "var b = new LoseWall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle +");" +
+        return "var b = new LoseWall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.rotation +");" +
                 "canvasState.addShape(b);";
     }
-    return "var b = new Box(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.angle + "," + this.n + ",'" + this.color1 + "','" + this.color2 +"');" +
+    return "var b = new Box(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.rotation + "," + this.n + ",'" + this.color1 + "','" + this.color2 +"');" +
             "canvasState.addShape(b);";
 }
 
 Box.prototype.generateLineSegments = function() {
-    this.x1 = this.x + this.h*Math.sin(this.angle)/2 - this.w*Math.cos(this.angle)/2;
-    this.y1 = this.y - this.h*Math.cos(this.angle)/2 - this.w*Math.sin(this.angle)/2;
+    this.x1 = this.x + this.h*Math.sin(this.rotation)/2 - this.w*Math.cos(this.rotation)/2;
+    this.y1 = this.y - this.h*Math.cos(this.rotation)/2 - this.w*Math.sin(this.rotation)/2;
 
-    this.x4 = this.x1 + this.w*Math.cos(this.angle);
-    this.y4 = this.y1 + this.w*Math.sin(this.angle);
+    this.x2 = this.x1 - this.h*Math.sin(this.rotation);
+    this.y2 = this.y1 + this.h*Math.cos(this.rotation);
 
-    this.x2 = this.x1 - this.h*Math.sin(this.angle);
-    this.y2 = this.y1 + this.h*Math.cos(this.angle);
+    this.x4 = this.x1 + this.w*Math.cos(this.rotation);
+    this.y4 = this.y1 + this.w*Math.sin(this.rotation);
 
-    this.x3 = this.x4 - this.h*Math.sin(this.angle);
-    this.y3 = this.y4 + this.h*Math.cos(this.angle);
+    this.x3 = this.x4 - this.h*Math.sin(this.rotation);
+    this.y3 = this.y4 + this.h*Math.cos(this.rotation);
 
     this.lineSegments = [];
     this.lineSegments.push(new LineSegment(this.x1, this.y1, this.x2, this.y2));
@@ -58,12 +71,12 @@ Box.prototype.generateLineSegments = function() {
     this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
 }
 
-Box.prototype.setAngle = function(angle) {
-    this.angle = mod(angle, 2*Math.PI);
+Box.prototype.setRotation = function(rotation) {
+    this.rotation = mod(rotation, 2*Math.PI);
 }
 
 Box.prototype.drawNormals = function(ctx) {
-// FOR DRAWING NORMALS
+    // FOR DRAWING NORMALS
     var oldStyle = ctx.strokeStyle;
     // ctx.lineWidth=10;
     ctx.strokeStyle="green";
@@ -102,8 +115,7 @@ Box.prototype.drawNormals = function(ctx) {
     normLine4.x2 = midpoint4[0] + normVec4[0];
     normLine4.y2 = midpoint4[1] + normVec4[1];
 
-
-    normalLines = [];
+    var normalLines = [];
     normalLines.push(normLine1);
     normalLines.push(normLine2);
     normalLines.push(normLine3);
@@ -128,13 +140,7 @@ Box.prototype.draw = function(ctx) {
     var grd = ctx.createLinearGradient(this.x,this.y,this.x,this.y+this.h);
     grd.addColorStop(0,this.color1);
     grd.addColorStop(1,this.color2);
-
     ctx.fillStyle = grd;
-
-    // var img = new Image();
-    // img.src = "images/water.gif";
-    // var pat=ctx.createPattern(img,"repeat");
-    // ctx.fillStyle=pat;
 
     ctx.beginPath();
     ctx.moveTo(this.x1, this.y1);
@@ -166,11 +172,11 @@ Box.prototype.highlight = function(ctx) {
 
 Box.prototype.intersection = function(ray) {
     var intersections = [];
-    var lineSegment;
+    var curLineSeg;
     var intersection;
     for (var i = 0; i < this.lineSegments.length; i +=1) {
-        lineSegment = this.lineSegments[i];
-        intersection = lineSegment.intersection(ray);
+        curLineSeg = this.lineSegments[i];
+        intersection = curLineSeg.intersection(ray);
         if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
             intersections.push(intersection);
         }
@@ -198,7 +204,8 @@ Box.prototype.intersection = function(ray) {
     return closest_point;
 }
 
-
+/** Returns true if the point (X, Y) lies within the rectangle defined by this
+  * box. */
 Box.prototype.contains = function(x, y) {
     var vs = [[this.x1, this.y1], [this.x2, this.y2], [this.x3, this.y3], [this.x4, this.y4]];
     var inside = false;
@@ -214,6 +221,10 @@ Box.prototype.contains = function(x, y) {
     return inside;
 }
 
+Box.prototype.getNormVec = function(curve) {
+    return normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
+}
+
 
 
 
@@ -222,8 +233,8 @@ Box.prototype.contains = function(x, y) {
 
 /** Defines the Mirror class. A Mirror is a simply a box that reflects all
   * incident rays (index of refraction 0). */
-var Mirror = function(x, y, w, h, angle){
-    Box.apply(this, [x, y, w, h, angle, 0, "#a3c2c2", "#d1e0e0"]);
+var Mirror = function(x, y, w, h, rotation){
+    Box.apply(this, [x, y, rotation, 0, w, h, "#a3c2c2", "#d1e0e0"]);
 }
 
 Mirror.prototype = Box.prototype;        // Set prototype to Person's
@@ -234,8 +245,8 @@ Mirror.prototype.constructor = Mirror;   // Set constructor back to Box
 
 /** Defines the GlassBox class. A GlassBox is a simply a box with an index
   * of refraction of 1.5. */
-var GlassBox = function(x, y, w, h, angle){
-    Box.apply(this, [x, y, w, h, angle, 1.33, "#33cccc", "#ccffcc"]);
+var GlassBox = function(x, y, w, h, rotation){
+    Box.apply(this, [x, y, rotation, 1.33, w, h, "#33cccc", "#ccffcc"]);
 }
 
 GlassBox.prototype = Box.prototype;   // Set constructor back to Box
@@ -243,8 +254,8 @@ GlassBox.prototype.constructor = GlassBox;   // Set constructor back to Box
 
 /** Defines the Wall class. A Wall is a simply a box with an index
   * of refraction of -1. */
-var Wall = function(x, y, w, h, angle){
-    Box.apply(this, [x, y, w, h, angle, -1, "#1f2e2e", "#1f2e2e"]);
+var Wall = function(x, y, w, h, rotation){
+    Box.apply(this, [x, y, rotation, -1, w, h, "#1f2e2e", "#1f2e2e"]);
     this.type = "wall";
     this.wall = true;
 }
@@ -256,8 +267,8 @@ Wall.prototype.constructor = Wall;   // Set constructor back to Box
 
 /** Defines the Wall class. A Wall is a simply a box with an index
   * of refraction of -1. */
-var WinWall = function(x, y, w, h, angle){
-    Box.apply(this, [x, y, w, h, angle, -1, "#00cc00", "#00cc00"]);
+var WinWall = function(x, y, w, h, rotation){
+    Box.apply(this, [x, y, rotation, -1, w, h, "#00cc00", "#00cc00"]);
     this.type = "winwall";
     this.wall = true;
 }
@@ -268,8 +279,8 @@ WinWall.prototype.constructor = WinWall;   // Set constructor back to Box
 
 /** Defines the Wall class. A Wall is a simply a box with an index
   * of refraction of -1. */
-var LoseWall = function(x, y, w, h, angle){
-    Box.apply(this, [x, y, w, h, angle, -1, "#ff0000", "#ff0000"]);
+var LoseWall = function(x, y, w, h, rotation){
+    Box.apply(this, [x, y, rotation, -1, w, h, "#ff0000", "#ff0000"]);
     this.type = "losewall";
     this.wall = true;
 }
@@ -285,24 +296,17 @@ LoseWall.prototype.constructor = LoseWall;   // Set constructor back to Box
 
 
 
-/** Defines the Mirror class. A Mirror is a simply a box that reflects all
-  * incident rays. */
-var PlanoConvexLens = function(x, y, r, angle, n, d){
-    this.x = x;
-    this.y = y;
+/** Defines the PlanoConvexLens class. */
+var PlanoConvexLens = function(x, y, rotation, n, r, w) {
+    Element.apply(this, arguments);
     this.r = r;
+    this.w = w;
     this.color1 = "#33cccc";
     this.color2 = "#ccffcc";
-    this.original_angle = angle;
-    this.n = n;
-    this.extent = Math.PI/2;
-    this.d = d;
-    this.w = 0.5*d;
+    this.extent = Math.PI;
+    this.rotation = rotation;
 
-    this.angle = this.original_angle + (Math.PI/2 - this.extent/2);
-
-    this.curves = [];
-    this.curves.push(new Arc(x - d*Math.sin(this.angle), y + d*Math.cos(this.angle), r, this.angle, this.extent));
+    this.arc = new Arc(x - this.w*Math.cos(rotation)/2, y + this.w*Math.sin(rotation)/2, r, rotation, this.extent + rotation);
 
     this.generateLineSegments();
     this.recalculateCurves();
@@ -311,48 +315,70 @@ var PlanoConvexLens = function(x, y, r, angle, n, d){
 }
 
 PlanoConvexLens.prototype.print = function() {
-    return "var pcv = new PlanoConvexLens(" + this.x + "," + this.y + "," + this.r + "," + this.angle + "," + this.n + "," + this.d + ");" +
+    return "var pcv = new PlanoConvexLens(" + this.x + "," + this.y + "," + this.r + "," + this.rotation + "," + this.n + "," + this.d + ");" +
             "canvasState.addShape(pcv);";
 }
 
 PlanoConvexLens.prototype.generateLineSegments = function() {
-    var x1 = this.curves[0].p1;
-    var y1 = this.curves[0].q1;
+    var x1 = this.arc.p1;
+    var y1 = this.arc.q1;
 
-    var x2 = x1 + this.w*Math.sin(this.angle - (Math.PI/2 - this.extent/2));
-    var y2 = y1 - this.w*Math.cos(this.angle - (Math.PI/2 - this.extent/2));
+    var x2 = x1 + this.w*Math.sin(this.rotation - (Math.PI/2 - this.extent/2));
+    var y2 = y1 - this.w*Math.cos(this.rotation - (Math.PI/2 - this.extent/2));
 
-    var x4 = this.curves[0].p2;
-    var y4 = this.curves[0].q2;
+    var x4 = this.arc.p2;
+    var y4 = this.arc.q2;
 
-    var x3 = x4 + this.w*Math.sin(this.angle - (Math.PI/2 - this.extent/2));
-    var y3 = y4 - this.w*Math.cos(this.angle - (Math.PI/2 - this.extent/2));
-
+    var x3 = x4 + this.w*Math.sin(this.rotation - (Math.PI/2 - this.extent/2));
+    var y3 = y4 - this.w*Math.cos(this.rotation - (Math.PI/2 - this.extent/2));
 
     this.lineSegments = [];
     this.lineSegments.push(new LineSegment(x1, y1, x2, y2));
     this.lineSegments.push(new LineSegment(x2, y2, x3, y3));
     this.lineSegments.push(new LineSegment(x3, y3, x4, y4));
-
 }
 
 PlanoConvexLens.prototype.recalculateCurves = function() {
-    for (var i = 0; i < this.curves.length; i += 1) {
-        this.curves[i].x = this.x;
-        this.curves[i].y = this.y;
-    }
+    this.arc.x = this.x - this.w*Math.sin(this.rotation)/2;
+    this.arc.y = this.y + this.w*Math.cos(this.rotation)/2;
 }
 
 PlanoConvexLens.prototype.generateCenter = function() {
-    this.curves[0].generateCenterOfCircle();
-    this.centerX = this.curves[0].centerX;
-    this.centerY = this.curves[0].centerY;
+    this.arc.generateCenterOfCircle();
+    this.centerX = this.arc.centerX;
+    this.centerY = this.arc.centerY;
 }
+
+
+PlanoConvexLens.prototype.drawCenter = function(ctx) {
+    ctx.beginPath();
+    ctx.strokeStyle = "black";
+    ctx.arc(this.x, this.y, 0.5, 0, 2*Math.PI);
+    ctx.stroke();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.strokeStyle = "blue";
+    ctx.arc(this.arc.x, this.arc.y, 0.5, 0, 2*Math.PI);
+    ctx.stroke();
+    ctx.fill();
+
+    // ctx.beginPath();
+    // ctx.strokeStyle = "red";
+    // ctx.arc(this.arc.centerX, this.arc.centerY, 0.5, 0, 2*Math.PI);
+    // ctx.stroke();
+    // ctx.fill();
+}
+
 
 PlanoConvexLens.prototype.draw = function(ctx) {
     this.recalculateCurves();
     this.generateCenter();
     this.generateLineSegments();
+
+    // console.log("(x, y) = (" + this.arc.x + ", " + this.arc.y + ")");
+    // console.log("(x0, y0) = (" + this.arc.centerX + ", " + this.arc.centerY + ")");
+    // console.log("\n");
 
     var grd = ctx.createLinearGradient(this.x,this.y,this.x + this.r, this.y + this.r);
     grd.addColorStop(0,this.color1);
@@ -360,29 +386,27 @@ PlanoConvexLens.prototype.draw = function(ctx) {
 
     ctx.fillStyle = grd;
 
-    var arc = this.curves[0];
-    for (var i = 0; i < this.curves.length; i += 1) {
-        ctx.beginPath();
-        ctx.arc(this.centerX, this.centerY, arc.r, arc.angle, arc.angle + arc.extent);
-        ctx.stroke();
-    }
+    var arc = this.arc;
+    ctx.beginPath();
+    ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation, arc.rotation + arc.extent);
+    ctx.stroke();
 
-    var curLineSeg = this.lineSegments[2];
-    for (var i = this.lineSegments.length - 1; i >= 0; i -= 1) {
-        curLineSeg = this.lineSegments[i];
-        ctx.lineTo(curLineSeg.x1, curLineSeg.y1);
-        ctx.stroke();
-    }
+    // var curLineSeg = this.lineSegments[2];
+    // for (var i = this.lineSegments.length - 1; i >= 0; i -= 1) {
+    //     curLineSeg = this.lineSegments[i];
+    //     ctx.lineTo(curLineSeg.x1, curLineSeg.y1);
+    //     ctx.stroke();
+    // }
 
     ctx.fill();
+
+    this.drawCenter(ctx);
     // ctx.closePath();
 }
 
-PlanoConvexLens.prototype.setAngle = function(angle) {
-    this.angle = mod(angle, 2*Math.PI);
-    for (var i = 0; i < this.curves.length; i += 1) {
-        this.curves[i].angle = this.angle;
-    }
+PlanoConvexLens.prototype.setRotation = function(rotation) {
+    this.rotation = mod(rotation, 2*Math.PI);
+    this.arc.rotation = this.rotation;
 }
 
 PlanoConvexLens.prototype.contains = function(x, y) {
@@ -394,7 +418,7 @@ PlanoConvexLens.prototype.contains = function(x, y) {
     var y3 = this.lineSegments[2].y1;
     var x4 = this.lineSegments[2].x2;
     var y4 = this.lineSegments[2].y2;
-    return this.curves[0].contains(x, y) || boxContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
+    return this.arc.contains(x, y) || boxContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
 }
 
 PlanoConvexLens.prototype.highlight = function(ctx) {
@@ -409,9 +433,7 @@ PlanoConvexLens.prototype.highlight = function(ctx) {
         ctx.stroke();
     }
 
-    for (var i = 0; i < this.curves.length; i += 1) {
-        this.curves[i].draw(ctx);
-    }
+    this.arc.draw(ctx);
 }
 
 PlanoConvexLens.prototype.intersectionBox = function(ray) {
@@ -507,308 +529,6 @@ PlanoConvexLens.prototype.intersectionArc = function(ray) {
         var q1, q2;
         // vertical line
         if (x2-x1==0) {
-            q1 = Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
-            q2 = -Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
-        } else {
-            var m = (y2 - y1)/(x2 - x1);
-            q1 = m*(p1-x1) + y1;
-            q2 = m*(p2-x1) + y1;
-        }
-
-        var dist1 = distance(p1, q1, x1, y1);
-        var dist2 = distance(p2, q2, x1, y1);
-
-        var intersection1 = {"x": p1, "y": q1, "curve": this.curves[0], "element": this};
-        var intersection2 = {"x": p2, "y": q2, "curve": this.curves[0], "element": this};
-        var closer_intersection;
-        var further_intersection;
-        if (dist1 < dist2 || (approxeq(p2, ray.x1, 0.1) && approxeq(q2, ray.y1, 0.1))) {
-            closer_intersection = intersection1;
-            further_intersection = intersection2;
-        } else {
-            closer_intersection = intersection2;
-            further_intersection = intersection1;
-        }
-
-        var a = angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y);
-
-        if (isInRange(this.angle, this.angle + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
-            return closer_intersection;
-        } else {
-            a = angleFromSegment(cx, cy, further_intersection.x, further_intersection.y);
-            if (isInRange(this.angle, this.angle + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, further_intersection.x, further_intersection.y)) {
-                return further_intersection;
-            }
-        }
-
-        return false;
-
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/** Defines the Mirror class. A Mirror is a simply a box that reflects all
-  * incident rays. */
-var ConvexLens = function(x, y, r, angle, n, d) {
-    this.x = x;
-    this.y = y;
-    this.r = r;
-    this.color1 = "#33cccc";
-    this.color2 = "#ccffcc";
-    this.angle = angle;
-    this.n = n;
-    this.extent = Math.PI/2;
-    this.d = 5*d;
-    this.w = 5*d;
-
-    this.setArcAngles();
-
-    this.curves = [];
-    this.curves.push(new Arc(x - (d)*Math.sin(this.angle), y + (d+r)*Math.cos(this.angle), r, this.angle1, this.extent));
-    this.curves.push(new Arc(x + (d)*Math.sin(this.angle), y - (d+r)*Math.cos(this.angle), r, this.angle2 + this.extent, this.extent));
-
-    this.generateLineSegments();
-    this.recalculateCurves();
-    this.generateCenter();
-}
-
-ConvexLens.prototype.setArcAngles = function() {
-    this.angle1 = this.angle + (Math.PI/2 - this.extent/2);
-    this.angle2 = this.angle - this.extent - (Math.PI/2 + this.extent/2);
-}
-
-ConvexLens.prototype.generateLineSegments = function() {
-    var x1 = this.curves[0].p1;
-    var y1 = this.curves[0].q1;
-
-    // not sure
-    var x2 = this.curves[1].p1;
-    var y2 = this.curves[1].q1;
-
-    var x3 = this.curves[1].p2;
-    var y3 = this.curves[1].q2;
-
-    var x4 = this.curves[0].p2;
-    var y4 = this.curves[0].q2;
-
-    this.lineSegments = [];
-    this.lineSegments.push(new LineSegment(x1, y1, x2, y2));
-    this.lineSegments.push(new LineSegment(x3, y3, x4, y4));
-
-}
-
-ConvexLens.prototype.recalculateCurves = function() {
-    this.curves[0].x = this.x - (this.d)*Math.sin(this.angle);
-    this.curves[0].y = this.y + (this.d)*Math.cos(this.angle);
-    this.curves[1].x = this.x + (this.d)*Math.sin(this.angle);
-    this.curves[1].y = this.y - (this.d)*Math.cos(this.angle);
-
-    this.curves[0].angle = this.angle1;
-    this.curves[1].angle = this.angle2 + this.extent;
-}
-
-ConvexLens.prototype.generateCenter = function() {
-    this.curves[0].generateCenterOfCircle();
-    this.curves[1].generateCenterOfCircle();
-    this.centerX = this.x;
-    this.centerY = this.y;
-}
-
-ConvexLens.prototype.draw = function(ctx) {
-    this.recalculateCurves();
-    this.generateCenter();
-    this.generateLineSegments();
-
-    var grd = ctx.createLinearGradient(this.x,this.y,this.x + this.r, this.y + this.r);
-    grd.addColorStop(0,this.color1);
-    grd.addColorStop(1,this.color2);
-
-    ctx.fillStyle = grd;
-
-    var arc = this.curves[0];
-    ctx.beginPath();
-    ctx.arc(arc.centerX, arc.centerY, arc.r, arc.angle, arc.angle + arc.extent);
-    ctx.stroke();
-
-    var curLineSeg = this.lineSegments[1];
-    ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
-    ctx.stroke();
-
-    arc = this.curves[1];
-    ctx.arc(arc.centerX, arc.centerY, arc.r, arc.angle, arc.angle + arc.extent);
-    ctx.stroke();
-
-    curLineSeg = this.lineSegments[0];
-    ctx.lineTo(curLineSeg.x1, curLineSeg.y1);
-    ctx.stroke();
-
-    ctx.fill();
-}
-
-ConvexLens.prototype.setAngle = function(angle) {
-    this.angle = mod(angle, 2*Math.PI);
-    this.setArcAngles();
-}
-
-ConvexLens.prototype.contains = function(x, y) {
-    var x1 = this.lineSegments[0].x1;
-    var y1 = this.lineSegments[0].y1;
-    var x2 = this.lineSegments[1].x1;
-    var y2 = this.lineSegments[1].y1;
-    var x3 = this.lineSegments[0].x2;
-    var y3 = this.lineSegments[0].y2;
-    var x4 = this.lineSegments[1].x2;
-    var y4 = this.lineSegments[1].y2;
-    return this.curves[0].contains(x, y) || this.curves[1].contains(x, y) || boxContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
-}
-
-ConvexLens.prototype.highlight = function(ctx) {
-    ctx.strokeStyle = 'purple';
-    ctx.lineWidth = 1;
-
-    var arc = this.curves[0];
-    ctx.beginPath();
-    ctx.arc(arc.centerX, arc.centerY, arc.r, arc.angle, arc.angle + arc.extent);
-    ctx.stroke();
-
-    var curLineSeg = this.lineSegments[1];
-    ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
-    ctx.stroke();
-
-    arc = this.curves[1];
-    ctx.arc(arc.centerX, arc.centerY, arc.r, arc.angle, arc.angle + arc.extent);
-    ctx.stroke();
-
-    curLineSeg = this.lineSegments[0];
-    ctx.lineTo(curLineSeg.x1, curLineSeg.y1);
-    ctx.stroke();
-
-    ctx.fill();
-}
-
-ConvexLens.prototype.intersectionBox = function(ray) {
-    var intersections = [];
-    var lineSegment;
-    var intersection;
-    for (var i = 0; i < this.lineSegments.length; i +=1) {
-        lineSegment = this.lineSegments[i];
-        intersection = lineSegment.intersection(ray);
-        if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
-            intersections.push(intersection);
-        }
-    }
-
-    if (intersections.length == 0) {
-        return false;
-    }
-
-    // choose the intersection point that is closest to the ray's starting point
-    var cur_dist;
-    var cur_point;
-    var closest_point = intersections[0];
-    var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
-    for (var i = 0; i < intersections.length; i += 1) {
-        cur_point = intersections[i];
-        cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
-        if (cur_dist < min_dist) {
-            closest_point = cur_point;
-            min_dist = cur_dist;
-        }
-    }
-
-    closest_point.element = this;
-    return closest_point;
-}
-
-ConvexLens.prototype.intersection = function(ray) {
-    var boxInt = this.intersectionBox(ray);
-    var arcInt1 = this.intersectionArc(ray, this.curves[0]);
-    var arcInt2 = this.intersectionArc(ray, this.curves[1]);
-    // var arcInt1 = false;
-    // var arcInt2 = false;
-    console.log("boxInt: " + boxInt);
-
-    var boxDist = distance(boxInt.x, boxInt.y, ray.x1, ray.y1);
-    var arcDist1 = distance(arcInt1.x, arcInt1.y, ray.x1, ray.y1);
-    var arcDist2 = distance(arcInt2.x, arcInt2.y, ray.x1, ray.y1);
-
-    if (boxDist < 0.001) {
-        boxInt = false;
-    }
-    if (arcDist1 < 0.001) {
-        arcInt1 = false;
-    }
-    if (arcDist2 < 0.001) {
-        arcInt2 = false;
-    }
-
-    if (false) {
-    // if ((boxDist < arcDist1 && boxDist < arcDist2) || (arcInt1 === false && arcInt2 === false)) {
-    //     console.log("BOX");
-    //     return boxInt;
-    } else if (arcDist1 < arcDist2 || arcInt2 === false) {
-        return arcInt1;
-    } else if (arcInt2) {
-        return arcInt2;
-    }
-
-    return false;
-
-}
-
-ConvexLens.prototype.intersectionArc = function(ray, arc) {
-    var x1 = ray.x1;
-    var x2 = ray.x2;
-    var y1 = ray.y1;
-    var y2 = ray.y2;
-    var cx = arc.centerX;
-    var cy = arc.centerY;
-    var cr = arc.r;
-
-    var dx = x2 - x1;
-    var dy = y2 - y1;
-    var a = dx * dx + dy * dy;
-    var b = 2 * (dx * (x1 - cx) + dy * (y1 - cy));
-    var c = (x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy) - cr * cr;
-
-    var bb4ac = b * b - 4 * a * c;
-    var p1 = (-b + Math.sqrt(bb4ac)) / (2*a);
-    var p2 = (-b - Math.sqrt(bb4ac)) / (2*a);
-    p1 = x1 + p1*dx;
-    p2 = x1 + p2*dx;
-
-    if (!p1 && p1 != 0) {
-        return false;    // No collision
-    } else {
-        var q1, q2;
-        // vertical line
-        if (x2-x1==0) {
             q1 = Math.sqrt(cr*cr-Math.pow(x1-cx, 2)) + cy;
             q2 = -Math.sqrt(cr*cr-Math.pow(x1-cx, 2)) + cy;
         } else {
@@ -820,8 +540,8 @@ ConvexLens.prototype.intersectionArc = function(ray, arc) {
         var dist1 = distance(p1, q1, x1, y1);
         var dist2 = distance(p2, q2, x1, y1);
 
-        var intersection1 = {"x": p1, "y": q1, "curve": arc, "element": this};
-        var intersection2 = {"x": p2, "y": q2, "curve": arc, "element": this};
+        var intersection1 = {"x": p1, "y": q1, "curve": this.arc, "element": this};
+        var intersection2 = {"x": p2, "y": q2, "curve": this.arc, "element": this};
         var closer_intersection;
         var further_intersection;
         if (dist1 < dist2 || (approxeq(p2, ray.x1, 0.1) && approxeq(q2, ray.y1, 0.1))) {
@@ -834,11 +554,11 @@ ConvexLens.prototype.intersectionArc = function(ray, arc) {
 
         var a = angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y);
 
-        if (isInRange(arc.angle, arc.angle + arc.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
+        if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
             return closer_intersection;
         } else {
             a = angleFromSegment(cx, cy, further_intersection.x, further_intersection.y);
-            if (isInRange(arc.angle, arc.angle + arc.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, further_intersection.x, further_intersection.y)) {
+            if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, further_intersection.x, further_intersection.y)) {
                 return further_intersection;
             }
         }
@@ -848,17 +568,13 @@ ConvexLens.prototype.intersectionArc = function(ray, arc) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
+PlanoConvexLens.prototype.getNormVec = function(curve, x, y) {
+    if (curve.type == "line") {
+        return normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
+    } else {
+        return normalVectorCircle(curve.centerX, curve.centerY, x, y);
+    }
+}
 
 
 
@@ -874,23 +590,22 @@ ConvexLens.prototype.intersectionArc = function(ray, arc) {
 
 /** Defines the Mirror class. A Mirror is a simply a box that reflects all
   * incident rays. */
-var PlanoConcaveLens = function(x, y, r, angle, n, d){
+var PlanoConcaveLens = function(x, y, rotation, n, r, d){
     this.x = x;
     this.y = y;
     this.r = r;
     this.color1 = "#33cccc";
     this.color2 = "#ccffcc";
-    this.original_angle = angle;
+    this.original_rotation = rotation;
     this.n = n;
-    this.extent = Math.PI/2;
+    this.extent = Math.PI;
     this.d = d;
     this.w = 0.5*d;
     this.type = "concave";
 
-    this.angle = this.original_angle + (Math.PI/2 - this.extent/2);
+    this.rotation = this.original_rotation + (Math.PI/2 - this.extent/2);
 
-    this.curves = [];
-    this.curves.push(new Arc(x - d*Math.sin(this.angle), y + d*Math.cos(this.angle), r, this.angle + Math.PI, this.extent));
+    this.arc = new Arc(x - d*Math.sin(this.rotation), y + d*Math.cos(this.rotation), r, this.rotation + Math.PI, this.extent);
 
     this.generateLineSegments();
     this.recalculateCurves();
@@ -899,22 +614,22 @@ var PlanoConcaveLens = function(x, y, r, angle, n, d){
 }
 
 PlanoConcaveLens.prototype.print = function() {
-    return "var pcc = new PlanoConcaveLens(" + this.x + "," + this.y + "," + this.r + "," + this.original_angle + "," + this.n + "," + this.d + ");" +
+    return "var pcc = new PlanoConcaveLens(" + this.x + "," + this.y + "," + this.r + "," + this.original_rotation + "," + this.n + "," + this.d + ");" +
             "canvasState.addShape(pcc);";
 }
 
 PlanoConcaveLens.prototype.generateLineSegments = function() {
-    var x1 = this.curves[0].p1;
-    var y1 = this.curves[0].q1;
+    var x1 = this.arc.p1;
+    var y1 = this.arc.q1;
 
-    var x2 = x1 + this.w*Math.sin(this.angle - (Math.PI/2 - this.extent/2));
-    var y2 = y1 - this.w*Math.cos(this.angle - (Math.PI/2 - this.extent/2));
+    var x2 = x1 + this.w*Math.sin(this.rotation - (Math.PI/2 - this.extent/2));
+    var y2 = y1 - this.w*Math.cos(this.rotation - (Math.PI/2 - this.extent/2));
 
-    var x4 = this.curves[0].p2;
-    var y4 = this.curves[0].q2;
+    var x4 = this.arc.p2;
+    var y4 = this.arc.q2;
 
-    var x3 = x4 + this.w*Math.sin(this.angle - (Math.PI/2 - this.extent/2));
-    var y3 = y4 - this.w*Math.cos(this.angle - (Math.PI/2 - this.extent/2));
+    var x3 = x4 + this.w*Math.sin(this.rotation - (Math.PI/2 - this.extent/2));
+    var y3 = y4 - this.w*Math.cos(this.rotation - (Math.PI/2 - this.extent/2));
 
 
     this.lineSegments = [];
@@ -925,16 +640,14 @@ PlanoConcaveLens.prototype.generateLineSegments = function() {
 }
 
 PlanoConcaveLens.prototype.recalculateCurves = function() {
-    for (var i = 0; i < this.curves.length; i += 1) {
-        this.curves[i].x = this.x;
-        this.curves[i].y = this.y;
-    }
+    this.arc.x = this.x;
+    this.arc.y = this.y;
 }
 
 PlanoConcaveLens.prototype.generateCenter = function() {
-    this.curves[0].generateCenterOfCircle();
-    this.centerX = this.curves[0].centerX;
-    this.centerY = this.curves[0].centerY;
+    this.arc.generateCenterOfCircle();
+    this.centerX = this.arc.centerX;
+    this.centerY = this.arc.centerY;
 }
 
 PlanoConcaveLens.prototype.draw = function(ctx) {
@@ -948,12 +661,10 @@ PlanoConcaveLens.prototype.draw = function(ctx) {
 
     ctx.fillStyle = grd;
 
-    var arc = this.curves[0];
-    for (var i = 0; i < this.curves.length; i += 1) {
-        ctx.beginPath();
-        ctx.arc(this.centerX, this.centerY, arc.r, arc.angle, arc.angle + arc.extent);
-        ctx.stroke();
-    }
+    var arc = this.arc;
+    ctx.beginPath();
+    ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation, arc.rotation + arc.extent);
+    ctx.stroke();
 
     var curLineSeg = this.lineSegments[2];
     for (var i = this.lineSegments.length - 1; i >= 0; i -= 1) {
@@ -965,11 +676,9 @@ PlanoConcaveLens.prototype.draw = function(ctx) {
     ctx.fill();
 }
 
-PlanoConcaveLens.prototype.setAngle = function(angle) {
-    this.angle = mod(angle, 2*Math.PI);
-    for (var i = 0; i < this.curves.length; i += 1) {
-        this.curves[i].angle = this.angle + Math.PI;
-    }
+PlanoConcaveLens.prototype.setRotation = function(rotation) {
+    this.rotation = mod(rotation, 2*Math.PI);
+    this.arc.rotation = this.rotation + Math.PI;
 }
 
 PlanoConcaveLens.prototype.contains = function(x, y) {
@@ -981,7 +690,7 @@ PlanoConcaveLens.prototype.contains = function(x, y) {
     var y3 = this.lineSegments[2].y1;
     var x4 = this.lineSegments[2].x2;
     var y4 = this.lineSegments[2].y2;
-    return !this.curves[0].contains(x, y) && boxContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
+    return !this.arc.contains(x, y) && boxContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
 }
 
 PlanoConcaveLens.prototype.highlight = function(ctx) {
@@ -996,9 +705,7 @@ PlanoConcaveLens.prototype.highlight = function(ctx) {
         ctx.stroke();
     }
 
-    for (var i = 0; i < this.curves.length; i += 1) {
-        this.curves[i].draw(ctx);
-    }
+    this.arc.draw(ctx);
 }
 
 PlanoConcaveLens.prototype.intersectionBox = function(ray) {
@@ -1092,8 +799,8 @@ PlanoConcaveLens.prototype.intersectionArc = function(ray) {
         var q1, q2;
         // vertical line
         if (x2-x1==0) {
-            q1 = Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
-            q2 = -Math.sqrt(r*r-Math.pow(x1-cx, 2)) + cy;
+            q1 = Math.sqrt(cr*cr-Math.pow(x1-cx, 2)) + cy;
+            q2 = -Math.sqrt(cr*cr-Math.pow(x1-cx, 2)) + cy;
         } else {
             var m = (y2 - y1)/(x2 - x1);
             q1 = m*(p1-x1) + y1;
@@ -1103,8 +810,8 @@ PlanoConcaveLens.prototype.intersectionArc = function(ray) {
         var dist1 = distance(p1, q1, x1, y1);
         var dist2 = distance(p2, q2, x1, y1);
 
-        var intersection1 = {"x": p1, "y": q1, "curve": this.curves[0], "element": this};
-        var intersection2 = {"x": p2, "y": q2, "curve": this.curves[0], "element": this};
+        var intersection1 = {"x": p1, "y": q1, "curve": this.arc, "element": this};
+        var intersection2 = {"x": p2, "y": q2, "curve": this.arc, "element": this};
         var closer_intersection;
         var further_intersection;
         if (dist1 < dist2 || (approxeq(p2, ray.x1, 0.1) && approxeq(q2, ray.y1, 0.1))) {
@@ -1118,16 +825,26 @@ PlanoConcaveLens.prototype.intersectionArc = function(ray) {
         }
 
         var a = mod(angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y) + Math.PI, 2*Math.PI);
-        if (isInRange(this.angle, this.angle + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
+        if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
             return closer_intersection;
         } else {
             a = mod(angleFromSegment(cx, cy, further_intersection.x, further_intersection.y) + Math.PI, 2*Math.PI);
-            if (isInRange(this.angle, this.angle + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, further_intersection.x, further_intersection.y)) {
+            if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, further_intersection.x, further_intersection.y)) {
                 return further_intersection;
             }
         }
 
         return false;
 
+    }
+}
+
+PlanoConcaveLens.prototype.getNormVec = function(curve, x, y) {
+    var normVec1;
+    if (curve.type == "line") {
+        return normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
+    } else {
+        normVec1 = normalVectorCircle(curve.centerX, curve.centerY, x, y);
+        return [-normVec1[0], -normVec1[1]];
     }
 }
