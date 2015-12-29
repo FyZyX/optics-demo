@@ -1,0 +1,23 @@
+html {
+    background-color: #1f1f14;
+}
+
+body {
+    background-color: #1f1f14;
+}
+
+canvas {
+    padding: 0;
+    margin: auto;
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color:white;
+}
+
+#myVideo {
+    position: absolute;
+}

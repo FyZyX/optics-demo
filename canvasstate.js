@@ -149,6 +149,10 @@ CanvasState.prototype.draw = function() {
         elementToChange.style.cursor = "default";
     }
 
+    // for (var i = 0; i < 4; i += 1) {
+    //     this.boundaries[i].
+    // }
+
     // if our state is invalid, redraw and validate!
     if (!this.valid) {
         c = 1;

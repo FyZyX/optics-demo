@@ -96,11 +96,31 @@ function default_load() {
 
 }
 
+
+
+var aspect_width = 1285;
+var aspect_height = 647;
+var aspect_ratio = aspect_width/aspect_height;
+aspect_ratio = 2.3;
+
+function get_width_height(width, height) {
+}
+
 function startPlaying() {
     c = document.getElementById("myCanvas");
     ctx = c.getContext("2d");
-    ctx.canvas.width  = window.innerWidth - 10;
-    ctx.canvas.height = window.innerHeight - 10;
+
+    var width = window.innerWidth - 10;
+    var height = window.innerHeight - 10;
+    if (width/height > aspect_ratio) {
+        width = height*aspect_ratio;
+    } else {
+        height = width/aspect_ratio;
+    }
+
+    ctx.canvas.width = width;
+    ctx.canvas.height = height;
+
     canvasState = new CanvasState(document.getElementById('myCanvas'));
 
     default_load();
