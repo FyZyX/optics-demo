@@ -17,7 +17,8 @@ var Laser = function(x, y, h, rotation, numRays) {
 }
 
 Laser.prototype.shootLaser = function(elements, boundaries) {
-    for (var i = 0; i < this.rays.length; i += 1) {
+    var numRays = this.rays.length;
+    for (var i = 0; i < numRays; i += 1) {
         this.rays[i].rayTrace(elements, boundaries);
     }
 
@@ -35,9 +36,4 @@ Laser.prototype.shootLaser = function(elements, boundaries) {
     } else {
         return {"win": false, "lose": false}
     }
-}
-
-Laser.prototype.print = function() {
-    return "var l = new Laser(" + this.x + "," + this.y + "," + this.h + "," + this.rotation + "," + this.numRays +");" +
-            "canvasState.setLaser(l);";
 }

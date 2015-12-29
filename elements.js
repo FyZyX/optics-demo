@@ -35,22 +35,6 @@ var Box = function(x, y, rotation, n, w, h, color1, color2) {
     this.generateLineSegments();
 }
 
-// TODO: fix this to match new constructor
-Box.prototype.print = function() {
-    if (this.type == "wall") {
-        return "var b = new Wall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.rotation +");" +
-                "canvasState.addShape(b);";
-    } else if (this.type == "winwall") {
-        return "var b = new WinWall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.rotation +");" +
-                "canvasState.addShape(b);";
-    } else if (this.type == "losewall") {
-        return "var b = new LoseWall(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.rotation +");" +
-                "canvasState.addShape(b);";
-    }
-    return "var b = new Box(" + this.x + "," + this.y + "," + this.w + "," + this.h + "," + this.rotation + "," + this.n + ",'" + this.color1 + "','" + this.color2 +"');" +
-            "canvasState.addShape(b);";
-}
-
 Box.prototype.generateLineSegments = function() {
     this.x1 = this.x + this.h*Math.sin(this.rotation)/2 - this.w*Math.cos(this.rotation)/2;
     this.y1 = this.y - this.h*Math.cos(this.rotation)/2 - this.w*Math.sin(this.rotation)/2;
@@ -150,7 +134,7 @@ Box.prototype.draw = function(ctx) {
     ctx.lineTo(this.x1, this.y1);
     ctx.fill();
 
-    //this.drawNormals(ctx);
+    // this.drawNormals(ctx);
 }
 
 Box.prototype.highlight = function(ctx) {
@@ -161,20 +145,15 @@ Box.prototype.highlight = function(ctx) {
     ctx.beginPath();
     ctx.moveTo(this.x1, this.y1);
     ctx.lineTo(this.x2, this.y2);
-    ctx.stroke();
     ctx.lineTo(this.x3, this.y3);
-    ctx.stroke();
     ctx.lineTo(this.x4, this.y4);
-    ctx.stroke();
     ctx.lineTo(this.x1, this.y1);
     ctx.stroke();
 }
 
 Box.prototype.intersection = function(ray) {
-    var intersections = [];
-    var curLineSeg;
-    var intersection;
-    for (var i = 0; i < this.lineSegments.length; i +=1) {
+    var curLineSeg, intersection, intersections = [];
+    for (var i = 0; i < 4; i +=1) {
         curLineSeg = this.lineSegments[i];
         intersection = curLineSeg.intersection(ray);
         if (intersection && !(approxeq(intersection.x, ray.x1, 0.1) && approxeq(intersection.y, ray.y1, 0.1))) {
@@ -182,26 +161,25 @@ Box.prototype.intersection = function(ray) {
         }
     }
 
-    if (intersections.length == 0) {
+    if (intersections.length) {
+        // choose the intersection point that is closest to the ray's starting point
+        var cur_dist, cur_point;
+        var closest_point = intersections[0];
+        var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
+        for (var i = 0; i < intersections.length; i += 1) {
+            cur_point = intersections[i];
+            cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
+            if (cur_dist < min_dist) {
+                closest_point = cur_point;
+                min_dist = cur_dist;
+            }
+        }
+
+        closest_point.element = this;
+        return closest_point;
+    } else {
         return false;
     }
-
-    // choose the intersection point that is closest to the ray's starting point
-    var cur_dist;
-    var cur_point;
-    var closest_point = intersections[0];
-    var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
-    for (var i = 0; i < intersections.length; i += 1) {
-        cur_point = intersections[i];
-        cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
-        if (cur_dist < min_dist) {
-            closest_point = cur_point;
-            min_dist = cur_dist;
-        }
-    }
-
-    closest_point.element = this;
-    return closest_point;
 }
 
 /** Returns true if the point (X, Y) lies within the rectangle defined by this
@@ -314,21 +292,13 @@ var PlanoConvexLens = function(x, y, rotation, n, r, w) {
     this.draw(canvasState.ctx);
 }
 
-PlanoConvexLens.prototype.print = function() {
-    return "var pcv = new PlanoConvexLens(" + this.x + "," + this.y + "," + this.r + "," + this.rotation + "," + this.n + "," + this.d + ");" +
-            "canvasState.addShape(pcv);";
-}
-
 PlanoConvexLens.prototype.generateLineSegments = function() {
     var x1 = this.arc.p1;
     var y1 = this.arc.q1;
-
     var x2 = x1 + this.w*Math.sin(this.rotation - (Math.PI/2 - this.extent/2));
     var y2 = y1 - this.w*Math.cos(this.rotation - (Math.PI/2 - this.extent/2));
-
     var x4 = this.arc.p2;
     var y4 = this.arc.q2;
-
     var x3 = x4 + this.w*Math.sin(this.rotation - (Math.PI/2 - this.extent/2));
     var y3 = y4 - this.w*Math.cos(this.rotation - (Math.PI/2 - this.extent/2));
 
@@ -376,32 +346,17 @@ PlanoConvexLens.prototype.draw = function(ctx) {
     this.generateCenter();
     this.generateLineSegments();
 
-    // console.log("(x, y) = (" + this.arc.x + ", " + this.arc.y + ")");
-    // console.log("(x0, y0) = (" + this.arc.centerX + ", " + this.arc.centerY + ")");
-    // console.log("\n");
-
     var grd = ctx.createLinearGradient(this.x,this.y,this.x + this.r, this.y + this.r);
     grd.addColorStop(0,this.color1);
     grd.addColorStop(1,this.color2);
-
     ctx.fillStyle = grd;
 
     var arc = this.arc;
     ctx.beginPath();
     ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation, arc.rotation + arc.extent);
-    ctx.stroke();
-
-    // var curLineSeg = this.lineSegments[2];
-    // for (var i = this.lineSegments.length - 1; i >= 0; i -= 1) {
-    //     curLineSeg = this.lineSegments[i];
-    //     ctx.lineTo(curLineSeg.x1, curLineSeg.y1);
-    //     ctx.stroke();
-    // }
-
     ctx.fill();
 
     this.drawCenter(ctx);
-    // ctx.closePath();
 }
 
 PlanoConvexLens.prototype.setRotation = function(rotation) {
@@ -426,20 +381,19 @@ PlanoConvexLens.prototype.highlight = function(ctx) {
     ctx.lineWidth = 1;
 
     var curLineSeg = this.lineSegments[0];
+    ctx.beginPath();
     ctx.moveTo(curLineSeg.x1, curLineSeg.y1);
     for (var i = 0; i < this.lineSegments.length; i += 1) {
         curLineSeg = this.lineSegments[i];
         ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
-        ctx.stroke();
     }
 
+    ctx.stroke();
     this.arc.draw(ctx);
 }
 
 PlanoConvexLens.prototype.intersectionBox = function(ray) {
-    var intersections = [];
-    var lineSegment;
-    var intersection;
+    var lineSegment, intersection, intersections = [];
     for (var i = 0; i < this.lineSegments.length; i +=1) {
         lineSegment = this.lineSegments[i];
         intersection = lineSegment.intersection(ray);
@@ -448,26 +402,26 @@ PlanoConvexLens.prototype.intersectionBox = function(ray) {
         }
     }
 
-    if (intersections.length == 0) {
+    if (intersections.length) {
+        // choose the intersection point that is closest to the ray's starting point
+        var cur_dist;
+        var cur_point;
+        var closest_point = intersections[0];
+        var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
+        for (var i = 0; i < intersections.length; i += 1) {
+            cur_point = intersections[i];
+            cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
+            if (cur_dist < min_dist) {
+                closest_point = cur_point;
+                min_dist = cur_dist;
+            }
+        }
+
+        closest_point.element = this;
+        return closest_point;
+    } else {
         return false;
     }
-
-    // choose the intersection point that is closest to the ray's starting point
-    var cur_dist;
-    var cur_point;
-    var closest_point = intersections[0];
-    var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
-    for (var i = 0; i < intersections.length; i += 1) {
-        cur_point = intersections[i];
-        cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
-        if (cur_dist < min_dist) {
-            closest_point = cur_point;
-            min_dist = cur_dist;
-        }
-    }
-
-    closest_point.element = this;
-    return closest_point;
 }
 
 PlanoConvexLens.prototype.intersection = function(ray) {
@@ -489,12 +443,10 @@ PlanoConvexLens.prototype.intersection = function(ray) {
     } else if (boxInt === false) {
         return arcInt;
     } else if (arcInt === false) {
-        // console.log("INTERSECT WITH BOX");
         return boxInt;
     }
 
     if (boxDist < arcDist) {
-        // console.log("INTERSECT WITH BOX");
         return boxInt;
     } else {
         return arcInt;

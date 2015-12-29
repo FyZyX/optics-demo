@@ -46,8 +46,6 @@ var Arc = function(x0, y0, r, rotation, extent) {
 Arc.prototype.generateCenterOfCircle = function() {
     var r = this.r;
     var w = 2*r*Math.sin(this.extent/2);
-    // console.log("r: " + r);
-    // console.log("w: " + w);
     var h;
 
     var a = 1;
@@ -55,13 +53,8 @@ Arc.prototype.generateCenterOfCircle = function() {
     var c = w*w/4;
 
     h = quadraticFormula(a, b, c);
-    // console.log("a: " +a);
-    // console.log("b: " + b);
-    // console.log("c: " + c);
-    // console.log("h: " + h);
 
     var d = r - h/2;
-    // console.log("d: " + d);
 
     this.centerX = this.x + d*Math.sin(this.rotation);
     this.centerY = this.y - d*Math.cos(this.rotation);
@@ -70,7 +63,6 @@ Arc.prototype.generateCenterOfCircle = function() {
     this.q1 = this.r*Math.sin(this.rotation) + this.centerY;
     this.p2 = this.r*Math.cos(this.rotation + this.extent) + this.centerX;
     this.q2 = this.r*Math.sin(this.rotation + this.extent) + this.centerY;
-    // console.log("\n");
 }
 
 Arc.prototype.draw = function(ctx) {

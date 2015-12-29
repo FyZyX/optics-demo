@@ -53,7 +53,7 @@ function CanvasState(canvas) {
                 // Keep track of where in the object we clicked
                 // so we can move it smoothly (see mousemove)
                 if (keysDown) {
-                    myState.mouseAngle = Math.atan2(my - mySel.centerY, mx - mySel.centerX);
+                    myState.mouseAngle = Math.atan2(my - mySel.y, mx - mySel.x);
                     myState.rotating = true;
                 } else {
                     myState.dragoffx = mx - mySel.x;
