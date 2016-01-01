@@ -1,5 +1,9 @@
 HTML_FILE="index.html"
+BACKUP_HTML_FILE="index.backup.html"
 OUTPUT_JS_FILE="all.min.js"
+
+# make a copy of index.html
+cp $HTML_FILE $BACKUP_HTML_FILE
 
 # Remove js files from git tree
 git rm -f --cached js/*.js
@@ -13,8 +17,11 @@ sed -i "/.*script.*/d" $HTML_FILE
 echo "<script src='js/$OUTPUT_JS_FILE'></script>" | cat - $HTML_FILE > /tmp/out && mv /tmp/out $HTML_FILE
 
 # push to gh-pages
-git add -A
+git add js/$OUTPUT_JS_FILE
 git push origin gh-pages
 
+
+# cleanup files and restore index.html to its previous state
 rm js/all.js
 rm js/all.min.js
+mv $BACKUP_HTML_FILE $HTML_FILE
