@@ -1,7 +1,7 @@
 HTML_FILE="index.html"
 BACKUP_HTML_FILE="index.backup.html"
 OUTPUT_JS_FILE="all.min.js"
-COMMIT_MSG="git log -1 --pretty=%B"
+COMMIT_MSG=$(git log -1 --pretty=%B)
 
 
 # switch to gh-pages branch
@@ -30,7 +30,6 @@ git push origin gh-pages
 rm js/all.js
 rm js/all.min.js
 mv $BACKUP_HTML_FILE $HTML_FILE
-
 
 
 # switch back to master branch
