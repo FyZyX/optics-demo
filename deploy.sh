@@ -3,7 +3,8 @@ BACKUP_HTML_FILE="index.backup.html"
 OUTPUT_JS_FILE="all.min.js"
 
 
-
+git checkout gh-pages
+git rebase master
 
 # make a copy of index.html
 cp $HTML_FILE $BACKUP_HTML_FILE
@@ -20,14 +21,8 @@ sed -i "/.*script.*/d" $HTML_FILE
 echo "<script src='js/$OUTPUT_JS_FILE'></script>" | cat - $HTML_FILE > /tmp/out && mv /tmp/out $HTML_FILE
 
 # push to gh-pages
-git checkout gh-pages
-git rebase master
 git add js/$OUTPUT_JS_FILE
 git push origin gh-pages
-git checkout master
-
-
-
 
 
 
@@ -35,3 +30,4 @@ git checkout master
 rm js/all.js
 rm js/all.min.js
 mv $BACKUP_HTML_FILE $HTML_FILE
+git checkout master
