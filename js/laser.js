@@ -23,7 +23,7 @@ Laser.prototype.shootLaser = function(elements, boundaries) {
     }
 
     var numRaysHittingWinWall = 0;
-    for (var i = 0; i < this.rays.length; i += 1) {
+    for (var i = 0; i < numRays; i += 1) {
         if (this.rays[i].hittingWinWall) {
             numRaysHittingWinWall += 1;
         } else if (this.rays[i].hittingLoseWall) {

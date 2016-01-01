@@ -75,11 +75,14 @@ function startLevel(level) {
 var vid = {};
 
 function default_load() {
-    var mirror = new Mirror(750, 400, 15, 150, 0);
-    canvasState.addShape(mirror);
+    // var mirror = new Mirror(750, 400, 15, 150, 0);
+    // canvasState.addShape(mirror);
 
-    var mirror = new Mirror(650, 400, 15, 150, 0);
-    canvasState.addShape(mirror);
+    // var mirror = new Mirror(650, 400, 15, 150, 0);
+    // canvasState.addShape(mirror);
+
+    // var pos = getCoordinates(400, 400);
+    // console.log(pos);
 
     var wall = new Wall(400, 400, 15, 300, 0);
     canvasState.addShape(wall);
@@ -101,10 +104,7 @@ function default_load() {
 var aspect_width = 1285;
 var aspect_height = 647;
 var aspect_ratio = aspect_width/aspect_height;
-aspect_ratio = 2.3;
-
-function get_width_height(width, height) {
-}
+// aspect_ratio = 2.3;
 
 function startPlaying() {
     c = document.getElementById("myCanvas");
