@@ -1,6 +1,7 @@
 HTML_FILE="index.html"
 BACKUP_HTML_FILE="index.backup.html"
 OUTPUT_JS_FILE="all.min.js"
+COMMIT_MSG="git log -1 --pretty=%B"
 
 
 # switch to gh-pages branch
@@ -22,6 +23,7 @@ echo "<script src='js/$OUTPUT_JS_FILE'></script>" | cat - $HTML_FILE > /tmp/out 
 git rm -f --cached js/*.js
 git add js/$OUTPUT_JS_FILE
 git add $HTML_FILE
+git commit -m $COMMIT_MSG
 git push origin gh-pages
 
 # cleanup files and restore index.html to its previous state
