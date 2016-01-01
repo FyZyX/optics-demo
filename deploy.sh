@@ -33,4 +33,5 @@ mv $BACKUP_HTML_FILE $HTML_FILE
 
 
 # switch back to master branch
+git stash
 git checkout master
