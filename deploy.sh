@@ -25,7 +25,7 @@ echo "<script src='js/$OUTPUT_JS_FILE'></script>" | cat - $HTML_FILE > /tmp/out 
 git rm -f --cached js/*.js
 git add js/$OUTPUT_JS_FILE
 git add $HTML_FILE
-git commit -m $COMMIT_MSG
+git commit -m "$COMMIT_MSG"
 git push --force origin gh-pages
 
 # cleanup files and restore index.html to its previous state
