@@ -4,11 +4,8 @@ OUTPUT_JS_FILE="all.min.js"
 
 COMMIT_MSG="$(git log -1 --pretty=%B)"
 COMMIT_MSG=$(echo "$COMMIT_MSG" | sed "s/$COMMIT_MSG/\'$COMMIT_MSG\'/")
+echo "$COMMIT_MSG"
 
-
-# switch to gh-pages branch
-git checkout gh-pages
-git rebase master
 
 # make a copy of index.html
 cp $HTML_FILE $BACKUP_HTML_FILE
