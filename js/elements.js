@@ -811,3 +811,4 @@ PlanoConcaveLens.prototype.getNormVec = function(curve, x, y) {
         return [-normVec1[0], -normVec1[1]];
     }
 }
+
