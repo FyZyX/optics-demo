@@ -37,12 +37,6 @@ window.addEventListener("mousedown", function(e) {
 }, true);
 
 
-function toggleElementInfo() {
-    var selection_list = document.getElementById("elementInfo");
-    displayElementInfo = selection_list[selection_list.selectedIndex].value;
-    canvasState.valid = false;
-}
-
 
 
 
@@ -144,4 +138,16 @@ function startGame() {
         startPlaying();
     }
 }
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById("elementInfo").onclick = function() {
+        var selection_list = document.getElementById("elementInfo");
+        displayElementInfo = selection_list[selection_list.selectedIndex].value;
+        canvasState.valid = false;
+        startGame();
+    };
+}, false);
 
