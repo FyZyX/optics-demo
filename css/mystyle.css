@@ -10,14 +10,85 @@ canvas {
     padding: 0;
     margin: auto;
     display: block;
-    position: absolute;
+/*    position: absolute;
     top: 0;
-    bottom: 0;
+    bottom: 0;*/
     left: 0;
     right: 0;
     background-color:white;
+
+    border: 10px solid #fff;
+    border-bottom: 45px solid #fff;
+    -webkit-box-shadow: 3px 3px 3px #777;
+    -moz-box-shadow: 3px 3px 3px #777;
+    box-shadow: 3px 3px 3px #777;
+}
+
+#toolbar {
+    padding: 0;
+    margin: auto;
+    display: block;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 50px;
+    background-color:white;
+}
+
+#pallet {
+    width: 100%;
+    height: 50px;
 }
 
 #myVideo {
     position: absolute;
 }
+
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+li {
+    float: left;
+}
+
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.last {
+    float: none;
+    overflow: hidden;
+}
+
+a:hover:not(.active) {
+    background-color: #111;
+}
+
+.active {
+background-color:#4CAF50;
+}
+
+
+
+
+        nav ul {
+            list-style: none;
+            margin:0;
+            padding:0;
+            display: table;
+            background: red;
+            width: 100%;
+        }
+        nav li {
+            z-index:10;
+            text-align: center;
+            display: table-cell;

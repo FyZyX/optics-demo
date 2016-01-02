@@ -1,7 +1,7 @@
 HTML_FILE="index.html"
 BACKUP_HTML_FILE="index.backup.html"
 OUTPUT_JS_FILE="all.min.js"
-COMMIT_MSG=$(git log -1 --pretty=%B)
+COMMIT_MSG=$(printf '"%sw"\n' $(git log -1 --pretty=%B))
 
 
 # switch to gh-pages branch

@@ -55,6 +55,12 @@ Box.prototype.generateLineSegments = function() {
     this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
 }
 
+Box.prototype.displayInfo = function(ctx) {
+    ctx.font = "12px serif";
+    ctx.fillStyle = "black";
+    ctx.fillText("Box\n(" + this.x + ", " + this.y + ")", this.x + 10, this.y);
+}
+
 Box.prototype.setRotation = function(rotation) {
     this.rotation = mod(rotation, 2*Math.PI);
 }
@@ -319,6 +325,11 @@ PlanoConvexLens.prototype.generateCenter = function() {
     this.centerY = this.arc.centerY;
 }
 
+PlanoConvexLens.prototype.displayInfo = function(ctx) {
+    ctx.font = "12px serif";
+    ctx.fillStyle = "black";
+    ctx.fillText("Plano-convex lens\n(" + this.x + ", " + this.y + ")", this.x + 10, this.y);
+}
 
 PlanoConvexLens.prototype.drawCenter = function(ctx) {
     ctx.beginPath();

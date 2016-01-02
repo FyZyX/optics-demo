@@ -6,24 +6,25 @@
 var canvasState;
 var mousePointer;
 var rayLineWidth = 3;
-var keysDown = 0;
+var shiftKeyPressed = false;
 var curLevel = 0;
 var numLevels = 3;
+var displayElementInfo = "Never";
 
 
 window.addEventListener("keydown", function(e) {
     if (e.keyCode == 13) {
         generateLevelFile();
-    } else if (e.shiftKey) {
-        keysDown += 1;
+    } else if (e.shiftKey && !shiftKeyPressed) {
+        shiftKeyPressed = true;
     } else if (e.keyCode > 47 && e.keyCode < 51) {
         startLevel(e.keyCode - 48);
     }
 }, true);
 
 window.addEventListener("keyup", function(e) {
-    if (keysDown > 0) {
-        keysDown -= 1;
+    if (shiftKeyPressed && !e.shiftKey) {
+        shiftKeyPressed = false;
     }
 }, true);
 
@@ -34,6 +35,13 @@ window.addEventListener("mousedown", function(e) {
         startPlaying();
     }
 }, true);
+
+
+function toggleElementInfo() {
+    var selection_list = document.getElementById("elementInfo");
+    displayElementInfo = selection_list[selection_list.selectedIndex].value;
+    canvasState.valid = false;
+}
 
 
 

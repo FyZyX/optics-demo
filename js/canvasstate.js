@@ -52,7 +52,7 @@ function CanvasState(canvas) {
                 var mySel = opticalElements[i];
                 // Keep track of where in the object we clicked
                 // so we can move it smoothly (see mousemove)
-                if (keysDown) {
+                if (shiftKeyPressed) {
                     myState.mouseAngle = Math.atan2(my - mySel.y, mx - mySel.x);
                     myState.rotating = true;
                 } else {
@@ -141,17 +141,13 @@ CanvasState.prototype.clear = function() {
 /** While draw is called as often as requestAnimationFrame demands, it only ever
   * does something if the canvas gets invalidated by our code. */
 CanvasState.prototype.draw = function() {
-    if (keysDown && mouseOverObject) {
+    if (shiftKeyPressed && mouseOverObject) {
         var elementToChange = document.getElementsByTagName("body")[0];
         elementToChange.style.cursor = "url('images/cursor.png') 9 10, auto";
     } else {
         var elementToChange = document.getElementsByTagName("body")[0];
         elementToChange.style.cursor = "default";
     }
-
-    // for (var i = 0; i < 4; i += 1) {
-    //     this.boundaries[i].
-    // }
 
     // if our state is invalid, redraw and validate!
     if (!this.valid) {
@@ -170,6 +166,10 @@ CanvasState.prototype.draw = function() {
             // if (shape.centerX > this.width || shape.centerY > this.height ||
             //     shape.centerX + shape.w < 0 || shape.centerY + shape.h < 0) continue;
             opticalElements[i].draw(ctx);
+
+            if ((displayElementInfo == "When selected" && this.selection == opticalElements[i]) || displayElementInfo == "Always") {
+                opticalElements[i].displayInfo(ctx);
+            }
         }
 
         // draw selection
@@ -255,4 +255,3 @@ CanvasState.prototype.clearElements = function() {
 CanvasState.prototype.setLaser = function(laser) {
     this.laser = laser;
 }
-

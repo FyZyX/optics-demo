@@ -14,6 +14,26 @@
   Your browser does not support the <code>video</code> element.
 </video>
 
+
+<div role="toolbar" id="toolbar">
+
+<ul>
+    <li>
+        Display Element Info:
+        <select id="elementInfo" size="3" onclick="toggleElementInfo();">
+            <option>Never</option>
+            <option>When selected</option>
+            <option>Always</option>
+        </select>
+    </li>
+    <li class="last">
+        <canvas id="pallet" width="100%" height="50px" style="border:1px solid #000000;">
+        </canvas>
+    </li>
+</ul>
+
+</div>
+
 <canvas id="myCanvas" width="0%" height="0%" style="border:1px solid #000000;">
 </canvas>
 
