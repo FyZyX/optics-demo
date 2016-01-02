@@ -2,10 +2,8 @@ HTML_FILE="index.html"
 BACKUP_HTML_FILE="index.backup.html"
 OUTPUT_JS_FILE="all.min.js"
 
-
-COMMIT_MSG=$(printf '"%s\w+"\n' $(git log -1 --pretty=%B))
-var="$(git log -1 --pretty=%B)"
-var=$(echo "$var" | sed "s/$var/\'$var\'/")
+COMMIT_MSG="$(git log -1 --pretty=%B)"
+COMMIT_MSG=$(echo "$COMMIT_MSG" | sed "s/$COMMIT_MSG/\'$COMMIT_MSG\'/")
 
 
 # switch to gh-pages branch
