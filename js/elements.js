@@ -367,7 +367,7 @@ PlanoConvexLens.prototype.draw = function(ctx) {
     ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation, arc.rotation + arc.extent);
     ctx.fill();
 
-    this.drawCenter(ctx);
+    // this.drawCenter(ctx);
 }
 
 PlanoConvexLens.prototype.setRotation = function(rotation) {

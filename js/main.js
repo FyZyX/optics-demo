@@ -126,7 +126,36 @@ function startPlaying() {
     canvasState = new CanvasState(document.getElementById('myCanvas'));
 
     default_load();
-    // startLevel(1);
+
+
+
+
+
+
+    toolbarCanvas = document.getElementById("pallet");
+    ctx2 = toolbarCanvas.getContext("2d");
+
+    // var width = window.innerWidth - 10;
+    // var height = window.innerHeight - 10;
+    // if (width/height > aspect_ratio) {
+    //     width = height*aspect_ratio;
+    // } else {
+    //     height = width/aspect_ratio;
+    // }
+
+    ctx2.canvas.width = toolbarCanvas.clientWidth;
+    ctx2.canvas.height = toolbarCanvas.clientHeight;
+
+    pallet = new CanvasState(document.getElementById('pallet'));
+    console.log(ctx2.canvas.width);
+    console.log(ctx2.canvas.height);
+    console.log(pallet.width);
+    console.log(pallet.height);
+
+    var planoConvex1 = new PlanoConvexLens(50, 25, 0, 1.5, 30, 0);
+    pallet.addShape(planoConvex1);
+
+
 }
 
 
