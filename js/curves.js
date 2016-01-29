@@ -59,24 +59,27 @@ Arc.prototype.generateCenterOfCircle = function() {
     this.centerX = this.x + d*Math.sin(this.rotation);
     this.centerY = this.y - d*Math.cos(this.rotation);
 
-    this.p1 = this.r*Math.cos(this.rotation) + this.centerX;
-    this.q1 = this.r*Math.sin(this.rotation) + this.centerY;
-    this.p2 = this.r*Math.cos(this.rotation + this.extent) + this.centerX;
-    this.q2 = this.r*Math.sin(this.rotation + this.extent) + this.centerY;
+    var val = (Math.PI - this.extent)/2;
+    this.p1 = this.r*Math.cos(this.rotation + val) + this.centerX;
+    this.q1 = this.r*Math.sin(this.rotation + val) + this.centerY;
+    this.p2 = this.r*Math.cos(this.rotation + val + this.extent) + this.centerX;
+    this.q2 = this.r*Math.sin(this.rotation + val + this.extent) + this.centerY;
 }
 
 Arc.prototype.draw = function(ctx) {
     this.generateCenterOfCircle();
     ctx.beginPath();
-    ctx.arc(this.centerX, this.centerY, this.r, this.rotation, this.rotation + this.extent);
+    ctx.arc(this.centerX, this.centerY, this.r, this.rotation + this.extent/2, this.rotation + 3*this.extent/2);
     ctx.stroke();
+    ctx.fill();
 }
 
 Arc.prototype.contains = function(x, y) {
-    var p1 = this.r*Math.cos(this.rotation) + this.centerX;
-    var q1 = this.r*Math.sin(this.rotation) + this.centerY;
-    var p2 = this.r*Math.cos(this.rotation + this.extent) + this.centerX;
-    var q2 = this.r*Math.sin(this.rotation + this.extent) + this.centerY;
+    var val = (Math.PI - this.extent)/2;
+    var p1 = this.r*Math.cos(this.rotation + val) + this.centerX;
+    var q1 = this.r*Math.sin(this.rotation + val) + this.centerY;
+    var p2 = this.r*Math.cos(this.rotation + val + this.extent) + this.centerX;
+    var q2 = this.r*Math.sin(this.rotation + val + this.extent) + this.centerY;
     if (p1 === p2) {
         var pastLine = Math.abs(x - this.centerX) >= Math.abs(p1 - this.centerX);
     }

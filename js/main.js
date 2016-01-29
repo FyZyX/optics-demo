@@ -152,8 +152,8 @@ function startPlaying() {
     console.log(pallet.width);
     console.log(pallet.height);
 
-    var planoConvex1 = new PlanoConvexLens(50, 25, 0, 1.5, 30, 0);
-    pallet.addShape(planoConvex1);
+    // var planoConvex1 = new PlanoConvexLens(50, 25, 0, 1.5, 30, 100);
+    // pallet.addShape(planoConvex1);
 
 
 }

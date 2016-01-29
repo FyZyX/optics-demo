@@ -287,10 +287,16 @@ var PlanoConvexLens = function(x, y, rotation, n, r, w) {
     this.w = w;
     this.color1 = "#33cccc";
     this.color2 = "#ccffcc";
-    this.extent = Math.PI;
+    this.extent = Math.PI/2;
     this.rotation = rotation;
+    this.w = w;
 
-    this.arc = new Arc(x - this.w*Math.cos(rotation)/2, y + this.w*Math.sin(rotation)/2, r, rotation, this.extent + rotation);
+    var a = r*Math.sin(this.extent/2);
+    var s = r - Math.sqrt(r*r - a*a);
+    var l = s+w;
+    var d = (l-s)/2;
+
+    this.arc = new Arc(x - d*Math.sin(rotation)/2, y + d*Math.cos(rotation)/2, r, rotation, this.extent + rotation);
 
     this.generateLineSegments();
     this.recalculateCurves();
@@ -301,12 +307,17 @@ var PlanoConvexLens = function(x, y, rotation, n, r, w) {
 PlanoConvexLens.prototype.generateLineSegments = function() {
     var x1 = this.arc.p1;
     var y1 = this.arc.q1;
-    var x2 = x1 + this.w*Math.sin(this.rotation - (Math.PI/2 - this.extent/2));
-    var y2 = y1 - this.w*Math.cos(this.rotation - (Math.PI/2 - this.extent/2));
+    var x2 = x1 + this.w*Math.sin(this.rotation);
+    var y2 = y1 - this.w*Math.cos(this.rotation);
     var x4 = this.arc.p2;
     var y4 = this.arc.q2;
-    var x3 = x4 + this.w*Math.sin(this.rotation - (Math.PI/2 - this.extent/2));
-    var y3 = y4 - this.w*Math.cos(this.rotation - (Math.PI/2 - this.extent/2));
+    var x3 = x4 + this.w*Math.sin(this.rotation);
+    var y3 = y4 - this.w*Math.cos(this.rotation);
+
+    console.log("x1: " + x1);
+    console.log("y1: " + y1);
+    console.log("x4: " + x4);
+    console.log("y4: " + y4);
 
     this.lineSegments = [];
     this.lineSegments.push(new LineSegment(x1, y1, x2, y2));
@@ -353,6 +364,10 @@ PlanoConvexLens.prototype.drawCenter = function(ctx) {
 
 
 PlanoConvexLens.prototype.draw = function(ctx) {
+    var val = (Math.PI - this.extent)/2;
+
+
+
     this.recalculateCurves();
     this.generateCenter();
     this.generateLineSegments();
@@ -364,10 +379,18 @@ PlanoConvexLens.prototype.draw = function(ctx) {
 
     var arc = this.arc;
     ctx.beginPath();
-    ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation, arc.rotation + arc.extent);
+    ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation + val, arc.rotation + val + this.extent);
+
+    var curLineSeg = this.lineSegments[0];
+    ctx.moveTo(curLineSeg.x1, curLineSeg.y1);
+    for (var i = 0; i < this.lineSegments.length; i += 1) {
+        curLineSeg = this.lineSegments[i];
+        ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
+    }
+
     ctx.fill();
 
-    // this.drawCenter(ctx);
+    this.drawCenter(ctx);
 }
 
 PlanoConvexLens.prototype.setRotation = function(rotation) {
@@ -391,6 +414,12 @@ PlanoConvexLens.prototype.highlight = function(ctx) {
     ctx.strokeStyle = 'purple';
     ctx.lineWidth = 1;
 
+    var val = (Math.PI - this.extent)/2;
+    var arc = this.arc;
+    ctx.beginPath();
+    ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation + val, arc.rotation + val + this.extent);
+    ctx.stroke();
+
     var curLineSeg = this.lineSegments[0];
     ctx.beginPath();
     ctx.moveTo(curLineSeg.x1, curLineSeg.y1);
@@ -400,7 +429,7 @@ PlanoConvexLens.prototype.highlight = function(ctx) {
     }
 
     ctx.stroke();
-    this.arc.draw(ctx);
+    // this.arc.draw(ctx);
 }
 
 PlanoConvexLens.prototype.intersectionBox = function(ray) {
