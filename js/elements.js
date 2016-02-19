@@ -554,7 +554,7 @@ PlanoConvexLens.prototype.intersectionArc = function(ray) {
             return closer_intersection;
         } else {
             a = angleFromSegment(cx, cy, further_intersection.x, further_intersection.y);
-            if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, further_intersection.x, further_intersection.y)) {
+            if (isInRange(this.rotation + val, this.rotation + val + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, further_intersection.x, further_intersection.y)) {
                 return further_intersection;
             }
         }

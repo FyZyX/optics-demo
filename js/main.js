@@ -95,8 +95,14 @@ function default_load() {
     var planoConvex2 = new PlanoConvexLens(100, 400, 0, 1.5, 100, 40);
     canvasState.addShape(planoConvex2);
 
-    var planoConvex3 = new PlanoConvexLens(200, 300, 0, 1.5, 100, 60);
+    var planoConvex3 = new PlanoConvexLens(200, 300, 0, 1.5, 100, 200);
     canvasState.addShape(planoConvex3);
+
+    var mirror1 = new Mirror(600, 200, 15, 150, 0);
+    canvasState.addShape(mirror1);
+
+    var mirror2 = new Mirror(450, 400, 15, 150, 0);
+    canvasState.addShape(mirror2);
 
     // var planoConcave1 = new PlanoConcaveLens(400, 200, 0, 1.5, 100, 10);
     // canvasState.addShape(planoConcave1);
