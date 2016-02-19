@@ -314,11 +314,6 @@ PlanoConvexLens.prototype.generateLineSegments = function() {
     var x3 = x4 + this.w*Math.sin(this.rotation);
     var y3 = y4 - this.w*Math.cos(this.rotation);
 
-    console.log("x1: " + x1);
-    console.log("y1: " + y1);
-    console.log("x4: " + x4);
-    console.log("y4: " + y4);
-
     this.lineSegments = [];
     this.lineSegments.push(new LineSegment(x1, y1, x2, y2));
     this.lineSegments.push(new LineSegment(x2, y2, x3, y3));
@@ -432,6 +427,37 @@ PlanoConvexLens.prototype.highlight = function(ctx) {
     // this.arc.draw(ctx);
 }
 
+PlanoConvexLens.prototype.intersection = function(ray) {
+    var boxInt = this.intersectionBox(ray);
+    var arcInt = this.intersectionArc(ray);
+
+    boxDist = distance(boxInt.x, boxInt.y, ray.x1, ray.y1);
+    arcDist = distance(arcInt.x, arcInt.y, ray.x1, ray.y1);
+
+    if (boxDist < 0.001) {
+        boxInt = false;
+    }
+    if (arcDist < 0.001) {
+        arcInt = false;
+    }
+
+    if (boxInt === false && arcInt === false) {
+        return false;
+    } else if (boxInt === false) {
+        return arcInt;
+    } else if (arcInt === false) {
+        return boxInt;
+    }
+
+    if (boxDist < arcDist) {
+        return boxInt;
+    } else {
+        return arcInt;
+    }
+
+}
+
+
 PlanoConvexLens.prototype.intersectionBox = function(ray) {
     var lineSegment, intersection, intersections = [];
     for (var i = 0; i < this.lineSegments.length; i +=1) {
@@ -464,37 +490,13 @@ PlanoConvexLens.prototype.intersectionBox = function(ray) {
     }
 }
 
-PlanoConvexLens.prototype.intersection = function(ray) {
-    var boxInt = this.intersectionBox(ray);
-    var arcInt = this.intersectionArc(ray);
-
-    boxDist = distance(boxInt.x, boxInt.y, ray.x1, ray.y1);
-    arcDist = distance(arcInt.x, arcInt.y, ray.x1, ray.y1);
-
-    if (boxDist < 0.001) {
-        boxInt = false;
-    }
-    if (arcDist < 0.001) {
-        arcInt = false;
-    }
-
-    if (boxInt === false && arcInt === false) {
-        return false;
-    } else if (boxInt === false) {
-        return arcInt;
-    } else if (arcInt === false) {
-        return boxInt;
-    }
-
-    if (boxDist < arcDist) {
-        return boxInt;
-    } else {
-        return arcInt;
-    }
-
-}
 
 PlanoConvexLens.prototype.intersectionArc = function(ray) {
+
+    var val = (Math.PI - this.extent)/2;
+
+
+
     var x1 = ray.x1;
     var x2 = ray.x2;
     var y1 = ray.y1;
@@ -546,7 +548,9 @@ PlanoConvexLens.prototype.intersectionArc = function(ray) {
 
         var a = angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y);
 
-        if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
+        // if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
+        //     return closer_intersection;
+        if (isInRange(this.rotation + val, this.rotation + val + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
             return closer_intersection;
         } else {
             a = angleFromSegment(cx, cy, further_intersection.x, further_intersection.y);
