@@ -79,7 +79,7 @@ background-color:#4CAF50;
 
 .infoBox {
     position: fixed;
-    bottom: 10px;
-    right: 10px;
+    bottom: 80px;
+    right: 80px;
     border: 2px solid black;
 }
