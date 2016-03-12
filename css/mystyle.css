@@ -77,18 +77,9 @@ a:hover:not(.active) {
 background-color:#4CAF50;
 }
 
-
-
-
-        nav ul {
-            list-style: none;
-            margin:0;
-            padding:0;
-            display: table;
-            background: red;
-            width: 100%;
-        }
-        nav li {
-            z-index:10;
-            text-align: center;
-            display: table-cell;
+.infoBox {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    border: 2px solid black;
+}

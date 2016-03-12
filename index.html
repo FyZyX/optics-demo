@@ -5,7 +5,11 @@
 <script src="js/canvasstate.js"></script>
 <script src="js/curves.js"></script>
 <script src="js/elements.js"></script>
+<script src="js/box.js"></script>
+<script src="js/circplanoconvex.js"></script>
+<script src="js/circplanoconcave.js"></script>
 <script src="js/coordinates.js"></script>
+<script src="js/info.js"></script>
 <script src="js/main.js"></script>
 
 <link rel="stylesheet" type="text/css" href="css/mystyle.css">
@@ -26,6 +30,7 @@
             <option>Always</option>
         </select>
     </li>
+
     <li class="last">
         <canvas id="pallet" width="0%" height="50px" style="border:1px solid #000000;">
         </canvas>
@@ -34,8 +39,21 @@
 
 </div>
 
-<canvas id="myCanvas" width="0%" height="0%" style="border:1px solid #000000;">
+<table class="infoBox" id="infoBox">
+  <tr>
+    <td>Radius</td>
+    <td><div contenteditable>50</div></td>
+  </tr>
+  <tr>
+    <td>Semi-diameter</td>
+    <td><div contenteditable>94</td>
+  </tr>
+</table>
+
+<canvas id="myCanvas" width="0%" height="0%" style="border:1px solid #000000;" oncontextmenu="return false;">
 </canvas>
+
+
 
 <html>
 <body style="margin: 0px;">

@@ -45,33 +45,39 @@ function CanvasState(canvas) {
         var mouse = myState.getMouse(e);
         var mx = mouse.x;
         var my = mouse.y;
-        var opticalElements = myState.opticalElements;
-        var l = opticalElements.length;
-        for (var i = l-1; i >= 0; i--) {
-            if (opticalElements[i].contains(mx, my) && !(opticalElements[i].wall && playing)) {
-                var mySel = opticalElements[i];
-                // Keep track of where in the object we clicked
-                // so we can move it smoothly (see mousemove)
-                if (shiftKeyPressed) {
-                    myState.mouseAngle = Math.atan2(my - mySel.y, mx - mySel.x);
-                    myState.rotating = true;
-                } else {
-                    myState.dragoffx = mx - mySel.x;
-                    myState.dragoffy = my - mySel.y;
-                    myState.dragging = true;
+        if (e.which == 3) { // right click
+            myState.placeOpticalElement(mx, my);
+        } else {
+            var opticalElements = myState.opticalElements;
+            var l = opticalElements.length;
+            for (var i = l-1; i >= 0; i--) {
+                if (opticalElements[i].contains(mx, my) && !(opticalElements[i].wall && playing)) {
+                    var mySel = opticalElements[i];
+                    infoBox.setElement(mySel);
+                    infoBox.display();
+                    // Keep track of where in the object we clicked
+                    // so we can move it smoothly (see mousemove)
+                    if (shiftKeyPressed) {
+                        myState.mouseAngle = Math.atan2(my - mySel.y, mx - mySel.x);
+                        myState.rotating = true;
+                    } else {
+                        myState.dragoffx = mx - mySel.x;
+                        myState.dragoffy = my - mySel.y;
+                        myState.dragging = true;
+                    }
+                    myState.selection = mySel;
+                    myState.last_angle = myState.selection.rotation;
+                    myState.valid = false;
+                    return;
                 }
-                myState.selection = mySel;
-                myState.last_angle = myState.selection.rotation;
-                myState.valid = false;
-                return;
             }
-        }
 
-        // havent returned means we have failed to select anything.
-        // If there was an object selected, we deselect it
-        if (myState.selection) {
-            myState.selection = null;
-            myState.valid = false; // Need to clear the old selection border
+            // havent returned means we have failed to select anything.
+            // If there was an object selected, we deselect it
+            if (myState.selection) {
+                myState.selection = null;
+                myState.valid = false; // Need to clear the old selection border
+            }
         }
 
     }, true);
@@ -254,4 +260,8 @@ CanvasState.prototype.clearElements = function() {
 
 CanvasState.prototype.setLaser = function(laser) {
     this.laser = laser;
+}
+
+CanvasState.prototype.placeOpticalElement = function(x, y) {
+    alert("place element");
 }
