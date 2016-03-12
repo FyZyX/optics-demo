@@ -103,11 +103,11 @@ function startPlaying() {
 
     var width = window.innerWidth - 10;
     var height = window.innerHeight - 10;
-    if (width/height > aspect_ratio) {
-        width = height*aspect_ratio;
-    } else {
-        height = width/aspect_ratio;
-    }
+    // if (width/height > aspect_ratio) {
+    //     width = height*aspect_ratio;
+    // } else {
+    //     height = width/aspect_ratio;
+    // }
 
     ctx.canvas.width = width;
     ctx.canvas.height = height;

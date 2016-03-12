@@ -10,8 +10,8 @@ InfoBox.prototype.setElement = function(element) {
 }
 
 function yes(e) {
-    var key = e.srcElement.parentNode.children[0].innerHTML;
-    var val = e.srcElement.innerHTML;
+    var key = e.srcElement.parentNode.parentNode.children[0].innerHTML;
+    var val = e.srcElement.value;
     this.updateAttribute(key, val);
 }
 
@@ -30,9 +30,12 @@ InfoBox.prototype.display = function() {
             var attr = tr.insertCell(0);
             var val = tr.insertCell(1);
             attr.innerHTML = key;
-            val.innerHTML = attributes[key];
+
+            val.innerHTML += '<input type="text" name="fname">';
+            var inp = val.children[0];
+            inp.value = attributes[key];
             val.contentEditable = "true";
-            val.addEventListener("input", yes.bind(this), false);
+            val.children[0].addEventListener("input", yes.bind(this), false);
 
             new_info.appendChild(tr);
         }
