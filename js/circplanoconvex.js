@@ -283,3 +283,4 @@ CircPlanoConvexLens.prototype.getNormVec = function(curve, x, y) {
         return normalVectorCircle(curve.centerX, curve.centerY, x, y);
     }
 }
+
