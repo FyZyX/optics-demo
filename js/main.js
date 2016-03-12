@@ -117,11 +117,11 @@ function startPlaying() {
     default_load();
 
 
-    toolbarCanvas = document.getElementById("pallet");
-    ctx2 = toolbarCanvas.getContext("2d");
-    ctx2.canvas.width = toolbarCanvas.clientWidth;
-    ctx2.canvas.height = toolbarCanvas.clientHeight;
-    pallet = new CanvasState(document.getElementById('pallet'));
+    // toolbarCanvas = document.getElementById("pallet");
+    // ctx2 = toolbarCanvas.getContext("2d");
+    // ctx2.canvas.width = toolbarCanvas.clientWidth;
+    // ctx2.canvas.height = toolbarCanvas.clientHeight;
+    // pallet = new CanvasState(document.getElementById('pallet'));
 
     infoBox = new InfoBox();
 }

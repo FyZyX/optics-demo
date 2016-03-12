@@ -92,7 +92,10 @@ background-color:#4CAF50;
 
 .CSSTableGenerator {
     margin:0px;padding:0px;
-/*    width:100%;*/
+    opacity: 0.4;
+    transition: opacity .12s ease-in-out;
+    -moz-transition: opacity .12s ease-in-out;
+    -webkit-transition: opacity .12s ease-in-out;
     box-shadow: 10px 10px 5px #888888;
     border:1px solid #000000;
 
@@ -111,7 +114,13 @@ background-color:#4CAF50;
     -moz-border-radius-topleft:0px;
     -webkit-border-top-left-radius:0px;
     border-top-left-radius:0px;
-}.CSSTableGenerator table{
+}
+
+.CSSTableGenerator:hover {
+    opacity: 1;
+}
+
+.CSSTableGenerator table{
     border-collapse: collapse;
         border-spacing: 0;
     width:100%;

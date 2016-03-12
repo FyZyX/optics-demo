@@ -68,6 +68,9 @@ function CanvasState(canvas) {
                     myState.selection = mySel;
                     myState.last_angle = myState.selection.rotation;
                     myState.valid = false;
+
+                    // var info = document.getElementById("infoBox");
+                    // info.style.opacity = 0.4;
                     return;
                 }
             }
@@ -77,6 +80,8 @@ function CanvasState(canvas) {
             if (myState.selection) {
                 myState.selection = null;
                 myState.valid = false; // Need to clear the old selection border
+                // var info = document.getElementById("infoBox");
+                // info.style.opacity = 0;
             }
         }
 

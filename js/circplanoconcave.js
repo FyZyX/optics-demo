@@ -157,7 +157,6 @@ CircPlanoConcaveLens.prototype.highlight = function(ctx) {
     }
 
     ctx.stroke();
-    // this.arc.draw(ctx);
 }
 
 CircPlanoConcaveLens.prototype.intersection = function(ray) {
@@ -227,8 +226,6 @@ CircPlanoConcaveLens.prototype.intersectionBox = function(ray) {
 CircPlanoConcaveLens.prototype.intersectionArc = function(ray) {
 
     var val = (Math.PI - this.extent)/2;
-
-
 
     var x1 = ray.x1;
     var x2 = ray.x2;
