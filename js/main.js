@@ -26,15 +26,6 @@ window.addEventListener("keyup", function(e) {
     }
 }, true);
 
-function videoFinished() {
-    var vid = document.getElementById("wrap_video");
-    if (vid) {
-        vid.remove();
-        startPlaying();
-    }
-}
-
-
 
 
 
@@ -140,10 +131,20 @@ function startGame() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    document.getElementById("skip").onclick = function() {
+        var vid = document.getElementById("wrap_video");
+        if (vid) {
+            vid.remove();
+            startPlaying();
+        }
+    }
+
     document.getElementById("myVideo").load();
     var vid = document.getElementById("myVideo");
     vid.onended = function() {
-        videoFinished();
+        vid.remove();
+        startPlaying();
     }
 
 }, false);
