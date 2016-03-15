@@ -53,11 +53,6 @@ canvas {
     height: 100%;
 }
 
-#myVideo {
-/*    position: absolute;
-    background-color: black !important; /* or whatever you want */*/
-}
-
 #wrap_video {
     position: absolute;
     background-color: black !important; /* or whatever you want */
