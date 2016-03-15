@@ -7,18 +7,34 @@ var CircPlanoConvexLens = function(x, y, rotation, n, r, semi_diameter, w) {
     this.color2 = "#ccffcc";
     this.rotation = rotation;
     this.w = w;
+    this.semi_diameter = semi_diameter;
+
+    this.attributes = {"radius": this.r, "semi_diameter": semi_diameter, "n": n, "width": w};
 
     this.extent = 2*Math.asin(semi_diameter/r);
     var a = semi_diameter;
     var s = r - Math.sqrt(r*r - a*a);
-    var l = s+w;
-    var d = (l-s)/2;
+    // var l = s+w;
+    // var d = (l-s)/2;
+    var d = (w+s)/2
 
-    this.arc = new Arc(x - w*Math.sin(rotation)/2, y + w*Math.cos(rotation)/2, r, rotation + Math.PI, this.extent + rotation + Math.PI);
+    this.arc = new Arc(x - d*Math.sin(rotation)/2, y + d*Math.cos(rotation)/2, r, rotation + Math.PI, this.extent + Math.PI);
+    this.draw(canvasState.ctx);
+}
 
-    this.generateLineSegments();
-    this.recalculateCurves();
-    this.generateCenter();
+CircPlanoConvexLens.prototype.updateAttribute = function(key, value) {
+    this.attributes[key] = value;
+    if (key == "width") {
+        this.w = value;
+    } else if (key == "radius") {
+        this.r = value;
+    } else if (key == "semi_diameter") {
+        this.semi_diameter = value;
+    } else {
+        this.n = value;
+    }
+
+    canvasState.valid = false;
     this.draw(canvasState.ctx);
 }
 
@@ -39,8 +55,17 @@ CircPlanoConvexLens.prototype.generateLineSegments = function() {
 }
 
 CircPlanoConvexLens.prototype.recalculateCurves = function() {
-    this.arc.x = this.x - this.w*Math.sin(this.rotation)/2;
-    this.arc.y = this.y + this.w*Math.cos(this.rotation)/2;
+    this.extent = 2*Math.asin(this.semi_diameter/this.r);
+    var a = this.semi_diameter;
+    var s = this.r - Math.sqrt(this.r*this.r - a*a);
+    // var l = s+w;
+    // var d = (l-s)/2;
+    var d = (this.w+s)/2
+
+    this.arc.x = this.x - d*Math.sin(this.rotation)/2;
+    this.arc.y = this.y + d*Math.cos(this.rotation)/2;
+    this.arc.extent = this.extent;
+    this.arc.r = this.r;
 }
 
 CircPlanoConvexLens.prototype.generateCenter = function() {
@@ -73,8 +98,6 @@ CircPlanoConvexLens.prototype.drawCenter = function(ctx) {
 CircPlanoConvexLens.prototype.draw = function(ctx) {
     var val = (Math.PI - this.extent)/2;
 
-
-
     this.recalculateCurves();
     this.generateCenter();
     this.generateLineSegments();
@@ -94,15 +117,17 @@ CircPlanoConvexLens.prototype.draw = function(ctx) {
         curLineSeg = this.lineSegments[i];
         ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
     }
+    // ctx.closePath();
 
     ctx.fill();
+    ctx.stroke();
 
     this.drawCenter(ctx);
 }
 
 CircPlanoConvexLens.prototype.setRotation = function(rotation) {
     this.rotation = mod(rotation, 2*Math.PI);
-    this.arc.rotation = this.rotation;
+    this.arc.rotation = this.rotation + Math.PI;
 }
 
 CircPlanoConvexLens.prototype.contains = function(x, y) {

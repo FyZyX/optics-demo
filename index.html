@@ -14,9 +14,21 @@
 
 <link rel="stylesheet" type="text/css" href="css/mystyle.css">
 
-<video src="videos/intro.ogv" id="myVideo" width="100%" height="100%" autoplay="autoplay">
-  Your browser does not support the <code>video</code> element.
-</video>
+<div id="wrap_video">
+    <div id="video_box">
+        <div id="video_overlays">
+            <img id="skip" onclick="videoFinished()"></img>
+        </div>
+        <div>
+            <video src="videos/intro.ogv" id="myVideo" width="100%" height="100%" autoplay="autoplay">
+                Your browser does not support the <code>video</code> element.
+            </video>
+        </div>
+    </div>
+</div>
+
+
+<div class="banner">Optic Studios Online</div>
 
 
 <!-- <div role="toolbar" id="toolbar">

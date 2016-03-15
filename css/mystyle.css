@@ -24,6 +24,19 @@ canvas {
     box-shadow: 3px 3px 3px #777;
 }
 
+.banner {
+    height: 30px;
+    line-height: 30px;
+    font-size: 30px;
+    font-style: italic;
+    padding: 10px;
+    color: white;
+    background-color: #5F2289;
+    border-bottom: 4px solid black;
+    border-top: 4px solid black;
+    /*box-shadow: inset 0 -3px 0 0 #000, 0 3px 0 0 #000;*/
+}
+
 #toolbar {
     padding: 0;
     margin: auto;
@@ -41,7 +54,35 @@ canvas {
 }
 
 #myVideo {
+/*    position: absolute;
+    background-color: black !important; /* or whatever you want */*/
+}
+
+#wrap_video {
     position: absolute;
+    background-color: black !important; /* or whatever you want */
+}
+
+#video_box {
+    position:relative;
+    width: 100%;
+    height: 100%;
+}
+
+#video_overlays {
+    position:absolute;
+    width: auto;
+    height: auto;
+    background-color:transparent;
+    z-index:300000;
+    top:20px;
+    right:20px;
+}
+
+#video_overlays img {
+    background: url(../images/skip2.png);
+    width: 246px;
+    height: 80px;
 }
 
 

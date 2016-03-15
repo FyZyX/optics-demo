@@ -26,13 +26,13 @@ window.addEventListener("keyup", function(e) {
     }
 }, true);
 
-window.addEventListener("mousedown", function(e) {
-    var vid = document.getElementById("myVideo");
+function videoFinished() {
+    var vid = document.getElementById("wrap_video");
     if (vid) {
         vid.remove();
         startPlaying();
     }
-}, true);
+}
 
 
 
@@ -70,8 +70,11 @@ function default_load() {
     var wall = new Wall(400, 400, 15, 300, 0);
     canvasState.addShape(wall);
 
-    var planoConcave1 = new CircPlanoConcaveLens(100, 200, Math.PI, 1.5, 200, 150, 100);
+    var planoConcave1 = new CircPlanoConcaveLens(200, 250, Math.PI, 1.5, 200, 150, 100);
     canvasState.addShape(planoConcave1);
+
+    var planoConcave2 = new CircPlanoConcaveLens(500, 200, 0, 1.5, 100, 70, 50);
+    canvasState.addShape(planoConcave2);
 
     // var planoConvex2 = new CircPlanoConvexLens(100, 100, 0, 1.5, 100, 100, 200);
     // canvasState.addShape(planoConvex2);
@@ -128,21 +131,20 @@ function startPlaying() {
 
 
 function startGame() {
-    document.getElementById("myVideo").load();
-    var vid = document.getElementById("myVideo");
-    vid.onended = function() {
-        this.remove();
-        startPlaying();
-    }
+    // document.getElementById("myVideo").load();
+    // var vid = document.getElementById("myVideo");
+    // vid.onended = function() {
+    //     videoFinished();
+    // }
 }
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById("elementInfo").onclick = function() {
-        var selection_list = document.getElementById("elementInfo");
-        displayElementInfo = selection_list[selection_list.selectedIndex].value;
-        canvasState.valid = false;
-        startGame();
-    };
+    document.getElementById("myVideo").load();
+    var vid = document.getElementById("myVideo");
+    vid.onended = function() {
+        videoFinished();
+    }
+
 }, false);
 
