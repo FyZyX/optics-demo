@@ -6,15 +6,35 @@ body {
     background-color: #1f1f14;
 }
 
+/*  width: 150px;
+  float: left;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  margin-right: 10px;*/
+
+#tool_canvas_wrapper {
+    /*overflow:hidden;*/
+    width: 100%;
+    height: 100%;
+}
+
+#tool_palette {
+    margin: 0;
+    padding: 0;
+    float: left;
+    display: inline;
+    left: 0;
+    width: 80px;
+    height: 100%;
+    background-color:white;
+}
+
 canvas {
     padding: 0;
-    margin: auto;
-    display: block;
-/*    position: absolute;
-    top: 0;
-    bottom: 0;*/
-    left: 0;
-    right: 0;
+    margin: 0;
+    display: inline;
+    float: left;
     background-color:white;
 
     border: 10px solid #fff;
@@ -35,22 +55,6 @@ canvas {
     border-bottom: 4px solid black;
     border-top: 4px solid black;
     /*box-shadow: inset 0 -3px 0 0 #000, 0 3px 0 0 #000;*/
-}
-
-#toolbar {
-    padding: 0;
-    margin: auto;
-    display: block;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 50px;
-    background-color:white;
-}
-
-#pallet {
-    width: 100%;
-    height: 100%;
 }
 
 #wrap_video {
@@ -120,6 +124,23 @@ background-color:#4CAF50;
     border: 2px solid black;
 }
 
+.elements_list {
+/*  columns: 2;
+  -webkit-columns: 2;*/
+/*  -moz-columns: 2;*/
+}
+
+.elements_list li {
+  border: 1px solid black;
+  width: 100%;
+  height: 80px;
+}
+
+#planoconvex {
+    background: url(../images/planoconvex.jpg);
+    width: 100%;
+    height: 100%;
+}
 
 
 

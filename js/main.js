@@ -4,7 +4,7 @@
   * in it. */
 
 var canvasState;
-var mousePointer;
+var mousePointer = false;
 var rayLineWidth = 3;
 var shiftKeyPressed = false;
 var displayElementInfo = "Never";
@@ -26,6 +26,10 @@ window.addEventListener("keyup", function(e) {
     }
 }, true);
 
+window.onmousedown = function() {
+    var elementToChange = document.getElementsByTagName("body")[0];
+    elementToChange.style.cursor = "default";
+};
 
 
 
@@ -95,7 +99,7 @@ function startPlaying() {
     c = document.getElementById("myCanvas");
     ctx = c.getContext("2d");
 
-    var width = window.innerWidth - 10;
+    var width = window.innerWidth - 100;
     var height = window.innerHeight - 10;
     // if (width/height > aspect_ratio) {
     //     width = height*aspect_ratio;
@@ -139,6 +143,13 @@ document.addEventListener('DOMContentLoaded', function() {
             startPlaying();
         }
     }
+
+    document.getElementById("planoconvex").onclick = function() {
+        var elementToChange = document.getElementsByTagName("body")[0];
+        elementToChange.style.cursor = "url('images/planoconvexcursor.png') 50 50, auto";
+        mousePointer = true;
+    }
+
 
     document.getElementById("myVideo").load();
     var vid = document.getElementById("myVideo");

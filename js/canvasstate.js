@@ -45,8 +45,10 @@ function CanvasState(canvas) {
         var mouse = myState.getMouse(e);
         var mx = mouse.x;
         var my = mouse.y;
-        if (e.which == 3) { // right click
-            myState.placeOpticalElement(mx, my);
+        if (mousePointer) {
+            var planoConvex = new CircPlanoConcaveLens(mx, my, 3*Math.PI/2, 1.5, 70, 40, 30);
+            canvasState.addShape(planoConvex);
+            mousePointer = false;
         } else {
             var opticalElements = myState.opticalElements;
             var l = opticalElements.length;
@@ -155,7 +157,7 @@ CanvasState.prototype.draw = function() {
     if (shiftKeyPressed && mouseOverObject) {
         var elementToChange = document.getElementsByTagName("body")[0];
         elementToChange.style.cursor = "url('images/cursor.png') 9 10, auto";
-    } else {
+    } else if (!mousePointer) {
         var elementToChange = document.getElementsByTagName("body")[0];
         elementToChange.style.cursor = "default";
     }
