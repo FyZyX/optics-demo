@@ -17,6 +17,8 @@ window.addEventListener("keydown", function(e) {
         shiftKeyPressed = true;
     } else if (e.keyCode > 47 && e.keyCode < 51) {
         // startLevel(e.keyCode - 48);
+    } else if (e.keyCode == 8) {
+        canvasState.removeShape(canvasState.selection);
     }
 }, true);
 

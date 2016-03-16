@@ -142,6 +142,16 @@ CanvasState.prototype.addShape = function(object) {
     this.valid = false;
 }
 
+CanvasState.prototype.removeShape = function(object) {
+    for (var i = 0; i < this.opticalElements.length; i += 1) {
+        if (this.opticalElements[i] == object) {
+            this.opticalElements.splice(i,1);
+        }
+    }
+    this.selection = null;
+    this.valid = false;
+}
+
 CanvasState.prototype.getOpticalElements = function() {
     return this.opticalElements;
 }
@@ -173,6 +183,7 @@ CanvasState.prototype.draw = function() {
 
         // draw all opticalElements
         var l = opticalElements.length;
+        console.log("length: " + l);
         for (var i = 0; i < l; i++) {
             var shape = opticalElements[i];
             // We can skip the drawing of elements that have moved off the screen:
