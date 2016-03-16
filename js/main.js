@@ -64,29 +64,23 @@ function startLevel(level) {
 var vid = {};
 
 function default_load() {
-    var wall = new Wall(400, 400, 15, 300, 0);
-    canvasState.addShape(wall);
+    // var wall = new Wall(400, 400, 15, 300, 0);
+    // canvasState.addShape(wall);
 
-    var planoConcave1 = new CircPlanoConcaveLens(200, 250, Math.PI, 1.5, 200, 150, 100);
-    canvasState.addShape(planoConcave1);
+    // var planoConcave1 = new CircPlanoConcaveLens(200, 250, Math.PI, 1.5, 200, 150, 100);
+    // canvasState.addShape(planoConcave1);
 
-    var planoConcave2 = new CircPlanoConcaveLens(500, 200, 0, 1.5, 100, 70, 50);
-    canvasState.addShape(planoConcave2);
+    // var planoConcave2 = new CircPlanoConcaveLens(500, 200, 0, 1.5, 100, 70, 50);
+    // canvasState.addShape(planoConcave2);
 
-    // var planoConvex2 = new CircPlanoConvexLens(100, 100, 0, 1.5, 100, 100, 200);
-    // canvasState.addShape(planoConvex2);
+    // var mirror1 = new Mirror(600, 200, 15, 150, 0);
+    // canvasState.addShape(mirror1);
 
-    // var planoConvex3 = new CircPlanoConvexLens(200, 300, 0, 1.5, 100, 200);
-    // canvasState.addShape(planoConvex3);
+    // var mirror2 = new Mirror(450, 400, 15, 150, 0);
+    // canvasState.addShape(mirror2);
 
-    var mirror1 = new Mirror(600, 200, 15, 150, 0);
-    canvasState.addShape(mirror1);
-
-    var mirror2 = new Mirror(450, 400, 15, 150, 0);
-    canvasState.addShape(mirror2);
-
-    var l = new Laser(0,50,80,0,15);
-    canvasState.setLaser(l);
+    // var l = new Laser(0,50,80,0,15);
+    // canvasState.setLaser(l);
 
 }
 
@@ -113,26 +107,8 @@ function startPlaying() {
     ctx.canvas.height = height;
 
     canvasState = new CanvasState(document.getElementById('myCanvas'));
-
     default_load();
-
-
-    // toolbarCanvas = document.getElementById("pallet");
-    // ctx2 = toolbarCanvas.getContext("2d");
-    // ctx2.canvas.width = toolbarCanvas.clientWidth;
-    // ctx2.canvas.height = toolbarCanvas.clientHeight;
-    // pallet = new CanvasState(document.getElementById('pallet'));
-
     infoBox = new InfoBox();
-}
-
-
-function startGame() {
-    // document.getElementById("myVideo").load();
-    // var vid = document.getElementById("myVideo");
-    // vid.onended = function() {
-    //     videoFinished();
-    // }
 }
 
 
@@ -149,7 +125,31 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("planoconvex").onclick = function() {
         var elementToChange = document.getElementsByTagName("body")[0];
         elementToChange.style.cursor = "url('images/planoconvexcursor.png') 50 50, auto";
-        mousePointer = true;
+        mousePointer = "planoconvex";
+    }
+
+    document.getElementById("medium").onclick = function() {
+        var elementToChange = document.getElementsByTagName("body")[0];
+        elementToChange.style.cursor = "url('images/mediumcursor.png') 50 50, auto";
+        mousePointer = "medium";
+    }
+
+    document.getElementById("laser").onclick = function() {
+        var elementToChange = document.getElementsByTagName("body")[0];
+        elementToChange.style.cursor = "url('images/laser_pointer_small.png') 25 25, auto";
+        mousePointer = "laser";
+    }
+
+    document.getElementById("mirror").onclick = function() {
+        var elementToChange = document.getElementsByTagName("body")[0];
+        elementToChange.style.cursor = "url('images/mirror.png') 25 25, auto";
+        mousePointer = "mirror";
+    }
+
+    document.getElementById("wall").onclick = function() {
+        var elementToChange = document.getElementsByTagName("body")[0];
+        elementToChange.style.cursor = "url('images/wall.png') 50 50, auto";
+        mousePointer = "wall";
     }
 
 

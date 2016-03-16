@@ -45,9 +45,26 @@ function CanvasState(canvas) {
         var mouse = myState.getMouse(e);
         var mx = mouse.x;
         var my = mouse.y;
-        if (mousePointer) {
-            var planoConvex = new CircPlanoConcaveLens(mx, my, 3*Math.PI/2, 1.5, 70, 40, 30);
+        if (mousePointer == "planoconvex") {
+            var planoConvex = new CircPlanoConcaveLens(mx, my, 3*Math.PI/2, 1.5, 90, 50, 30);
             canvasState.addShape(planoConvex);
+            mousePointer = false;
+        } else if (mousePointer == "medium") {
+            var glass_box = new GlassBox(mx, my, 150, 150, 0);
+            myState.addShape(glass_box);
+            mousePointer = false;
+        } else if (mousePointer == "laser") {
+            var l = new Laser(mx,my,80,0,15);
+            canvasState.setLaser(l);
+            mousePointer = false;
+            canvasState.valid = false;
+        } else if (mousePointer == "mirror") {
+            var mirror1 = new Mirror(mx, my, 15, 150, 0);
+            canvasState.addShape(mirror1);
+            mousePointer = false;
+        } else if (mousePointer == "wall") {
+            var wall = new Wall(mx, my, 15, 150, 0);
+            canvasState.addShape(wall);
             mousePointer = false;
         } else {
             var opticalElements = myState.opticalElements;
@@ -123,13 +140,6 @@ function CanvasState(canvas) {
         myState.rotating = false;
     }, true);
 
-    // double click for making new opticalElements
-    canvas.addEventListener('dblclick', function(e) {
-        var mouse = myState.getMouse(e);
-        var glass_box = new GlassBox(mouse.x - 10, mouse.y - 10, 200, 200, 0);
-        myState.addShape(glass_box);
-    }, true);
-
     // **** Options! ****
 
     this.selectionColor = '#660066';
@@ -183,7 +193,6 @@ CanvasState.prototype.draw = function() {
 
         // draw all opticalElements
         var l = opticalElements.length;
-        console.log("length: " + l);
         for (var i = 0; i < l; i++) {
             var shape = opticalElements[i];
             // We can skip the drawing of elements that have moved off the screen:
