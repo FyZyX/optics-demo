@@ -10,6 +10,8 @@ var shiftKeyPressed = false;
 var displayElementInfo = "Never";
 var infoBox;
 
+var stack = [];
+
 window.addEventListener("keydown", function(e) {
     if (e.keyCode == 13) {
         generateLevelFile();
@@ -19,6 +21,8 @@ window.addEventListener("keydown", function(e) {
         // startLevel(e.keyCode - 48);
     } else if (e.keyCode == 46) {
         canvasState.removeShape(canvasState.selection);
+    } else if (e.keyCode == 90 && e.ctrlKey) {
+        canvasState.undo();
     }
 }, true);
 

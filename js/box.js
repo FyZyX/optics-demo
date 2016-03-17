@@ -12,6 +12,10 @@ var Box = function(x, y, rotation, n, w, h, color1, color2) {
     this.attributes = {"width": w, "height": h, "n": this.n};
 }
 
+Box.prototype.createClone = function() {
+    return new Box(this.x, this.y, this.rotation, this.n, this.w, this.h, this.color1, this.color2);
+}
+
 Box.prototype.updateAttribute = function(key, value) {
     this.attributes[key] = value;
     if (key == "width") {

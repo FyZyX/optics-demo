@@ -3,6 +3,7 @@
 
 var mouseOverObject = false;
 var c = 0;
+var updating = false;
 
 function CanvasState(canvas) {
     // **** First some setup! ****
@@ -88,8 +89,8 @@ function CanvasState(canvas) {
                     myState.last_angle = myState.selection.rotation;
                     myState.valid = false;
 
-                    // var info = document.getElementById("infoBox");
-                    // info.style.opacity = 0.4;
+                    var info = document.getElementById("infoBox");
+                    info.style.visibility = 'visible';     // Show
                     return;
                 }
             }
@@ -99,14 +100,18 @@ function CanvasState(canvas) {
             if (myState.selection) {
                 myState.selection = null;
                 myState.valid = false; // Need to clear the old selection border
-                // var info = document.getElementById("infoBox");
-                // info.style.opacity = 0;
+                var info = document.getElementById("infoBox");
+                info.style.visibility = 'hidden';
             }
         }
 
     }, true);
 
     canvas.addEventListener('mousemove', function(e) {
+        if (!updating) {
+            myState.addToStack();
+            updating = true;
+        }
         if (myState.dragging) {
             var mouse = myState.getMouse(e);
             // We don't want to drag the object by its top-left corner, we want to drag it
@@ -136,6 +141,7 @@ function CanvasState(canvas) {
     }, true);
 
     canvas.addEventListener('mouseup', function(e) {
+        updating = false;
         myState.dragging = false;
         myState.rotating = false;
     }, true);
@@ -148,11 +154,13 @@ function CanvasState(canvas) {
 }
 
 CanvasState.prototype.addShape = function(object) {
+    this.addToStack();
     this.opticalElements.push(object);
     this.valid = false;
 }
 
 CanvasState.prototype.removeShape = function(object) {
+    this.addToStack();
     for (var i = 0; i < this.opticalElements.length; i += 1) {
         if (this.opticalElements[i] == object) {
             this.opticalElements.splice(i,1);
@@ -291,4 +299,26 @@ CanvasState.prototype.setLaser = function(laser) {
 
 CanvasState.prototype.placeOpticalElement = function(x, y) {
     alert("place element");
+}
+
+CanvasState.prototype.undo = function() {
+    if (stack.length) {
+        this.opticalElements = stack.pop();
+        this.selection = null;
+        this.valid = false;
+    }
+}
+
+CanvasState.prototype.addToStack = function() {
+    var old_optical_elements = [];
+
+    // draw all opticalElements
+    var l = this.opticalElements.length;
+    for (var i = 0; i < l; i++) {
+        var shape = this.opticalElements[i];
+        old_optical_elements.push(shape.createClone());
+    }
+
+    stack.push(old_optical_elements);
+    this.valid = false;
 }

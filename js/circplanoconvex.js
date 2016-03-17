@@ -14,8 +14,6 @@ var CircPlanoConvexLens = function(x, y, rotation, n, r, semi_diameter, w) {
     this.extent = 2*Math.asin(semi_diameter/r);
     var a = semi_diameter;
     var s = r - Math.sqrt(r*r - a*a);
-    // var l = s+w;
-    // var d = (l-s)/2;
     var d = (w+s)/2
 
     this.arc = new Arc(x - d*Math.sin(rotation)/2, y + d*Math.cos(rotation)/2, r, rotation + Math.PI, this.extent + Math.PI);

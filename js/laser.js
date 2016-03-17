@@ -11,7 +11,7 @@ var Laser = function(x, y, h, rotation, numRays) {
     this.rays = [];
     var spacing = h/numRays;
     for (var i = 0; i < this.numRays; i += 1) {
-        this.rays.push(new Ray(x - i*spacing*Math.sin(rotation), y + i*spacing*Math.cos(rotation), rotation));
+        this.rays.push(new Ray(x - i*spacing*Math.sin(rotation), y - h/2 + i*spacing*Math.cos(rotation), rotation));
     }
 
 }

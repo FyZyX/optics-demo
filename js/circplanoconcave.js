@@ -21,6 +21,10 @@ var CircPlanoConcaveLens = function(x, y, rotation, n, r, semi_diameter, w) {
     this.draw(canvasState.ctx);
 }
 
+CircPlanoConcaveLens.prototype.createClone = function() {
+    return new CircPlanoConcaveLens(this.x, this.y, this.rotation, this.n, this.r, this.semi_diameter, this.w);
+}
+
 CircPlanoConcaveLens.prototype.updateAttribute = function(key, value) {
     this.attributes[key] = value;
     if (key == "width") {
@@ -278,8 +282,6 @@ CircPlanoConcaveLens.prototype.intersectionArc = function(ray) {
 
         var a = angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y);
 
-        // if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
-        //     return closer_intersection;
         if (isInRange(this.rotation + val, this.rotation + val + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
             return closer_intersection;
         } else {
