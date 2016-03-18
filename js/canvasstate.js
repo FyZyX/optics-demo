@@ -337,7 +337,6 @@ CanvasState.prototype.getOpticalElementsClone = function() {
 }
 
 CanvasState.prototype.addToStack = function() {
-    alert("add to stack");
     var old_optical_elements = this.getOpticalElementsClone();
 
     undo_stack.push(old_optical_elements);
