@@ -10,7 +10,8 @@ var shiftKeyPressed = false;
 var displayElementInfo = "Never";
 var infoBox;
 
-var stack = [];
+var undo_stack = [];
+var redo_stack = [];
 
 window.addEventListener("keydown", function(e) {
     if (e.keyCode == 13) {
@@ -23,6 +24,8 @@ window.addEventListener("keydown", function(e) {
         canvasState.removeShape(canvasState.selection);
     } else if (e.keyCode == 90 && e.ctrlKey) {
         canvasState.undo();
+    } else if (e.keyCode == 89 && e.ctrlKey) {
+        canvasState.redo();
     }
 }, true);
 

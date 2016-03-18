@@ -43,6 +43,9 @@ function CanvasState(canvas) {
 
     // Up, down, and move are for dragging
     canvas.addEventListener('mousedown', function(e) {
+        if (!updating) {
+            updating = true;
+        }
         var mouse = myState.getMouse(e);
         var mx = mouse.x;
         var my = mouse.y;
@@ -108,9 +111,9 @@ function CanvasState(canvas) {
     }, true);
 
     canvas.addEventListener('mousemove', function(e) {
-        if (!updating) {
+        if (updating) {
             myState.addToStack();
-            updating = true;
+            updating = false;
         }
         if (myState.dragging) {
             var mouse = myState.getMouse(e);
@@ -302,14 +305,25 @@ CanvasState.prototype.placeOpticalElement = function(x, y) {
 }
 
 CanvasState.prototype.undo = function() {
-    if (stack.length) {
-        this.opticalElements = stack.pop();
+    if (undo_stack.length) {
+        redo_stack.push(this.getOpticalElementsClone());
+        this.opticalElements = undo_stack.pop();
         this.selection = null;
         this.valid = false;
     }
 }
 
-CanvasState.prototype.addToStack = function() {
+CanvasState.prototype.redo = function() {
+    if (redo_stack.length) {
+        var new_optical_elements = redo_stack.pop();
+        undo_stack.push(this.getOpticalElementsClone());
+        this.opticalElements = new_optical_elements;
+        this.selection = null;
+        this.valid = false;
+    }
+}
+
+CanvasState.prototype.getOpticalElementsClone = function() {
     var old_optical_elements = [];
 
     // draw all opticalElements
@@ -319,6 +333,13 @@ CanvasState.prototype.addToStack = function() {
         old_optical_elements.push(shape.createClone());
     }
 
-    stack.push(old_optical_elements);
+    return old_optical_elements;
+}
+
+CanvasState.prototype.addToStack = function() {
+    alert("add to stack");
+    var old_optical_elements = this.getOpticalElementsClone();
+
+    undo_stack.push(old_optical_elements);
     this.valid = false;
 }
