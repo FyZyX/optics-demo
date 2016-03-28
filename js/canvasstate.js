@@ -2,7 +2,6 @@
   * all of the optical elements on the screen, as well as ray tracing a ray. */
 
 var mouseOverObject = false;
-var c = 0;
 var updating = false;
 
 function CanvasState(canvas) {
@@ -49,35 +48,35 @@ function CanvasState(canvas) {
         var mouse = myState.getMouse(e);
         var mx = mouse.x;
         var my = mouse.y;
-        if (mousePointer == "planoconvex") {
+        if (cursorImg == "planoconvex") {
             var planoConvex = new CircPlanoConcaveLens(mx, my, 3*Math.PI/2, 1.5, 90, 50, 30);
             canvasState.addShape(planoConvex);
-            mousePointer = false;
-        } else if (mousePointer == "medium") {
+            cursorImg = "default";
+        } else if (cursorImg == "medium") {
             var glass_box = new GlassBox(mx, my, 150, 150, 0);
             myState.addShape(glass_box);
-            mousePointer = false;
-        } else if (mousePointer == "laser") {
+            cursorImg = "default";
+        } else if (cursorImg == "laser") {
             var l = new Laser(mx,my,80,0,15);
             canvasState.setLaser(l);
-            mousePointer = false;
+            cursorImg = "default";
             canvasState.valid = false;
-        } else if (mousePointer == "mirror") {
+        } else if (cursorImg == "mirror") {
             var mirror1 = new Mirror(mx, my, 15, 150, 0);
             canvasState.addShape(mirror1);
-            mousePointer = false;
-        } else if (mousePointer == "wall") {
+            cursorImg = "default";
+        } else if (cursorImg == "wall") {
             var wall = new Wall(mx, my, 15, 150, 0);
             canvasState.addShape(wall);
-            mousePointer = false;
+            cursorImg = "default";
         } else {
             var opticalElements = myState.opticalElements;
             var l = opticalElements.length;
             for (var i = l-1; i >= 0; i--) {
-                if (opticalElements[i].contains(mx, my) && !(opticalElements[i].wall && playing)) {
+                if (opticalElements[i].contains(mx, my) && !(opticalElements[i].wall)) {
                     var mySel = opticalElements[i];
-                    infoBox.setElement(mySel);
-                    infoBox.display();
+                    attrBox.setElement(mySel);
+                    attrBox.display();
                     // Keep track of where in the object we clicked
                     // so we can move it smoothly (see mousemove)
                     if (shiftKeyPressed) {
@@ -92,7 +91,7 @@ function CanvasState(canvas) {
                     myState.last_angle = myState.selection.rotation;
                     myState.valid = false;
 
-                    var info = document.getElementById("infoBox");
+                    var info = document.getElementById("attrBox");
                     info.style.visibility = 'visible';     // Show
                     return;
                 }
@@ -103,7 +102,7 @@ function CanvasState(canvas) {
             if (myState.selection) {
                 myState.selection = null;
                 myState.valid = false; // Need to clear the old selection border
-                var info = document.getElementById("infoBox");
+                var info = document.getElementById("attrBox");
                 info.style.visibility = 'hidden';
             }
         }
@@ -134,7 +133,7 @@ function CanvasState(canvas) {
             var opticalElements = myState.opticalElements;
             var l = opticalElements.length;
             for (var i = l-1; i >= 0; i--) {
-                if (opticalElements[i].contains(mx, my) && !(opticalElements[i].wall && playing)) {
+                if (opticalElements[i].contains(mx, my) && !(opticalElements[i].wall)) {
                     mouseOverObject = true;
                     return;
                 }
@@ -188,7 +187,7 @@ CanvasState.prototype.draw = function() {
     if (shiftKeyPressed && mouseOverObject) {
         var elementToChange = document.getElementsByTagName("body")[0];
         elementToChange.style.cursor = "url('images/cursor.png') 9 10, auto";
-    } else if (!mousePointer) {
+    } else if (cursorImg == "default") {
         var elementToChange = document.getElementsByTagName("body")[0];
         elementToChange.style.cursor = "default";
     }
@@ -210,10 +209,6 @@ CanvasState.prototype.draw = function() {
             // if (shape.centerX > this.width || shape.centerY > this.height ||
             //     shape.centerX + shape.w < 0 || shape.centerY + shape.h < 0) continue;
             opticalElements[i].draw(ctx);
-
-            if ((displayElementInfo == "When selected" && this.selection == opticalElements[i]) || displayElementInfo == "Always") {
-                opticalElements[i].displayInfo(ctx);
-            }
         }
 
         // draw selection
@@ -300,23 +295,19 @@ CanvasState.prototype.setLaser = function(laser) {
     this.laser = laser;
 }
 
-CanvasState.prototype.placeOpticalElement = function(x, y) {
-    alert("place element");
-}
-
 CanvasState.prototype.undo = function() {
-    if (undo_stack.length) {
-        redo_stack.push(this.getOpticalElementsClone());
-        this.opticalElements = undo_stack.pop();
+    if (undoStack.length) {
+        redoStack.push(this.getOpticalElementsClone());
+        this.opticalElements = undoStack.pop();
         this.selection = null;
         this.valid = false;
     }
 }
 
 CanvasState.prototype.redo = function() {
-    if (redo_stack.length) {
-        var new_optical_elements = redo_stack.pop();
-        undo_stack.push(this.getOpticalElementsClone());
+    if (redoStack.length) {
+        var new_optical_elements = redoStack.pop();
+        undoStack.push(this.getOpticalElementsClone());
         this.opticalElements = new_optical_elements;
         this.selection = null;
         this.valid = false;
@@ -338,8 +329,8 @@ CanvasState.prototype.getOpticalElementsClone = function() {
 
 CanvasState.prototype.addToStack = function() {
     var old_optical_elements = this.getOpticalElementsClone();
-    redo_stack = [];
+    redoStack = [];
 
-    undo_stack.push(old_optical_elements);
+    undoStack.push(old_optical_elements);
     this.valid = false;
 }

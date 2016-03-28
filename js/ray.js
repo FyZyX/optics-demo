@@ -64,11 +64,10 @@ Ray.prototype.drawPath = function() {
 
 Ray.prototype.getIntersection = function(elements) {
     var intersection, intersections = [];
-    var ray = this;
     var numElements = elements.length;
     for (var i = 0; i < numElements; i += 1) {
-        intersection = elements[i].intersection(ray);
-        if (intersection && !(approxeq(intersection.x, ray.x1, 0.01) && approxeq(intersection.y, ray.y1, 0.01))) {
+        intersection = elements[i].intersection(this);
+        if (intersection && !(approxeq(intersection.x, this.x1, 0.01) && approxeq(intersection.y, this.y1, 0.01))) {
             intersections.push(intersection);
         }
     }
@@ -77,10 +76,10 @@ Ray.prototype.getIntersection = function(elements) {
         // choose the intersection point that is closest to the ray's starting point
         var cur_dist, cur_point;
         var closest_point = intersections[0];
-        var min_dist = distance(closest_point.x, closest_point.y, ray.x1, ray.y1);
+        var min_dist = distance(closest_point.x, closest_point.y, this.x1, this.y1);
         for (var i = 0; i < intersections.length; i += 1) {
             cur_point = intersections[i];
-            cur_dist = distance(cur_point.x, cur_point.y, ray.x1, ray.y1);
+            cur_dist = distance(cur_point.x, cur_point.y, this.x1, this.y1);
             if (cur_dist < min_dist) {
                 closest_point = cur_point;
                 min_dist = cur_dist;
@@ -91,25 +90,6 @@ Ray.prototype.getIntersection = function(elements) {
     } else {
         return false;
     }
-}
-
-
-Ray.prototype.getReflectionAngle = function(intersection, normVec) {
-    var ray = this;
-    var curve = intersection.curve;
-
-    if (curve.type == "arc") {
-        var x = intersection.x;
-        var y = intersection.y;
-        var tanLine = normalVectorLine(x, y, x+normVec[0], y+normVec[1]);
-        var p = mirror(ray.x2, ray.y2, x, y, x+tanLine[0], y+tanLine[1]);
-    } else {
-        var p = mirror(ray.x2, ray.y2, curve.x1, curve.y1, curve.x2, curve.y2);
-    }
-    var x2 = p[0];
-    var y2 = p[1];
-
-    return Math.atan2(y2 - intersection.y, x2 - intersection.x);
 }
 
 
@@ -137,20 +117,21 @@ Ray.prototype.rayTrace = function(elements, boundaries) {
                 return;
             } else {
                 // create a vector from the ray's start and end points
-                var rayVec = [ray.x2 - ray.x1, ray.y2 - ray.y1];
+                var rayVec = new Vector(1, ray.angle);
                 var normVec = intersection.element.getNormVec(curve, intersection.x, intersection.y);
+
                 var entering = dotProduct(rayVec, normVec) < 0;
-                var n2 = (entering && intersection.element.n != 0) ? intersection.element.n : 1;
-                new_angle = refractedAngle(ray.n, n2, ray, intersection.curve, [intersection.x, intersection.y]);
+                var n2 = (entering) ? intersection.element.n : 1;
+                var t_vec = refract(rayVec, normVec, ray.n, n2);
 
                 // CHECK FOR TIR and mirrors
-                if (new_angle == undefined || isNaN(new_angle) || intersection.element.n == 0) {
-                    new_angle = this.getReflectionAngle(intersection, normVec);
+                if (isNaN(t_vec.angle)) {
+                    t_vec = reflect(rayVec, normVec, ray.n)
                 } else {
                     ray.n = n2;
                 }
 
-                ray.setAngle(new_angle);
+                ray.setAngle(t_vec.angle);
             }
 
             ray.x1 = intersection.x;

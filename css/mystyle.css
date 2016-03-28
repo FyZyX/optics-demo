@@ -111,7 +111,7 @@ a:hover:not(.active) {
 background-color:#4CAF50;
 }
 
-.infoBox {
+.attrBox {
     position: fixed;
     bottom: 25px;
     right: 25px;

@@ -23,6 +23,16 @@ LineSegment.prototype.intersection = function(ray) {
     }
 }
 
+LineSegment.prototype.getNormVec = function() {
+    var dx = this.x2 - this.x1;
+    var dy = this.y2 - this.y1;
+    var angle = Math.atan2(dx, 0-dy);
+    return new Vector(1, angle);
+};
+
+LineSegment.prototype.draw = function(path) {
+    path.lineTo(this.x2, this.y2);
+}
 
 
 
@@ -66,37 +76,15 @@ Arc.prototype.generateCenterOfCircle = function() {
     this.q2 = this.r*Math.sin(this.rotation + val + this.extent) + this.centerY;
 }
 
-Arc.prototype.draw = function(ctx) {
+
+Arc.prototype.getNormVec = function(x, y) {
+    var angle = Math.atan2(y - this.centerY, x - this.centerX);
+    return new Vector(1, angle);
+};
+
+
+Arc.prototype.draw = function(path) {
     this.generateCenterOfCircle();
-    ctx.beginPath();
-    ctx.arc(this.centerX, this.centerY, this.r, this.rotation + this.extent/2, this.rotation + 3*this.extent/2);
-    ctx.stroke();
-    ctx.fill();
-}
-
-Arc.prototype.contains = function(x, y) {
     var val = (Math.PI - this.extent)/2;
-    var p1 = this.r*Math.cos(this.rotation + val) + this.centerX;
-    var q1 = this.r*Math.sin(this.rotation + val) + this.centerY;
-    var p2 = this.r*Math.cos(this.rotation + val + this.extent) + this.centerX;
-    var q2 = this.r*Math.sin(this.rotation + val + this.extent) + this.centerY;
-    if (p1 === p2) {
-        var pastLine = Math.abs(x - this.centerX) >= Math.abs(p1 - this.centerX);
-    }
-    else {
-        var vecToPoint = [x - p1, y - q1];
-        var vecToCenter = [this.centerX - p1, this.centerY - q1];
-        var normal = normalVector(p1, q1, p2, q2);
-        var dot1 = dotProduct(vecToPoint, normal) > 0;
-        var dot2 = dotProduct(vecToCenter, normal) >= 0;
-
-        if (approxeq(dot2, 0, 0.001)) {
-            dot2 = 0;
-        }
-        var pastLine = dot1 != dot2;
-    }
-    var inCircle = Math.pow((x - this.centerX), 2) + Math.pow((y - this.centerY), 2) <= Math.pow(this.r, 2);
-    if (pastLine && inCircle) {return true}
-
-    return false;
+    path.arc(this.centerX, this.centerY, this.r, this.rotation + val, this.rotation + val + this.extent);
 }

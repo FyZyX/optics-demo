@@ -137,7 +137,7 @@ CircPlanoConvexLens.prototype.contains = function(x, y) {
     var y3 = this.lineSegments[2].y1;
     var x4 = this.lineSegments[2].x2;
     var y4 = this.lineSegments[2].y2;
-    return this.arc.contains(x, y) || boxContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
+    return this.arc.contains(x, y) || rectContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
 }
 
 CircPlanoConvexLens.prototype.highlight = function(ctx) {
@@ -300,10 +300,13 @@ CircPlanoConvexLens.prototype.intersectionArc = function(ray) {
 }
 
 CircPlanoConvexLens.prototype.getNormVec = function(curve, x, y) {
+    var v;
     if (curve.type == "line") {
-        return normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
+        v = normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
     } else {
-        return normalVectorCircle(curve.centerX, curve.centerY, x, y);
+        v = normalVectorCircle(curve.centerX, curve.centerY, x, y);
     }
+
+    return getVectorFromComponents(v[0], v[1]);
 }
 

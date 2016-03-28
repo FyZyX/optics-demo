@@ -1,171 +1,117 @@
-/** This file contains the central logic for the game. The function startGame()
-  * gets called when the web page loads, and creates the CanvasState object
-  * that will contain (and render) our coordinate system and all of the objects
-  * in it. */
+/** This file contains the entry point for the application. When all of the
+  * DOM content has been loaded, the 'startApplication' function gets called.
+  * This function does the following:
+  *
+  *     1) Loads the intro video
+  *     2) Fills the tool bar with optical elements
+  *     3) Creates the canvas where all of the rays/optical elements will reside
+  *     4) Sets up event handlers for things such as key presses & mouse clicks
+**/
 
 var canvasState;
-var mousePointer = false;
+var cursorImg = "default";
 var rayLineWidth = 3;
 var shiftKeyPressed = false;
-var displayElementInfo = "Never";
-var infoBox;
+var attrBox;
 
-var undo_stack = [];
-var redo_stack = [];
+var undoStack = [];
+var redoStack = [];
 
-window.addEventListener("keydown", function(e) {
-    if (e.keyCode == 13) {
-        generateLevelFile();
-    } else if (e.shiftKey && !shiftKeyPressed) {
-        shiftKeyPressed = true;
-    } else if (e.keyCode > 47 && e.keyCode < 51) {
-        // startLevel(e.keyCode - 48);
-    } else if (e.keyCode == 46) {
-        canvasState.removeShape(canvasState.selection);
-    } else if (e.keyCode == 90 && e.ctrlKey) {
-        canvasState.undo();
-    } else if (e.keyCode == 89 && e.ctrlKey) {
-        canvasState.redo();
+/** Loads intro video and removes it after it has either finished playing or
+  * the skip button has been clicked. */
+function playIntroVideo() {
+    var vidWrapper = document.getElementById("wrap_video");
+    var vid = document.getElementById("myVideo");
+    var skipButton = document.getElementById("skip");
+
+    vid.onended = function() {
+        vidWrapper.remove();
     }
-}, true);
 
-window.addEventListener("keyup", function(e) {
-    if (shiftKeyPressed && !e.shiftKey) {
-        shiftKeyPressed = false;
+    skipButton.onclick = function() {
+        vidWrapper.remove();
     }
-}, true);
 
-window.onmousedown = function() {
-    var elementToChange = document.getElementsByTagName("body")[0];
-    elementToChange.style.cursor = "default";
-};
+    vid.load();
+}
 
+/** Populates the tool bar with lens elements. */
+function initializeToolBar() {
+    var mouseDomElement = document.getElementsByTagName("body")[0];
 
+    document.getElementById("planoconvex").onclick = function() {
+        mouseDomElement.style.cursor = "url('images/planoconvexcursor.png') 50 50, auto";
+        cursorImg = "planoconvex";
+    }
 
-function generateLevelFile() {
-    if (!playing) {
-        var opticalElements = canvasState.opticalElements;
-        var string = "";
+    document.getElementById("medium").onclick = function() {
+        mouseDomElement.style.cursor = "url('images/mediumcursor.png') 50 50, auto";
+        cursorImg = "medium";
+    }
 
-        var element;
-        for (var i = 0; i < opticalElements.length; i += 1) {
-            element = opticalElements[i];
-            string += element.print();
-        }
+    document.getElementById("laser").onclick = function() {
+        mouseDomElement.style.cursor = "url('images/laser_pointer_small.png') 25 25, auto";
+        cursorImg = "laser";
+    }
 
-        string += canvasState.laser.print();
+    document.getElementById("mirror").onclick = function() {
+        mouseDomElement.style.cursor = "url('images/mirror.png') 25 25, auto";
+        cursorImg = "mirror";
+    }
 
-        window.open().document.write(string);
+    document.getElementById("wall").onclick = function() {
+        mouseDomElement.style.cursor = "url('images/wall.png') 50 50, auto";
+        cursorImg = "wall";
     }
 }
 
-var playing = false;
-
-function startLevel(level) {
-    canvasState.clearElements();
-    canvasState.dragging = false;
-    canvasState.rotating = false;
-    eval(levels[level]);
-}
-
-var vid = {};
-
-function default_load() {
-    // var wall = new Wall(400, 400, 15, 300, 0);
-    // canvasState.addShape(wall);
-
-    // var planoConcave1 = new CircPlanoConcaveLens(200, 250, Math.PI, 1.5, 200, 150, 100);
-    // canvasState.addShape(planoConcave1);
-
-    // var planoConcave2 = new CircPlanoConcaveLens(500, 200, 0, 1.5, 100, 70, 50);
-    // canvasState.addShape(planoConcave2);
-
-    // var mirror1 = new Mirror(600, 200, 15, 150, 0);
-    // canvasState.addShape(mirror1);
-
-    // var mirror2 = new Mirror(450, 400, 15, 150, 0);
-    // canvasState.addShape(mirror2);
-
-    // var l = new Laser(0,50,80,0,15);
-    // canvasState.setLaser(l);
-
-}
-
-
-
-var aspect_width = 1285;
-var aspect_height = 647;
-var aspect_ratio = aspect_width/aspect_height;
-// aspect_ratio = 2.3;
-
-function startPlaying() {
-    c = document.getElementById("myCanvas");
+/** Creates the canvasState where all of the rays/optical elements will be. */
+function initializeCanvas() {
+    var c = document.getElementById("myCanvas");
     ctx = c.getContext("2d");
-
-    var width = window.innerWidth - 100;
-    var height = window.innerHeight - 10;
-    // if (width/height > aspect_ratio) {
-    //     width = height*aspect_ratio;
-    // } else {
-    //     height = width/aspect_ratio;
-    // }
-
-    ctx.canvas.width = width;
-    ctx.canvas.height = height;
+    ctx.canvas.width = window.innerWidth - 100;
+    ctx.canvas.height = window.innerHeight - 10;
 
     canvasState = new CanvasState(document.getElementById('myCanvas'));
-    default_load();
-    infoBox = new InfoBox();
+    attrBox = new AttrBox();
+}
+
+/** Sets up event handlers for things such as key presses and mouse clicks. */
+function setUpEventHandlers() {
+    window.addEventListener("keydown", function(e) {
+        if (e.shiftKey) {
+            shiftKeyPressed = true;
+        } else if (e.keyCode == 46) {
+            canvasState.removeShape(canvasState.selection);
+        } else if (e.keyCode == 90 && e.ctrlKey) {
+            canvasState.undo();
+        } else if (e.keyCode == 89 && e.ctrlKey) {
+            canvasState.redo();
+        }
+    }, true);
+
+    window.addEventListener("keyup", function(e) {
+        if (shiftKeyPressed && !e.shiftKey) {
+            shiftKeyPressed = false;
+        }
+    }, true);
+
+    window.onmousedown = function() {
+        var mouseDomElement = document.getElementsByTagName("body")[0];
+        mouseDomElement.style.cursor = "default";
+    };
+}
+
+
+function startApplication() {
+    playIntroVideo();
+    initializeToolBar();
+    initializeCanvas();
+    setUpEventHandlers();
 }
 
 
 document.addEventListener('DOMContentLoaded', function() {
-
-    document.getElementById("skip").onclick = function() {
-        var vid = document.getElementById("wrap_video");
-        if (vid) {
-            vid.remove();
-            startPlaying();
-        }
-    }
-
-    document.getElementById("planoconvex").onclick = function() {
-        var elementToChange = document.getElementsByTagName("body")[0];
-        elementToChange.style.cursor = "url('images/planoconvexcursor.png') 50 50, auto";
-        mousePointer = "planoconvex";
-    }
-
-    document.getElementById("medium").onclick = function() {
-        var elementToChange = document.getElementsByTagName("body")[0];
-        elementToChange.style.cursor = "url('images/mediumcursor.png') 50 50, auto";
-        mousePointer = "medium";
-    }
-
-    document.getElementById("laser").onclick = function() {
-        var elementToChange = document.getElementsByTagName("body")[0];
-        elementToChange.style.cursor = "url('images/laser_pointer_small.png') 25 25, auto";
-        mousePointer = "laser";
-    }
-
-    document.getElementById("mirror").onclick = function() {
-        var elementToChange = document.getElementsByTagName("body")[0];
-        elementToChange.style.cursor = "url('images/mirror.png') 25 25, auto";
-        mousePointer = "mirror";
-    }
-
-    document.getElementById("wall").onclick = function() {
-        var elementToChange = document.getElementsByTagName("body")[0];
-        elementToChange.style.cursor = "url('images/wall.png') 50 50, auto";
-        mousePointer = "wall";
-    }
-
-
-    document.getElementById("myVideo").load();
-    var vid = document.getElementById("myVideo");
-    vid.onended = function() {
-        vid.remove();
-        startPlaying();
-    }
-
+    startApplication();
 }, false);
 

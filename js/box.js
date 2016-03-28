@@ -7,9 +7,8 @@ var Box = function(x, y, rotation, n, w, h, color1, color2) {
     this.h = h;
     this.color1 = color1;
     this.color2 = color2;
+    this.attributes = ["w", "h", "n"];
     this.generateLineSegments();
-
-    this.attributes = {"width": w, "height": h, "n": this.n};
 }
 
 Box.prototype.createClone = function() {
@@ -17,37 +16,30 @@ Box.prototype.createClone = function() {
 }
 
 Box.prototype.updateAttribute = function(key, value) {
-    this.attributes[key] = value;
-    if (key == "width") {
-        this.w = value;
-    } else if (key == "height") {
-        this.h = value;
-    } else {
-        this.n = value;
-    }
-
+    this[key] = value;
     this.generateLineSegments();
     canvasState.valid = false;
 }
 
 Box.prototype.generateLineSegments = function() {
-    this.x1 = this.x + this.h*Math.sin(this.rotation)/2 - this.w*Math.cos(this.rotation)/2;
-    this.y1 = this.y - this.h*Math.cos(this.rotation)/2 - this.w*Math.sin(this.rotation)/2;
+    var h = this.h;
+    var w = this.w;
+    var rotation = this.rotation;
 
-    this.x2 = this.x1 - this.h*Math.sin(this.rotation);
-    this.y2 = this.y1 + this.h*Math.cos(this.rotation);
-
-    this.x4 = this.x1 + this.w*Math.cos(this.rotation);
-    this.y4 = this.y1 + this.w*Math.sin(this.rotation);
-
-    this.x3 = this.x4 - this.h*Math.sin(this.rotation);
-    this.y3 = this.y4 + this.h*Math.cos(this.rotation);
+    var x1 = this.x + h*Math.sin(rotation)/2 - w*Math.cos(rotation)/2;
+    var y1 = this.y - h*Math.cos(rotation)/2 - w*Math.sin(rotation)/2;
+    var x2 = x1 - h*Math.sin(rotation);
+    var y2 = y1 + h*Math.cos(rotation);
+    var x4 = x1 + w*Math.cos(rotation);
+    var y4 = y1 + w*Math.sin(rotation);
+    var x3 = x4 - h*Math.sin(rotation);
+    var y3 = y4 + h*Math.cos(rotation);
 
     this.lineSegments = [];
-    this.lineSegments.push(new LineSegment(this.x1, this.y1, this.x2, this.y2));
-    this.lineSegments.push(new LineSegment(this.x2, this.y2, this.x3, this.y3));
-    this.lineSegments.push(new LineSegment(this.x3, this.y3, this.x4, this.y4));
-    this.lineSegments.push(new LineSegment(this.x4, this.y4, this.x1, this.y1));
+    this.lineSegments.push(new LineSegment(x1, y1, x2, y2));
+    this.lineSegments.push(new LineSegment(x2, y2, x3, y3));
+    this.lineSegments.push(new LineSegment(x3, y3, x4, y4));
+    this.lineSegments.push(new LineSegment(x4, y4, x1, y1));
 }
 
 Box.prototype.displayInfo = function(ctx) {
@@ -60,96 +52,46 @@ Box.prototype.setRotation = function(rotation) {
     this.rotation = mod(rotation, 2*Math.PI);
 }
 
-Box.prototype.drawNormals = function(ctx) {
-    // FOR DRAWING NORMALS
-    var oldStyle = ctx.strokeStyle;
-    // ctx.lineWidth=10;
-    ctx.strokeStyle="green";
-    ctx.beginPath();
-    var midpoint1 = midpoint(this.x1, this.y1, this.x2, this.y2);
-    var midpoint2 = midpoint(this.x2, this.y2, this.x3, this.y3);
-    var midpoint3 = midpoint(this.x3, this.y3, this.x4, this.y4);
-    var midpoint4 = midpoint(this.x4, this.y4, this.x1, this.y1);
-
-    var normVec1 = normalVectorLine(this.x1, this.y1, this.x2, this.y2);
-    var normVec2 = normalVectorLine(this.x2, this.y2, this.x3, this.y3);
-    var normVec3 = normalVectorLine(this.x3, this.y3, this.x4, this.y4);
-    var normVec4 = normalVectorLine(this.x4, this.y4, this.x1, this.y1);
-
-    var normLine1 = {};
-    normLine1.x1 = midpoint1[0];
-    normLine1.y1 = midpoint1[1];
-    normLine1.x2 = midpoint1[0] + normVec1[0];
-    normLine1.y2 = midpoint1[1] + normVec1[1];
-
-    var normLine2 = {};
-    normLine2.x1 = midpoint2[0];
-    normLine2.y1 = midpoint2[1];
-    normLine2.x2 = midpoint2[0] + normVec2[0];
-    normLine2.y2 = midpoint2[1] + normVec2[1];
-
-    var normLine3 = {};
-    normLine3.x1 = midpoint3[0];
-    normLine3.y1 = midpoint3[1];
-    normLine3.x2 = midpoint3[0] + normVec3[0];
-    normLine3.y2 = midpoint3[1] + normVec3[1];
-
-    var normLine4 = {};
-    normLine4.x1 = midpoint4[0];
-    normLine4.y1 = midpoint4[1];
-    normLine4.x2 = midpoint4[0] + normVec4[0];
-    normLine4.y2 = midpoint4[1] + normVec4[1];
-
-    var normalLines = [];
-    normalLines.push(normLine1);
-    normalLines.push(normLine2);
-    normalLines.push(normLine3);
-    normalLines.push(normLine4);
-
-    var curNormLine;
-    for (var i = 0; i < normalLines.length; i += 1) {
-        curNormLine = normalLines[i];
-        ctx.moveTo(curNormLine.x1, curNormLine.y1);
-        ctx.lineTo(curNormLine.x2, curNormLine.y2);
-        ctx.stroke();
-    }
-
-    ctx.strokeStyle = oldStyle;
-}
-
 Box.prototype.draw = function(ctx) {
     this.generateLineSegments();
     this.centerX = this.x;
     this.centerY = this.y;
 
+    var lineSegments = this.lineSegments;
     var grd = ctx.createLinearGradient(this.x,this.y,this.x,this.y+this.h);
+    var path;
+
     grd.addColorStop(0,this.color1);
     grd.addColorStop(1,this.color2);
     ctx.fillStyle = grd;
 
+    this.path = new Path2D();
+    path = this.path;
     ctx.beginPath();
-    ctx.moveTo(this.x1, this.y1);
-    ctx.lineTo(this.x2, this.y2);
-    ctx.lineTo(this.x3, this.y3);
-    ctx.lineTo(this.x4, this.y4);
-    ctx.lineTo(this.x1, this.y1);
-    ctx.fill();
-
-    // this.drawNormals(ctx);
+    // path.moveTo(lineSegments[0].x1, lineSegments[0].y1);
+    for (var i = 0; i < lineSegments.length; i += 1) {
+        lineSegments[i].draw(path);
+    }
+    ctx.fill(path);
 }
 
 Box.prototype.highlight = function(ctx) {
     this.generateLineSegments();
-
     ctx.strokeStyle = 'purple';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
+
+    var lineSegments = this.lineSegments;
+    var path;
+
+
+    this.path = new Path2D();
+    path = this.path;
     ctx.beginPath();
-    ctx.moveTo(this.x1, this.y1);
-    ctx.lineTo(this.x2, this.y2);
-    ctx.lineTo(this.x3, this.y3);
-    ctx.lineTo(this.x4, this.y4);
-    ctx.lineTo(this.x1, this.y1);
-    ctx.stroke();
+    path.moveTo(lineSegments[0].x1, lineSegments[0].y1);
+    for (var i = 0; i < lineSegments.length; i += 1) {
+        lineSegments[i].draw(path);
+    }
+    ctx.stroke(path);
 }
 
 Box.prototype.intersection = function(ray) {
@@ -186,24 +128,12 @@ Box.prototype.intersection = function(ray) {
 /** Returns true if the point (X, Y) lies within the rectangle defined by this
   * box. */
 Box.prototype.contains = function(x, y) {
-    var vs = [[this.x1, this.y1], [this.x2, this.y2], [this.x3, this.y3], [this.x4, this.y4]];
-    var inside = false;
-    for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-        var xi = vs[i][0], yi = vs[i][1];
-        var xj = vs[j][0], yj = vs[j][1];
-
-        var intersect = ((yi > y) != (yj > y))
-            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-    }
-
-    return inside;
+    return canvasState.ctx.isPointInPath(this.path, x, y);
 }
 
 Box.prototype.getNormVec = function(curve) {
-    return normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
+    return curve.getNormVec();
 }
-
 
 
 
