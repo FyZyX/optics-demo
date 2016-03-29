@@ -42,12 +42,6 @@ Box.prototype.generateLineSegments = function() {
     this.lineSegments.push(new LineSegment(x4, y4, x1, y1));
 }
 
-Box.prototype.displayInfo = function(ctx) {
-    ctx.font = "12px serif";
-    ctx.fillStyle = "black";
-    ctx.fillText("Box\n(" + this.x + ", " + this.y + ")", this.x + 10, this.y);
-}
-
 Box.prototype.setRotation = function(rotation) {
     this.rotation = mod(rotation, 2*Math.PI);
 }
@@ -77,21 +71,21 @@ Box.prototype.draw = function(ctx) {
 
 Box.prototype.highlight = function(ctx) {
     this.generateLineSegments();
+
+    var lineSegments = this.lineSegments;
+    var path = new Path2D();
+
+    ctx.beginPath();
     ctx.strokeStyle = 'purple';
     ctx.lineWidth = 2;
 
-    var lineSegments = this.lineSegments;
-    var path;
-
-
-    this.path = new Path2D();
-    path = this.path;
-    ctx.beginPath();
     path.moveTo(lineSegments[0].x1, lineSegments[0].y1);
     for (var i = 0; i < lineSegments.length; i += 1) {
         lineSegments[i].draw(path);
     }
     ctx.stroke(path);
+
+    this.path = path;
 }
 
 Box.prototype.intersection = function(ray) {

@@ -44,6 +44,11 @@ function initializeToolBar() {
         cursorImg = "planoconvex";
     }
 
+    document.getElementById("planoconcave").onclick = function() {
+        mouseDomElement.style.cursor = "url('images/planoconcavecursor.png') 30 30, auto";
+        cursorImg = "planoconcave";
+    }
+
     document.getElementById("medium").onclick = function() {
         mouseDomElement.style.cursor = "url('images/mediumcursor.png') 50 50, auto";
         cursorImg = "medium";

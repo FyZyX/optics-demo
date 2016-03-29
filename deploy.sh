@@ -15,7 +15,7 @@ cp $HTML_FILE $BACKUP_HTML_FILE
 
 # concatenate js files into a single, compressed js file
 cd js
-cat vector.js snellsLaw.js tools.js ray.js laser.js canvasstate.js curves.js elements.js box.js circplanoconvex.js circplanoconcave.js attrBox.js main.js > all.js
+cat vector.js snellsLaw.js tools.js ray.js laser.js canvasState.js curves.js elements.js box.js circPlanoConvex.js circPlanoConcave.js attrBox.js main.js > all.js
 # uglifyjs -m -c -- all.js > $OUTPUT_JS_FILE
 java -jar compiler.jar --compilation_level ADVANCED --js all.js --js_output_file all.min.js
 cd ..

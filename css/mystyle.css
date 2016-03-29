@@ -136,6 +136,12 @@ background-color:#4CAF50;
     height: 100%;
 }
 
+#planoconcave {
+    background: url(../images/planoconcavecursor.png);
+    width: 100%;
+    height: 100%;
+}
+
 #medium {
     background: url(../images/mediumcursor.png);
     width: 100%;

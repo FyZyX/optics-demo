@@ -49,8 +49,12 @@ function CanvasState(canvas) {
         var mx = mouse.x;
         var my = mouse.y;
         if (cursorImg == "planoconvex") {
-            var planoConvex = new CircPlanoConcaveLens(mx, my, 3*Math.PI/2, 1.5, 90, 50, 30);
+            var planoConvex = new CircPlanoConvexLens(mx, my, 3*Math.PI/2, 1.5, 90, 50, 30);
             canvasState.addShape(planoConvex);
+            cursorImg = "default";
+        } else if (cursorImg == "planoconcave") {
+            var planoConcave = new CircPlanoConcaveLens(mx, my, 3*Math.PI/2, 1.5, 90, 50, 30);
+            myState.addShape(planoConcave);
             cursorImg = "default";
         } else if (cursorImg == "medium") {
             var glass_box = new GlassBox(mx, my, 150, 150, 0);

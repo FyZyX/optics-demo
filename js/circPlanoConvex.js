@@ -9,29 +9,24 @@ var CircPlanoConvexLens = function(x, y, rotation, n, r, semi_diameter, w) {
     this.w = w;
     this.semi_diameter = semi_diameter;
 
-    this.attributes = {"radius": this.r, "semi_diameter": semi_diameter, "n": n, "width": w};
+    this.attributes = ["r", "semi_diameter", "n", "w"];
 
     this.extent = 2*Math.asin(semi_diameter/r);
     var a = semi_diameter;
     var s = r - Math.sqrt(r*r - a*a);
-    var d = (w+s)/2
+    var l = s+w;
+    var d = (l-s)/2;
 
-    this.arc = new Arc(x - d*Math.sin(rotation)/2, y + d*Math.cos(rotation)/2, r, rotation + Math.PI, this.extent + Math.PI);
+    this.arc = new Arc(x - d*Math.sin(rotation)/2, y + d*Math.cos(rotation)/2, r, rotation, this.extent);
     this.draw(canvasState.ctx);
 }
 
-CircPlanoConvexLens.prototype.updateAttribute = function(key, value) {
-    this.attributes[key] = value;
-    if (key == "width") {
-        this.w = value;
-    } else if (key == "radius") {
-        this.r = value;
-    } else if (key == "semi_diameter") {
-        this.semi_diameter = value;
-    } else {
-        this.n = value;
-    }
+CircPlanoConvexLens.prototype.createClone = function() {
+    return new CircPlanoConvexLens(this.x, this.y, this.rotation, this.n, this.r, this.semi_diameter, this.w);
+}
 
+CircPlanoConvexLens.prototype.updateAttribute = function(key, value) {
+    this[key] = value;
     canvasState.valid = false;
     this.draw(canvasState.ctx);
 }
@@ -56,12 +51,11 @@ CircPlanoConvexLens.prototype.recalculateCurves = function() {
     this.extent = 2*Math.asin(this.semi_diameter/this.r);
     var a = this.semi_diameter;
     var s = this.r - Math.sqrt(this.r*this.r - a*a);
-    // var l = s+w;
-    // var d = (l-s)/2;
-    var d = (this.w+s)/2
+    var l = s+this.w;
+    var d = (l-s)/2;
 
-    this.arc.x = this.x - d*Math.sin(this.rotation)/2;
-    this.arc.y = this.y + d*Math.cos(this.rotation)/2;
+    this.arc.x = this.x - this.w*Math.sin(this.rotation)/2;
+    this.arc.y = this.y + this.w*Math.cos(this.rotation)/2;
     this.arc.extent = this.extent;
     this.arc.r = this.r;
 }
@@ -72,11 +66,6 @@ CircPlanoConvexLens.prototype.generateCenter = function() {
     this.centerY = this.arc.centerY;
 }
 
-CircPlanoConvexLens.prototype.displayInfo = function(ctx) {
-    ctx.font = "12px serif";
-    ctx.fillStyle = "black";
-    ctx.fillText("Plano-convex lens\n(" + this.x + ", " + this.y + ")", this.x + 10, this.y);
-}
 
 CircPlanoConvexLens.prototype.drawCenter = function(ctx) {
     ctx.beginPath();
@@ -94,8 +83,6 @@ CircPlanoConvexLens.prototype.drawCenter = function(ctx) {
 
 
 CircPlanoConvexLens.prototype.draw = function(ctx) {
-    var val = (Math.PI - this.extent)/2;
-
     this.recalculateCurves();
     this.generateCenter();
     this.generateLineSegments();
@@ -105,61 +92,46 @@ CircPlanoConvexLens.prototype.draw = function(ctx) {
     grd.addColorStop(1,this.color2);
     ctx.fillStyle = grd;
 
-    var arc = this.arc;
+    var lineSegments = this.lineSegments;
+    var path = new Path2D();
+
     ctx.beginPath();
-    ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation + val, arc.rotation + val + this.extent);
-
-    var curLineSeg = this.lineSegments[0];
-    ctx.moveTo(curLineSeg.x1, curLineSeg.y1);
-    for (var i = 0; i < this.lineSegments.length; i += 1) {
-        curLineSeg = this.lineSegments[i];
-        ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
+    this.arc.draw(path);
+    path.moveTo(lineSegments[0].x1, lineSegments[0].y1);
+    for (var i = 0; i < lineSegments.length; i += 1) {
+        lineSegments[i].draw(path);
     }
-    // ctx.closePath();
 
-    ctx.fill();
-    ctx.stroke();
-
-    this.drawCenter(ctx);
+    ctx.fill(path);
+    this.path = path;
+    // this.drawCenter(ctx);
 }
 
 CircPlanoConvexLens.prototype.setRotation = function(rotation) {
     this.rotation = mod(rotation, 2*Math.PI);
-    this.arc.rotation = this.rotation + Math.PI;
+    this.arc.rotation = this.rotation;
 }
 
 CircPlanoConvexLens.prototype.contains = function(x, y) {
-    var x1 = this.lineSegments[0].x1;
-    var y1 = this.lineSegments[0].y1;
-    var x2 = this.lineSegments[0].x2;
-    var y2 = this.lineSegments[0].y2;
-    var x3 = this.lineSegments[2].x1;
-    var y3 = this.lineSegments[2].y1;
-    var x4 = this.lineSegments[2].x2;
-    var y4 = this.lineSegments[2].y2;
-    return this.arc.contains(x, y) || rectContains(x1, y1, x2, y2, x3, y3, x4, y4, x, y);
+    return canvasState.ctx.isPointInPath(this.path, x, y);
 }
 
 CircPlanoConvexLens.prototype.highlight = function(ctx) {
     ctx.strokeStyle = 'purple';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
 
-    var val = (Math.PI - this.extent)/2;
-    var arc = this.arc;
-    ctx.beginPath();
-    ctx.arc(this.centerX, this.centerY, arc.r, arc.rotation + val, arc.rotation + val + this.extent);
-    ctx.stroke();
+    var lineSegments = this.lineSegments;
+    var path = new Path2D();
 
-    var curLineSeg = this.lineSegments[0];
     ctx.beginPath();
-    ctx.moveTo(curLineSeg.x1, curLineSeg.y1);
-    for (var i = 0; i < this.lineSegments.length; i += 1) {
-        curLineSeg = this.lineSegments[i];
-        ctx.lineTo(curLineSeg.x2, curLineSeg.y2);
+    this.arc.draw(path);
+    path.moveTo(lineSegments[0].x1, lineSegments[0].y1);
+    for (var i = 0; i < lineSegments.length; i += 1) {
+        lineSegments[i].draw(path);
     }
 
-    ctx.stroke();
-    // this.arc.draw(ctx);
+    ctx.stroke(path);
+    this.path = path;
 }
 
 CircPlanoConvexLens.prototype.intersection = function(ray) {
@@ -230,8 +202,6 @@ CircPlanoConvexLens.prototype.intersectionArc = function(ray) {
 
     var val = (Math.PI - this.extent)/2;
 
-
-
     var x1 = ray.x1;
     var x2 = ray.x2;
     var y1 = ray.y1;
@@ -283,8 +253,6 @@ CircPlanoConvexLens.prototype.intersectionArc = function(ray) {
 
         var a = angleFromSegment(cx, cy, closer_intersection.x, closer_intersection.y);
 
-        // if (isInRange(this.rotation, this.rotation + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
-        //     return closer_intersection;
         if (isInRange(this.rotation + val, this.rotation + val + this.extent, a) && onLineSeg(ray.x1, ray.y1, ray.x2, ray.y2, closer_intersection.x, closer_intersection.y)) {
             return closer_intersection;
         } else {
@@ -300,13 +268,6 @@ CircPlanoConvexLens.prototype.intersectionArc = function(ray) {
 }
 
 CircPlanoConvexLens.prototype.getNormVec = function(curve, x, y) {
-    var v;
-    if (curve.type == "line") {
-        v = normalVectorLine(curve.x1, curve.y1, curve.x2, curve.y2);
-    } else {
-        v = normalVectorCircle(curve.centerX, curve.centerY, x, y);
-    }
-
-    return getVectorFromComponents(v[0], v[1]);
+    return curve.getNormVec(x, y);
 }
 

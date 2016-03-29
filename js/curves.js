@@ -24,9 +24,7 @@ LineSegment.prototype.intersection = function(ray) {
 }
 
 LineSegment.prototype.getNormVec = function() {
-    var dx = this.x2 - this.x1;
-    var dy = this.y2 - this.y1;
-    var angle = Math.atan2(dx, 0-dy);
+    var angle = Math.atan2(this.x2 - this.x1, this.y1 - this.y2);
     return new Vector(1, angle);
 };
 
